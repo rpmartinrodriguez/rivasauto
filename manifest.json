@@ -1,0 +1,17 @@
+{
+  "name": "RIVAS AUTO ERP",
+  "short_name": "RivasAuto",
+  "description": "Sistema de Gestión y CRM para RIVAS AUTO",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#16a34a",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
