@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RIVAS AUTO | 2026</title>
+  <title>RIVAS AUTO | ERP 2026</title>
   <meta name="theme-color" content="#000000">
   
   <link rel="icon" href="icon.png" type="image/png">
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="manifest" href="manifest.json">
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,10 +18,8 @@
     }
   </script>
 
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Custom CSS -->
   <style>
     ::-webkit-scrollbar { 
       width: 6px; 
@@ -62,7 +59,7 @@
       animation: slideUp 0.5s ease-out forwards; 
     }
     
-    /* Custom Toggle Switch - Verde y Negro */
+    /* Custom Toggle Switch */
     .toggle-checkbox:checked { 
       right: 0; 
       border-color: #16a34a; 
@@ -93,24 +90,21 @@
     }
   </style>
 </head>
-<body class="bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-white font-sans selection:bg-green-200 selection:text-neutral-900 dark:selection:bg-green-900 dark:selection:text-white transition-colors duration-300 overflow-hidden">
+<body class="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white font-sans selection:bg-green-200 selection:text-neutral-900 dark:selection:bg-green-900 dark:selection:text-white transition-colors duration-300 overflow-hidden">
 
-  <!-- Ambient Background -->
   <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-green-200/30 dark:bg-green-900/20 rounded-full blur-[120px]"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neutral-200/50 dark:bg-neutral-800/30 rounded-full blur-[120px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neutral-200/50 dark:bg-neutral-900/30 rounded-full blur-[120px]"></div>
   </div>
 
-  <!-- LOADER INICIAL FIREBASE -->
   <div id="loader-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black text-white">
     <i data-lucide="loader-2" class="w-12 h-12 animate-spin text-green-500 mb-4"></i>
-    <h2 class="text-xl font-black tracking-tight">Conectando con Servidores...</h2>
+    <h2 class="text-xl font-bold">Conectando con Servidores...</h2>
   </div>
 
-  <!-- PANTALLA DE AUTHENTICACION -->
-  <div id="auth-wrapper" class="hidden relative z-50 flex items-center justify-center min-h-screen bg-black/40 backdrop-blur-xl">
+  <div id="auth-wrapper" class="hidden relative z-50 flex items-center justify-center min-h-screen bg-neutral-900/40 backdrop-blur-xl">
     <div class="bg-white dark:bg-neutral-900 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 dark:border-neutral-800 fade-in">
-       
+        
        <div class="flex flex-col items-center justify-center mb-8">
          <img src="icon.png" alt="Rivas Auto Logo" class="w-24 h-24 mb-4 drop-shadow-xl rounded-3xl object-cover" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTZhMzRhIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PG1hdGggZD0iTTE5IDE3aDJjLjYgMCAxLS40IDEtMXYtM2MtMi0uMy00LS44LTYtMWwtMS40LTEuNEExIDEgMCAwIDAgMTQgMTBINkExIDEgMCAwIDAgNSAxMS4xaC0yYTEgMSAwIDAgMC0xIDF2M2MwIC42LjQgMSAxIDFoMiIvPjxjaXJjbGUgY3g9IjciIGN5PSIxNyIgcj0iMiIvPjxjaXJjbGUgY3g9IjE3IiBjeT0iMTciIHI9IjIiPjwvc3ZnPg=='">
          <h1 class="text-3xl font-black tracking-tight text-neutral-900 dark:text-white">RIVAS <span class="text-green-600 dark:text-green-500">AUTO</span></h1>
@@ -119,14 +113,13 @@
 
        <h2 class="text-xl font-bold text-center mb-6 text-neutral-600 dark:text-neutral-300" id="auth-title">Iniciar Sesión</h2>
        
-       <!-- Formulario Login Normal -->
        <form id="login-form" onsubmit="handleLogin(event)">
          <input 
            type="email" 
            id="login-email" 
            required 
            placeholder="Correo electrónico" 
-           class="w-full mb-4 rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow" 
+           class="w-full mb-4 rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500" 
          />
          <div class="relative w-full mb-6">
            <input 
@@ -134,26 +127,25 @@
              id="login-pwd" 
              required 
              placeholder="Contraseña" 
-             class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow" 
+             class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500" 
            />
            <button 
              type="button" 
              onclick="togglePwdVisibility('login-pwd')" 
-             class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-green-600 transition-colors"
+             class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
            >
              <i data-lucide="eye" class="w-5 h-5"></i>
            </button>
          </div>
          <button 
            type="submit" 
-           class="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 hover:shadow-green-600/30 transition-all shadow-lg"
+           class="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-lg"
          >
            Entrar al Sistema
          </button>
          
          <p id="login-error" class="text-rose-500 text-sm font-bold mt-4 hidden text-center">Credenciales incorrectas.</p>
          
-         <!-- Botón de instalación PWA -->
          <button 
            id="login-install-btn" 
            type="button" 
@@ -164,7 +156,6 @@
          </button>
        </form>
 
-       <!-- Formulario Cambio de Contraseña Inicial -->
        <form id="pwd-change-form" class="hidden" onsubmit="handlePwdChange(event)">
          <p class="text-sm text-neutral-500 dark:text-neutral-400 text-center mb-6">Por motivos de seguridad, debes establecer una nueva contraseña personal antes de continuar.</p>
          
@@ -176,7 +167,7 @@
              placeholder="Nueva contraseña" 
              class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500" 
            />
-           <button type="button" onclick="togglePwdVisibility('new-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-green-600"><i data-lucide="eye" class="w-5 h-5"></i></button>
+           <button type="button" onclick="togglePwdVisibility('new-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400"><i data-lucide="eye" class="w-5 h-5"></i></button>
          </div>
          
          <div class="relative w-full mb-6">
@@ -187,7 +178,7 @@
              placeholder="Confirmar contraseña" 
              class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500" 
            />
-           <button type="button" onclick="togglePwdVisibility('confirm-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-green-600"><i data-lucide="eye" class="w-5 h-5"></i></button>
+           <button type="button" onclick="togglePwdVisibility('confirm-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400"><i data-lucide="eye" class="w-5 h-5"></i></button>
          </div>
          
          <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-lg">Guardar y Entrar</button>
@@ -196,13 +187,10 @@
     </div>
   </div>
 
-  <!-- CONTENEDOR PRINCIPAL ERP -->
   <div id="app-wrapper" class="hidden relative z-10 flex h-screen overflow-hidden fade-in">
     
-    <!-- Backdrop del Sidebar para móviles -->
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
     
-    <!-- SIDEBAR (MENÚ LATERAL) -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl shadow-2xl transform -translate-x-full transition-transform duration-300 z-50 flex flex-col border-r border-neutral-200 dark:border-neutral-800">
       
       <div class="p-6 flex justify-between items-center border-b border-neutral-100 dark:border-neutral-800">
@@ -210,12 +198,11 @@
           <img src="icon.png" alt="Logo" class="w-10 h-10 rounded-xl shadow-md object-cover" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTZhMzRhIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PG1hdGggZD0iTTE5IDE3aDJjLjYgMCAxLS40IDEtMXYtM2MtMi0uMy00LS44LTYtMWwtMS40LTEuNEExIDEgMCAwIDAgMTQgMTBINkExIDEgMCAwIDAgNSAxMS4xaC0yYTEgMSAwIDAgMC0xIDF2M2MwIC42LjQgMSAxIDFoMiIvPjxjaXJjbGUgY3g9IjciIGN5PSIxNyIgcj0iMiIvPjxjaXJjbGUgY3g9IjE3IiBjeT0iMTciIHI9IjIiPjwvc3ZnPg=='">
           <h1 class="text-xl font-black tracking-tight">RIVAS <span class="text-green-600">AUTO</span></h1>
         </div>
-        <button onclick="toggleSidebar()" class="p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors">
+        <button onclick="toggleSidebar()" class="p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
       
-      <!-- Opciones del Menú -->
       <nav id="nav-menu" class="flex-1 px-4 py-6 space-y-2 overflow-y-auto no-scrollbar"></nav>
 
       <div class="p-6 border-t border-neutral-100 dark:border-neutral-800">
@@ -242,7 +229,6 @@
 
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
       
-      <!-- HEADER PRINCIPAL FIJO -->
       <header class="shrink-0 z-30 w-full backdrop-blur-2xl bg-white/80 dark:bg-neutral-950/80 border-b border-neutral-200/50 dark:border-neutral-800 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between items-center h-20">
@@ -257,7 +243,6 @@
 
             <div class="flex items-center space-x-3">
               
-              <!-- Campanita Notificaciones (Exclusiva Admin) -->
               <div class="relative" id="notif-container">
                 <button onclick="toggleNotifications()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors shadow-sm border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 relative">
                   <i data-lucide="bell" class="w-5 h-5"></i>
@@ -274,7 +259,6 @@
                 </div>
               </div>
 
-              <!-- Switch Modo Oscuro -->
               <button onclick="toggleDarkMode()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors shadow-sm border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700">
                 <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
               </button>
@@ -283,21 +267,19 @@
         </div>
       </header>
 
-      <!-- CUERPO PRINCIPAL DESLIZABLE -->
       <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 overflow-y-auto no-scrollbar pb-32" id="main-content">
         
-        <!-- VISTA: CAJA -->
         <div id="view-caja" class="view-section slide-up hidden space-y-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
               <h2 class="text-4xl font-black tracking-tight">Planilla de Caja</h2>
-              <p class="text-neutral-500 mt-2 text-lg font-medium">Ingresos y egresos operativos.</p>
+              <p class="text-neutral-500 mt-2 text-lg">Ingresos y egresos operativos.</p>
             </div>
             <div class="flex space-x-3">
               <button id="btn-ver-pendientes" onclick="openModalPendientes()" class="hidden items-center justify-center px-6 py-3 font-bold text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 rounded-2xl hover:scale-105 transition-all duration-300">
                 <i data-lucide="clock" class="w-5 h-5 mr-2"></i>Cobros Pendientes
               </button>
-              <button onclick="openModal('modal-caja')" class="flex items-center justify-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 shadow-xl shadow-green-600/20 hover:scale-105 transition-all duration-300">
+              <button onclick="openModal('modal-caja')" class="flex items-center justify-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 shadow-xl shadow-green-600/20 transition-all duration-300">
                 <i data-lucide="plus" class="w-5 h-5 mr-2"></i>Registrar Movimiento
               </button>
             </div>
@@ -324,12 +306,11 @@
           </div>
         </div>
 
-        <!-- VISTA: HISTORIAL VENTAS -->
         <div id="view-ventas" class="view-section slide-up hidden space-y-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
               <h2 class="text-4xl font-black tracking-tight">Historial de Ventas</h2>
-              <p class="text-neutral-500 mt-2 text-lg font-medium">Registro completo de operaciones y créditos.</p>
+              <p class="text-neutral-500 mt-2 text-lg">Registro completo de operaciones y créditos.</p>
             </div>
           </div>
           <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
@@ -350,12 +331,11 @@
           </div>
         </div>
 
-        <!-- VISTA: FACTURAS -->
         <div id="view-facturas" class="view-section slide-up hidden space-y-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
               <h2 class="text-4xl font-black tracking-tight">Control de Facturación</h2>
-              <p class="text-neutral-500 mt-2 text-lg font-medium">Resumen global de comprobantes emitidos.</p>
+              <p class="text-neutral-500 mt-2 text-lg">Resumen global de comprobantes emitidos.</p>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="facturas-summary"></div>
@@ -378,27 +358,38 @@
           </div>
         </div>
 
-        <!-- VISTA: FLOTA DE AUTOS -->
         <div id="view-autos" class="view-section slide-up hidden space-y-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
               <h2 class="text-4xl font-black tracking-tight">Flota y Stock</h2>
-              <p class="text-neutral-500 mt-2 text-lg font-medium">Control de vehículos e inversiones.</p>
+              <p class="text-neutral-500 mt-2 text-lg">Control de vehículos e inversiones.</p>
             </div>
-            <button onclick="openModalCreateAuto()" class="flex items-center justify-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 shadow-xl shadow-green-600/20 hover:scale-105 transition-all duration-300">
-              <i data-lucide="plus" class="w-5 h-5 mr-2"></i>Ingresar Vehículo
-            </button>
+            <div class="flex items-center space-x-3">
+              <div class="bg-neutral-100 dark:bg-neutral-900 p-1 rounded-xl flex items-center shadow-sm border border-neutral-200 dark:border-neutral-800">
+                 <button onclick="toggleAutosViewMode('grid')" id="btn-view-grid" class="p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors" title="Vista Tarjetas">
+                   <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                 </button>
+                 <button onclick="toggleAutosViewMode('list')" id="btn-view-list" class="p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors" title="Vista Lista">
+                   <i data-lucide="list" class="w-4 h-4"></i>
+                 </button>
+              </div>
+              <button onclick="openModalCreateAuto()" class="flex items-center justify-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 shadow-xl shadow-green-600/20 transition-all duration-300">
+                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>Ingresar Vehículo
+              </button>
+            </div>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="autos-grid"></div>
+          <div id="autos-container"></div>
         </div>
 
-        <!-- VISTA: CRM -->
         <div id="view-clientes" class="view-section slide-up hidden space-y-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
               <h2 class="text-4xl font-black tracking-tight">CRM Clientes</h2>
-              <p class="text-neutral-500 mt-2 text-lg font-medium">Base de datos de leads e interesados.</p>
+              <p class="text-neutral-500 mt-2 text-lg">Base de datos de leads e interesados.</p>
             </div>
+            <button onclick="openModal('modal-nuevo-lead')" class="flex items-center justify-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 shadow-xl shadow-green-600/20 transition-all duration-300">
+              <i data-lucide="user-plus" class="w-5 h-5 mr-2"></i>Nuevo Lead
+            </button>
           </div>
           <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
@@ -407,8 +398,8 @@
                   <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
                     <th class="px-6 py-4 font-bold">Lead</th>
                     <th class="px-6 py-4 font-bold">Contacto</th>
-                    <th class="px-6 py-4 font-bold">Interés</th>
-                    <th class="px-6 py-4 font-bold">Follow-Up</th>
+                    <th class="px-6 py-4 font-bold">Interés Buscado</th>
+                    <th class="px-6 py-4 font-bold">Registro</th>
                     <th class="px-6 py-4 font-bold">Acción</th>
                   </tr>
                 </thead>
@@ -418,28 +409,25 @@
           </div>
         </div>
 
-        <!-- VISTA: RESÚMENES -->
         <div id="view-resumenes" class="view-section slide-up hidden space-y-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
               <h2 class="text-4xl font-black tracking-tight">Dashboard Ejecutivo</h2>
-              <p class="text-neutral-500 mt-2 text-lg font-medium">Análisis de rendimiento integral.</p>
+              <p class="text-neutral-500 mt-2 text-lg">Análisis de rendimiento integral.</p>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dashboard-content"></div>
         </div>
 
-        <!-- VISTA: ADMINISTRACIÓN -->
         <div id="view-admin" class="view-section slide-up hidden space-y-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
               <h2 class="text-4xl font-black tracking-tight">Ajustes del Sistema</h2>
-              <p class="text-neutral-500 mt-2 text-lg font-medium">Gestión de usuarios y sucursales.</p>
+              <p class="text-neutral-500 mt-2 text-lg">Gestión de usuarios y sucursales.</p>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             
-            <!-- ABM Usuarios -->
             <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm">
                <h3 class="text-xl font-bold mb-4 flex items-center">
                  <i data-lucide="users" class="w-5 h-5 mr-2 text-neutral-700 dark:text-neutral-300"></i> Usuarios
@@ -451,14 +439,14 @@
                       id="new-user-name" 
                       required 
                       placeholder="Nombre completo" 
-                      class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500 transition-colors" 
+                      class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500" 
                     />
                     <input 
                       type="email" 
                       id="new-user-email" 
                       required 
                       placeholder="correo@rivasauto.com" 
-                      class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 placeholder-neutral-400 focus:border-green-500 transition-colors" 
+                      class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 placeholder-neutral-400 focus:border-green-500" 
                     />
                   </div>
                   <div class="grid grid-cols-2 gap-3">
@@ -475,19 +463,19 @@
                       id="new-user-pwd" 
                       required 
                       placeholder="Contraseña Temporal" 
-                      class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 pr-10 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500 transition-colors" 
+                      class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 pr-10 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500" 
                     />
-                    <button type="button" onclick="togglePwdVisibility('new-user-pwd')" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-green-600 transition-colors">
+                    <button type="button" onclick="togglePwdVisibility('new-user-pwd')" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">
                       <i data-lucide="eye" class="w-4 h-4"></i>
                     </button>
                   </div>
-                  <p class="text-[10px] text-neutral-500 mb-2 font-bold">Pedirá cambio de clave al inicio.</p>
+                  <p class="text-[10px] text-neutral-500 mb-2">Pedirá cambio de clave al inicio.</p>
                   
                   <div class="flex space-x-2">
-                    <button type="button" id="new-user-cancel" onclick="resetUserForm()" class="hidden flex-1 py-2 bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 rounded-xl text-sm font-bold hover:bg-neutral-300 dark:hover:bg-neutral-700 transition">
+                    <button type="button" id="new-user-cancel" onclick="resetUserForm()" class="hidden flex-1 py-2 bg-neutral-300 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-xl text-sm font-bold">
                       Cancelar
                     </button>
-                    <button type="submit" id="new-user-submit" class="flex-1 py-2 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold hover:scale-105 transition-transform shadow-lg">
+                    <button type="submit" id="new-user-submit" class="flex-1 py-2 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold">
                       Crear Usuario
                     </button>
                   </div>
@@ -495,7 +483,6 @@
                <div id="admin-users-list" class="space-y-2 max-h-64 overflow-y-auto pr-2 no-scrollbar"></div>
             </div>
 
-            <!-- ABM Sucursales -->
             <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm h-fit">
                <h3 class="text-xl font-bold mb-4 flex items-center">
                  <i data-lucide="map-pin" class="w-5 h-5 mr-2 text-neutral-700 dark:text-neutral-300"></i> Sucursales
@@ -507,13 +494,13 @@
                       id="new-suc-name" 
                       required 
                       placeholder="Nombre de Sucursal" 
-                      class="flex-1 bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500 transition-colors" 
+                      class="flex-1 bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500" 
                     />
-                    <button type="submit" id="new-suc-submit" class="px-4 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold hover:scale-105 transition-transform shadow-lg">
+                    <button type="submit" id="new-suc-submit" class="px-4 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold">
                       Crear
                     </button>
                   </div>
-                  <button type="button" id="new-suc-cancel" onclick="resetSucForm()" class="hidden w-full py-1.5 bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 rounded-xl text-xs font-bold transition">
+                  <button type="button" id="new-suc-cancel" onclick="resetSucForm()" class="hidden w-full py-1.5 bg-neutral-300 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-xl text-xs font-bold">
                     Cancelar Edición
                   </button>
                </form>
@@ -525,9 +512,6 @@
       </main>
     </div>
 
-    <!-- MODALES GLOBALES -->
-
-    <!-- Modal Caja: Nuevo Movimiento -->
     <div id="modal-caja" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-caja')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
@@ -559,7 +543,7 @@
               <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Categoría</label>
               <div class="flex space-x-2">
                 <select id="caja-cat" required class="flex-1 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"></select>
-                <button type="button" onclick="agregarCategoria()" class="px-4 bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 rounded-2xl font-bold hover:bg-green-600 hover:text-white transition-colors border border-neutral-200 dark:border-neutral-700">+</button>
+                <button type="button" onclick="agregarCategoria()" class="px-4 bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 rounded-2xl font-bold hover:bg-neutral-300 transition-colors">+</button>
               </div>
             </div>
             
@@ -600,7 +584,7 @@
               </div>
             </div>
             
-            <button type="submit" class="w-full py-4 bg-green-600 text-white font-black text-lg rounded-2xl shadow-xl shadow-green-600/30 hover:bg-green-700 hover:scale-[1.02] transition-transform">
+            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition">
               Guardar Movimiento
             </button>
           </form>
@@ -608,13 +592,12 @@
       </div>
     </div>
 
-    <!-- Modal Cobros Pendientes (Admin) -->
     <div id="modal-pendientes" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-pendientes')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-xl flex flex-col overflow-hidden max-h-[80vh]">
-        <div class="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-white dark:bg-neutral-900">
+        <div class="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-xl font-black tracking-tight">Cobros Pendientes</h3>
-          <button onclick="closeModal('modal-pendientes')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+          <button onclick="closeModal('modal-pendientes')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
@@ -622,13 +605,12 @@
       </div>
     </div>
 
-    <!-- Modal Detalle Factura -->
     <div id="modal-detalle-factura" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-factura')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-white dark:bg-neutral-900">
+        <div class="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-xl font-black tracking-tight">Detalle Factura</h3>
-          <button onclick="closeModal('modal-detalle-factura')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+          <button onclick="closeModal('modal-detalle-factura')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
@@ -636,13 +618,12 @@
       </div>
     </div>
 
-    <!-- Modal Detalle Venta -->
     <div id="modal-detalle-venta" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-venta')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
         <div class="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-10 bg-white dark:bg-neutral-900">
           <h3 class="text-2xl font-black tracking-tight">Ficha de Operación</h3>
-          <button onclick="closeModal('modal-detalle-venta')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors">
+          <button onclick="closeModal('modal-detalle-venta')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full transition-colors">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
@@ -650,13 +631,12 @@
       </div>
     </div>
 
-    <!-- Modal Alta/Edición de Auto -->
     <div id="modal-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-auto')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-white dark:bg-neutral-900">
+        <div class="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-2xl font-black" id="modal-auto-title">Alta Vehículo</h3>
-          <button onclick="closeModal('modal-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+          <button onclick="closeModal('modal-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
@@ -672,12 +652,12 @@
             </div>
             <input id="auto-precio" type="number" required placeholder="Precio Venta Est. ($)" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
             
-            <div class="mb-6">
+            <div class="mb-4">
               <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Sucursal / Ubicación Física</label>
               <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500"></select>
             </div>
             
-            <button type="submit" id="modal-auto-submit" class="w-full py-4 bg-green-600 text-white font-black text-lg rounded-2xl shadow-xl shadow-green-600/30 hover:bg-green-700 hover:scale-[1.02] transition-transform">
+            <button type="submit" id="modal-auto-submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition">
               Guardar Vehículo
             </button>
           </form>
@@ -685,7 +665,6 @@
       </div>
     </div>
 
-    <!-- Modal Detalle Auto 360 -->
     <div id="modal-detalle-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-auto')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
@@ -696,28 +675,51 @@
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar relative" id="da-content"></div>
       </div>
     </div>
-    
-    <!-- Modal UI Custom Dialogs (Reemplazo de alert, confirm, prompt) -->
-    <div id="custom-dialog" class="fixed inset-0 z-[200] flex items-center justify-center p-4 hidden fade-in">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeDialog()"></div>
-        <div class="relative bg-white dark:bg-neutral-900 rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl border border-neutral-200 dark:border-neutral-800 text-center">
-            <h3 id="dialog-title" class="text-2xl font-black mb-3 text-neutral-900 dark:text-white"></h3>
-            <p id="dialog-msg" class="text-neutral-500 font-medium mb-6 text-sm"></p>
-            <input type="text" id="dialog-input" class="hidden w-full mb-6 rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-            <div class="flex space-x-3">
-                <button id="dialog-cancel" onclick="closeDialog()" class="hidden flex-1 py-3 bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-700 transition">Cancelar</button>
-                <button id="dialog-confirm" class="flex-1 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-600/30 hover:scale-105">Confirmar</button>
-            </div>
+
+    <div id="modal-nuevo-lead" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-nuevo-lead')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
+          <h3 class="text-2xl font-black">Nuevo Interesado</h3>
+          <button onclick="closeModal('modal-nuevo-lead')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
         </div>
+        <div class="p-6">
+          <form onsubmit="handleGlobalLeadSubmit(event)">
+            <input id="gl-nombre" required placeholder="Nombre y Apellido" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
+            <input id="gl-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
+            
+            <div class="mb-4">
+              <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Vehículo / Marca Buscada</label>
+              <input id="gl-interes" required placeholder="Ej: Pick-ups, Ford Fiesta, etc." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Temperatura del Lead</label>
+              <select id="gl-estado" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
+                <option value="Caliente">🔥 Caliente (Alta intención de compra)</option>
+                <option value="Tibio" selected>⭐ Tibio (Consultando/Comparando)</option>
+                <option value="Frío">❄️ Frío (Solo mirando)</option>
+              </select>
+            </div>
+
+            <textarea id="gl-nota" placeholder="Notas de la consulta..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 resize-none"></textarea>
+            
+            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition">
+              Guardar Lead
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC (FIREBASE & UI) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // Configuración Firebase de RIVAS AUTO
+    // Firebase Configuration - Actualizado para RIVAS AUTO
     const firebaseConfig = {
       apiKey: "AIzaSyDCQSEAMGBfd8MgMMEgaYZ5jAjhaPYfeng",
       authDomain: "rivasauto.firebaseapp.com",
@@ -795,7 +797,7 @@
          const usersSnap = await getDocs(collection(db, "usuarios"));
          
          if(usersSnap.empty) {
-            console.log("Generando Admin y Casa Central...");
+            console.log("Generando Admin y Casa Central de Rivas Auto...");
             try {
               const sucRef = await addDoc(collection(db, "sucursales"), { nombre: 'Casa Central' });
               await addDoc(collection(db, "usuarios"), {
@@ -841,66 +843,6 @@
   </script>
 
   <script>
-    // --- DIALOGOS PERSONALIZADOS (Reemplazo alert, confirm, prompt) ---
-    window.closeDialog = () => {
-      const dialog = document.getElementById('custom-dialog');
-      dialog.classList.add('hidden');
-    };
-    
-    window.customAlert = (msg) => {
-        const dialog = document.getElementById('custom-dialog');
-        dialog.classList.remove('hidden');
-        document.getElementById('dialog-title').innerText = "Aviso";
-        document.getElementById('dialog-title').className = "text-2xl font-black mb-3 text-neutral-900 dark:text-white";
-        document.getElementById('dialog-msg').innerText = msg;
-        document.getElementById('dialog-input').classList.add('hidden');
-        document.getElementById('dialog-cancel').classList.add('hidden');
-        
-        const btn = document.getElementById('dialog-confirm');
-        btn.innerText = "Entendido";
-        btn.className = "flex-1 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:scale-105 transition-transform shadow-lg";
-        btn.onclick = closeDialog;
-    };
-
-    window.customConfirm = (msg, callback) => {
-        const dialog = document.getElementById('custom-dialog');
-        dialog.classList.remove('hidden');
-        document.getElementById('dialog-title').innerText = "Confirmación";
-        document.getElementById('dialog-title').className = "text-2xl font-black mb-3 text-rose-600 dark:text-rose-500";
-        document.getElementById('dialog-msg').innerText = msg;
-        document.getElementById('dialog-input').classList.add('hidden');
-        document.getElementById('dialog-cancel').classList.remove('hidden');
-        
-        const btn = document.getElementById('dialog-confirm');
-        btn.innerText = "Confirmar";
-        btn.className = "flex-1 py-3 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 transition shadow-lg hover:scale-105";
-        btn.onclick = () => {
-            closeDialog();
-            callback();
-        };
-    };
-
-    window.customPrompt = (titleMsg, callback) => {
-        const dialog = document.getElementById('custom-dialog');
-        dialog.classList.remove('hidden');
-        document.getElementById('dialog-title').innerText = "Ingreso de Dato";
-        document.getElementById('dialog-title').className = "text-2xl font-black mb-3 text-neutral-900 dark:text-white";
-        document.getElementById('dialog-msg').innerText = titleMsg;
-        const input = document.getElementById('dialog-input');
-        input.classList.remove('hidden');
-        input.value = '';
-        input.focus();
-        document.getElementById('dialog-cancel').classList.remove('hidden');
-        
-        const btn = document.getElementById('dialog-confirm');
-        btn.innerText = "Aceptar";
-        btn.className = "flex-1 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-lg hover:scale-105 shadow-green-600/30";
-        btn.onclick = () => {
-            closeDialog();
-            callback(input.value);
-        };
-    };
-
     // --- ESTADO GLOBAL LOCAL ---
     const state = {
       activeTab: 'caja',
@@ -918,6 +860,7 @@
       selectedAutoId: null,
       daActiveSection: 'crm',
       isVentaMode: false,
+      autosViewMode: 'grid', // 'grid' o 'list'
       ventaData: { montoEfectivo: '', tienePermuta: false },
       editingUserId: null,
       editingSucursalId: null,
@@ -943,7 +886,7 @@
         }
         deferredPrompt = null;
       } else {
-        customAlert("La instalación funcionará cuando el sistema esté desplegado en un servidor web seguro (https).");
+        alert("La instalación funcionará cuando el sistema esté desplegado en un servidor web seguro (https).");
       }
     };
 
@@ -1127,7 +1070,7 @@
           <div class="p-4 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
             <p class="font-bold text-sm">${n.v.compradorNombre}</p>
             <p class="text-xs text-neutral-500 mb-3">${n.v.autoDesc} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span></p>
-            <a href="${formatWhatsAppLink(n.v.compradorTelefono, `Hola ${n.v.compradorNombre}, vimos que estás por finalizar tu plan. ¿Te interesaría charlar para renovar tu unidad?`)}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
+            <a href="${formatWhatsAppLink(n.v.compradorTelefono, `Hola ${n.v.compradorNombre}, vimos que estás por finalizar tu plan. ¿Te interesaría charlar para renovar tu unidad?`)}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
               <i data-lucide="message-circle" class="w-3.5 h-3.5 mr-1.5"></i> Ofrecer Recompra
             </a>
           </div>
@@ -1159,7 +1102,7 @@
       }
       
       document.getElementById('nav-menu').innerHTML = tabs.map(t => `
-        <button onclick="switchTab('${t.id}')" class="w-full flex items-center space-x-3 py-3 px-4 rounded-2xl transition-all font-bold text-sm ${state.activeTab === t.id ? 'bg-green-600 text-white shadow-md shadow-green-600/30' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'}">
+        <button onclick="switchTab('${t.id}')" class="w-full flex items-center space-x-3 py-3 px-4 rounded-2xl transition-all font-bold text-sm ${state.activeTab === t.id ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'}">
           <i data-lucide="${t.icon}" class="w-5 h-5"></i>
           <span>${t.label}</span>
         </button>
@@ -1191,7 +1134,7 @@
         fc.innerHTML = `
           <div class="flex-1 min-w-[200px]">
             <label class="text-xs font-bold text-neutral-500 block mb-1">Filtrar por Vendedor</label>
-            <select onchange="state.cajaFilterUser=this.value; renderCajaView()" class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500">
+            <select onchange="state.cajaFilterUser=this.value; renderCajaView()" class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm border dark:border-neutral-700 outline-none">
               <option value="all">Todas las cajas permitidas</option>
               ${users.map(u => `
                 <option value="${u.id}" ${state.cajaFilterUser === u.id ? 'selected' : ''}>
@@ -1234,23 +1177,23 @@
 
       document.getElementById('caja-stats').innerHTML = `
         <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
-          <h3 class="text-sm font-bold text-neutral-500 mb-1">Saldo Real Disponible</h3>
-          <p class="text-3xl font-black tracking-tight ${saldo >= 0 ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">${formatMoney(saldo)}</p>
+          <h3 class="text-sm font-medium text-neutral-500 mb-1">Saldo Real Disponible</h3>
+          <p class="text-3xl font-black ${saldo >= 0 ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">${formatMoney(saldo)}</p>
         </div>
         <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
-          <h3 class="text-sm font-bold text-neutral-500 mb-1">Ingresos Efectivizados</h3>
-          <p class="text-3xl font-black tracking-tight text-green-600 dark:text-green-500">${formatMoney(ing)}</p>
+          <h3 class="text-sm font-medium text-neutral-500 mb-1">Ingresos Efectivizados</h3>
+          <p class="text-3xl font-black text-green-600 dark:text-green-500">${formatMoney(ing)}</p>
         </div>
         <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
-          <h3 class="text-sm font-bold text-neutral-500 mb-1">Egresos Registrados</h3>
-          <p class="text-3xl font-black tracking-tight text-rose-600 dark:text-rose-400">${formatMoney(egr)}</p>
+          <h3 class="text-sm font-medium text-neutral-500 mb-1">Egresos Registrados</h3>
+          <p class="text-3xl font-black text-rose-600 dark:text-rose-400">${formatMoney(egr)}</p>
         </div>
       `;
 
       if (transWithSaldo.length === 0) {
         document.getElementById('caja-table').innerHTML = `
           <tr>
-            <td colspan="4" class="text-center py-8 text-neutral-500 font-medium">Sin movimientos.</td>
+            <td colspan="4" class="text-center py-8 text-neutral-500">Sin movimientos.</td>
           </tr>
         `;
       } else {
@@ -1267,23 +1210,23 @@
                   <div>
                     <p class="text-sm font-bold flex items-center">
                       ${t.descripcion}
-                      ${t.estadoCobro === 'pendiente' ? '<span class="ml-2 text-[10px] bg-amber-200 text-amber-800 px-1 rounded uppercase font-black">Pendiente</span>' : ''}
+                      ${t.estadoCobro === 'pendiente' ? '<span class="ml-2 text-[10px] bg-amber-200 text-amber-800 px-1 rounded">Pendiente</span>' : ''}
                     </p>
                     <div class="flex items-center space-x-2 mt-1">
-                      <span class="text-xs text-neutral-500 uppercase font-bold tracking-wider">${t.categoria}</span>
-                      ${t.tipoComprobante !== 'X' ? `<span class="bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300 text-[10px] font-black uppercase px-1.5 py-0.5 rounded">Fac ${t.tipoComprobante}</span>` : ''}
+                      <span class="text-xs text-neutral-500 uppercase">${t.categoria}</span>
+                      ${t.tipoComprobante !== 'X' ? `<span class="bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300 text-[10px] font-bold px-1.5 py-0.5 rounded">Fac ${t.tipoComprobante}</span>` : ''}
                     </div>
                   </div>
                 </div>
               </td>
               <td class="px-6 py-4">
                 <p class="text-sm font-bold">${u ? u.nombre : '-'}</p>
-                <p class="text-xs text-neutral-500 font-medium">${s ? s.nombre : ''}</p>
+                <p class="text-xs text-neutral-500">${s ? s.nombre : ''}</p>
               </td>
               <td class="px-6 py-4 text-sm font-bold text-right ${t.tipo === 'ingreso' ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">
                 ${t.tipo === 'ingreso' ? '+' : '-'}${formatMoney(t.valor)}
               </td>
-              <td class="px-6 py-4 text-sm font-black tracking-tight text-right text-neutral-900 dark:text-white">
+              <td class="px-6 py-4 text-sm font-bold text-right">
                 ${t.estadoCobro === 'pendiente' ? '-' : formatMoney(t.saldoDisponible)}
               </td>
             </tr>
@@ -1299,7 +1242,7 @@
       
       if (p.length === 0) {
         document.getElementById('pendientes-list-content').innerHTML = `
-          <p class="text-center text-neutral-500 py-6 font-bold">Sin cobros pendientes.</p>
+          <p class="text-center text-neutral-500 py-6">Sin cobros pendientes.</p>
         `;
       } else {
         document.getElementById('pendientes-list-content').innerHTML = p.map(t => `
@@ -1309,8 +1252,8 @@
               <p class="text-xs text-amber-700 dark:text-amber-400 font-bold mt-1">Acreditación: ${formatDate(t.fechaAcreditacion)}</p>
             </div>
             <div class="text-right">
-              <p class="font-black text-lg text-green-600 dark:text-green-400 mb-2">${formatMoney(t.valor)}</p>
-              <button onclick="marcarCobrado('${t.id}')" class="px-4 py-2 bg-black text-white dark:bg-white dark:text-black text-xs font-bold rounded-xl hover:scale-105 transition-transform shadow-md">
+              <p class="font-black text-green-600 dark:text-green-500 mb-2">${formatMoney(t.valor)}</p>
+              <button onclick="marcarCobrado('${t.id}')" class="px-3 py-1.5 bg-black text-white dark:bg-white dark:text-black text-xs font-bold rounded-lg hover:scale-105 transition-transform">
                 Marcar Acreditado
               </button>
             </div>
@@ -1326,12 +1269,11 @@
     }
 
     window.agregarCategoria = async () => {
-      customPrompt('Ingresa el nombre de la nueva categoría global:', (nueva) => {
-        if (nueva && nueva.trim() !== '') {
-          state.categoriasGasto.push(nueva.trim());
-          initSelects();
-        }
-      });
+      const nueva = prompt('Ingresa la nueva categoría (ej. Gestoría Avanzada):');
+      if (nueva && nueva.trim() !== '') {
+        state.categoriasGasto.push(nueva.trim());
+        initSelects();
+      }
     };
 
     window.handleComprobanteChange = (val) => {
@@ -1394,6 +1336,7 @@
       initSelects();
     });
 
+
     // --- RENDERIZADO DE VENTAS ---
     window.renderVentasView = () => {
       if(state.currentUser?.rol !== 'Admin') return;
@@ -1403,7 +1346,7 @@
       if (state.ventas.length === 0) {
         table.innerHTML = `
           <tr>
-            <td colspan="5" class="text-center py-8 text-neutral-500 font-medium">No hay ventas registradas.</td>
+            <td colspan="5" class="text-center py-8 text-neutral-500">No hay ventas registradas.</td>
           </tr>
         `;
       } else {
@@ -1412,24 +1355,24 @@
           if (v.metodoPago !== 'efectivo') {
             const p = v.cuotasTotales - v.cuotasPagadas;
             badge = `
-              <span class="block mt-1 text-[10px] ${p > 0 ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/30' : 'text-green-600 bg-green-50 dark:bg-green-900/30'} px-2 py-0.5 rounded font-black tracking-widest uppercase">
+              <span class="block mt-1 text-[10px] ${p > 0 ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/30' : 'text-green-600 bg-green-50 dark:bg-green-900/30'} px-2 py-0.5 rounded font-bold">
                 ${p} Pendientes
               </span>
             `;
           }
           return `
-            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="openDetalleVenta('${v.id}')">
-              <td class="px-6 py-4 text-sm text-neutral-500 font-medium">${formatDate(v.fecha)}</td>
+            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer" onclick="openDetalleVenta('${v.id}')">
+              <td class="px-6 py-4 text-sm text-neutral-500">${formatDate(v.fecha)}</td>
               <td class="px-6 py-4">
                 <p class="font-bold text-sm">${v.compradorNombre}</p>
-                <p class="text-xs text-neutral-500 flex items-center mt-1 font-medium">
+                <p class="text-xs text-neutral-500 flex items-center mt-1">
                   <i data-lucide="phone" class="w-3 h-3 mr-1"></i>${v.compradorTelefono}
                 </p>
               </td>
               <td class="px-6 py-4 font-bold text-sm">${v.autoDesc}</td>
-              <td class="px-6 py-4 text-right font-black tracking-tight text-lg">${formatMoney(v.montoTotal)}</td>
+              <td class="px-6 py-4 text-right font-black">${formatMoney(v.montoTotal)}</td>
               <td class="px-6 py-4 text-center">
-                <span class="text-xs uppercase font-black tracking-wider text-neutral-700 dark:text-neutral-300">${v.metodoPago}</span>
+                <span class="text-xs uppercase font-bold text-neutral-700 dark:text-neutral-300">${v.metodoPago}</span>
                 ${badge}
               </td>
             </tr>
@@ -1448,15 +1391,15 @@
          pagosHTML = `
            <div class="mt-6 p-6 bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-[2rem]">
              <div class="flex justify-between items-center mb-4">
-               <h4 class="font-black uppercase text-xs tracking-wider">Estado Crédito/Pagaré</h4>
-               <span class="font-black text-xl text-green-600 dark:text-green-500">${v.cuotasPagadas} / ${v.cuotasTotales} Pagadas</span>
+               <h4 class="font-bold uppercase text-xs tracking-wider">Estado Crédito/Pagaré</h4>
+               <span class="font-black text-xl text-indigo-600 dark:text-indigo-400">${v.cuotasPagadas} / ${v.cuotasTotales} Pagadas</span>
              </div>
              ${v.cuotasPagadas < v.cuotasTotales ? `
-               <button onclick="registrarCuotaVenta('${v.id}')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-black text-lg rounded-2xl shadow-lg hover:scale-[1.02] transition-transform">
+               <button onclick="registrarCuotaVenta('${v.id}')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow">
                  Registrar Pago de 1 Cuota
                </button>
              ` : `
-               <div class="text-center text-green-600 font-black tracking-widest uppercase p-4 bg-green-100 dark:bg-green-900/30 rounded-2xl border border-green-200 dark:border-green-800/50">
+               <div class="text-center text-green-600 font-bold p-3 bg-green-100 dark:bg-green-900/30 rounded-2xl">
                  Plan Finalizado
                </div>
              `}
@@ -1467,32 +1410,32 @@
       document.getElementById('venta-detail-content').innerHTML = `
         <div class="space-y-4 text-sm">
           <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Fecha</span>
+            <span class="text-neutral-500">Fecha</span>
             <span class="font-bold">${formatDate(v.fecha)}</span>
           </div>
           <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Comprador</span>
+            <span class="text-neutral-500">Comprador</span>
             <span class="font-bold">${v.compradorNombre}</span>
           </div>
           <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Teléfono</span>
-            <a href="${formatWhatsAppLink(v.compradorTelefono,'Hola')}" target="_blank" class="font-bold text-green-600 hover:underline">${v.compradorTelefono}</a>
+            <span class="text-neutral-500">Teléfono</span>
+            <a href="${formatWhatsAppLink(v.compradorTelefono,'Hola')}" target="_blank" class="font-bold text-green-500 hover:underline">${v.compradorTelefono}</a>
           </div>
           <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Vehículo</span>
+            <span class="text-neutral-500">Vehículo</span>
             <span class="font-bold text-right">${v.autoDesc}</span>
           </div>
-          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3 items-center">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Monto Op.</span>
-            <span class="font-black text-2xl">${formatMoney(v.montoTotal)}</span>
+          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+            <span class="text-neutral-500">Monto Operación</span>
+            <span class="font-black text-lg">${formatMoney(v.montoTotal)}</span>
           </div>
-          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3 items-center">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Método</span>
-            <span class="font-black uppercase tracking-wider px-3 py-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg">${v.metodoPago}</span>
+          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+            <span class="text-neutral-500">Método</span>
+            <span class="font-bold uppercase">${v.metodoPago}</span>
           </div>
           ${v.tienePermuta ? `
             <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-              <span class="text-neutral-500 font-bold uppercase tracking-wider">Permuta</span>
+              <span class="text-neutral-500">Permuta</span>
               <span class="font-bold text-right">${v.detallePermuta}</span>
             </div>
           ` : ''}
@@ -1510,166 +1453,140 @@
       }
     };
 
-    // --- RENDERIZADO DE FACTURAS ---
-    window.renderFacturasView = () => {
-      if(state.currentUser?.rol !== 'Admin') return;
-      
-      const facturas = state.transacciones.filter(t => ['A','B','C'].includes(t.tipoComprobante));
-      
-      const totalEmitido = facturas.reduce((a,c) => a + c.valor, 0);
-      const totalIva = facturas.reduce((a,c) => a + (c.iva || 0), 0);
-      
-      document.getElementById('facturas-summary').innerHTML = `
-        <div class="p-8 bg-black dark:bg-neutral-800 rounded-3xl text-white shadow-xl">
-          <p class="text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">Monto Total Facturado (Global)</p>
-          <p class="text-5xl font-black tracking-tight">${formatMoney(totalEmitido)}</p>
-        </div>
-        <div class="p-8 bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
-          <p class="text-neutral-500 dark:text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">IVA Total Acumulado (Fac. A)</p>
-          <p class="text-5xl font-black tracking-tight text-neutral-900 dark:text-white">${formatMoney(totalIva)}</p>
-        </div>
-      `;
-      
-      const table = document.getElementById('facturas-table');
-      if(facturas.length === 0) {
-        table.innerHTML = `
-          <tr>
-            <td colspan="5" class="text-center py-8 text-neutral-500 font-medium">No hay facturas registradas.</td>
-          </tr>
-        `;
-      } else {
-        table.innerHTML = facturas.slice().reverse().map(f => {
-          const u = state.usuarios.find(x => x.id === f.userId);
-          return `
-            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-              <td class="px-6 py-4">
-                <span class="inline-block bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-black text-[10px] uppercase tracking-wider px-2 py-1 rounded mb-1">
-                  Tipo ${f.tipoComprobante}
-                </span>
-                <p class="font-mono text-sm font-bold tracking-tight">${f.numComprobante || 'S/N'}</p>
-              </td>
-              <td class="px-6 py-4 text-sm text-neutral-500 font-medium">${formatDate(f.fecha)}</td>
-              <td class="px-6 py-4">
-                <p class="font-bold">${f.descripcion}</p>
-                <p class="text-xs text-neutral-400 mt-1 font-medium">Por: ${u ? u.nombre : '-'}</p>
-              </td>
-              <td class="px-6 py-4 text-right font-black tracking-tight text-lg">${formatMoney(f.valor)}</td>
-              <td class="px-6 py-4 text-center">
-                ${f.tipoComprobante === 'A' ? `
-                  <button onclick="openDetalleFactura('${f.id}')" class="text-xs font-black uppercase tracking-wider bg-neutral-200 px-4 py-2 rounded-xl dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors">
-                    Ver Detalle
-                  </button>
-                ` : '<span class="text-neutral-300 dark:text-neutral-700 font-bold">-</span>'}
-              </td>
-            </tr>
-          `;
-        }).join('');
-      }
-    };
-    
-    window.openDetalleFactura = (id) => {
-      const t = state.transacciones.find(x => x.id === id);
-      const subtotal = t.valor - (t.iva || 0);
-      
-      document.getElementById('factura-detail-content').innerHTML = `
-        <div class="text-center mb-8">
-          <div class="w-16 h-16 bg-black text-white dark:bg-white dark:text-black flex items-center justify-center text-3xl font-black mx-auto mb-3 rounded-2xl shadow-md">A</div>
-          <p class="font-mono text-neutral-500 font-bold">${t.numComprobante}</p>
-        </div>
-        
-        <div class="space-y-4 mb-8">
-          <div class="flex justify-between text-sm">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Fecha:</span> 
-            <span class="font-bold">${formatDate(t.fecha)}</span>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Operación:</span> 
-            <span class="font-bold text-right">${t.descripcion}</span>
-          </div>
-        </div>
-        
-        <div class="border-t border-neutral-200 dark:border-neutral-700 pt-6 space-y-3">
-          <div class="flex justify-between text-sm">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Subtotal:</span> 
-            <span class="font-bold text-lg">${formatMoney(subtotal)}</span>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">IVA:</span> 
-            <span class="font-bold text-lg">${formatMoney(t.iva)}</span>
-          </div>
-          <div class="flex justify-between text-xl mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-            <span class="font-black uppercase tracking-wider">Total:</span> 
-            <span class="font-black text-3xl tracking-tight">${formatMoney(t.valor)}</span>
-          </div>
-        </div>
-      `;
-      openModal('modal-detalle-factura');
-    };
 
     // --- RENDERIZADO DE AUTOS Y MODAL DE AUTOS ---
+    window.toggleAutosViewMode = (mode) => {
+      state.autosViewMode = mode;
+      renderAutosView();
+    }
+
     window.renderAutosView = () => {
-      const grid = document.getElementById('autos-grid');
+      const container = document.getElementById('autos-container');
+      
+      // Actualizar UI botones
+      document.getElementById('btn-view-grid').className = state.autosViewMode === 'grid' 
+        ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' 
+        : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
+        
+      document.getElementById('btn-view-list').className = state.autosViewMode === 'list' 
+        ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' 
+        : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
       
       if (state.autos.length === 0) {
-        grid.innerHTML = '<div class="col-span-full py-12 text-center text-neutral-500 font-bold">No hay vehículos en la flota.</div>';
-      } else {
-        grid.innerHTML = state.autos.map(auto => {
-          const totalGastos = auto.gastos?.reduce((s, g) => s + Number(g.monto), 0) || 0;
-          const docsOk = checkDocStatus(auto.documentacion);
-          const sName = state.sucursales.find(x => x.id === auto.sucursalId)?.nombre || 'Sin Asignar';
-          
-          let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300';
-          if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-          if(auto.estado === 'Vendido') bClass = 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-500';
-          if(auto.estado === 'Aprobación Pendiente') bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 animate-pulse';
-          
-          return `
-            <div onclick="openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-xl hover:border-green-500/50 transition-all duration-300">
-              <div class="bg-neutral-50/50 dark:bg-neutral-800/50 rounded-[2rem] p-6 h-full flex flex-col relative overflow-hidden ${auto.estado === 'Vendido' ? 'opacity-60 grayscale' : ''}">
-                <div class="flex justify-between items-start mb-4 relative z-10">
-                  <div class="flex flex-col space-y-1">
-                    <div class="flex space-x-2">
-                      <span class="px-3 py-1 text-[10px] font-black tracking-widest uppercase rounded-xl ${bClass}">
-                        ${auto.estado}
-                      </span>
-                      ${(!docsOk && auto.estado !== 'Vendido') ? `
-                        <span class="text-rose-500" title="Papeles Incompletos">
-                          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        container.innerHTML = '<div class="col-span-full py-12 text-center text-neutral-500">No hay vehículos en la flota.</div>';
+        return;
+      }
+
+      if (state.autosViewMode === 'grid') {
+        container.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
+            ${state.autos.map(auto => {
+              const totalGastos = auto.gastos?.reduce((s, g) => s + Number(g.monto), 0) || 0;
+              const docsOk = checkDocStatus(auto.documentacion);
+              const sName = state.sucursales.find(x => x.id === auto.sucursalId)?.nombre || 'Sin Asignar';
+              
+              let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300';
+              if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500';
+              if(auto.estado === 'Vendido') bClass = 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-500';
+              if(auto.estado === 'Aprobación Pendiente') bClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 animate-pulse';
+              
+              return `
+                <div onclick="openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
+                  <div class="bg-neutral-50/50 dark:bg-neutral-800/50 rounded-[2rem] p-6 h-full flex flex-col relative overflow-hidden ${auto.estado === 'Vendido' ? 'opacity-60 grayscale' : ''}">
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                      <div class="flex flex-col space-y-1">
+                        <div class="flex space-x-2">
+                          <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-xl ${bClass}">
+                            ${auto.estado}
+                          </span>
+                          ${(!docsOk && auto.estado !== 'Vendido') ? `
+                            <span class="text-rose-500" title="Papeles Incompletos">
+                              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                            </span>
+                          ` : ''}
+                        </div>
+                        <span class="text-xs text-neutral-500 font-bold ml-1">
+                          <i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${sName}
                         </span>
-                      ` : ''}
+                      </div>
+                      <div class="bg-white dark:bg-neutral-900 p-2 rounded-xl border border-neutral-200 dark:border-neutral-700">
+                        <span class="font-mono text-sm font-bold">${auto.patente}</span>
+                      </div>
                     </div>
-                    <span class="text-xs text-neutral-500 font-bold ml-1 tracking-wide">
-                      <i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${sName}
-                    </span>
-                  </div>
-                  <div class="bg-white dark:bg-neutral-900 p-2 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
-                    <span class="font-mono text-sm font-bold">${auto.patente}</span>
-                  </div>
-                </div>
-                
-                <div class="mb-8 relative z-10">
-                  <h3 class="text-2xl font-black leading-tight">${auto.marca} <br/>
-                    <span class="text-neutral-500">${auto.modelo}</span>
-                  </h3>
-                  <p class="text-sm text-neutral-400 font-bold mt-2">Año ${auto.año}</p>
-                </div>
-                
-                <div class="mt-auto space-y-3 relative z-10">
-                  <div class="flex justify-between items-center p-3 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700">
-                    <span class="text-xs font-black tracking-widest text-neutral-500 uppercase">Precio</span>
-                    <span class="text-lg font-black tracking-tight">${formatMoney(auto.precio)}</span>
-                  </div>
-                  <div class="flex justify-between items-center px-2">
-                    <span class="text-xs text-neutral-500 font-bold uppercase tracking-wider">
-                      <i data-lucide="wrench" class="w-3 h-3 inline mr-1"></i> Inversión
-                    </span>
-                    <span class="text-sm font-black text-neutral-700 dark:text-neutral-300">${formatMoney(totalGastos)}</span>
+                    
+                    <div class="mb-8 relative z-10">
+                      <h3 class="text-2xl font-black">${auto.marca} <br/>
+                        <span class="text-neutral-500">${auto.modelo}</span>
+                      </h3>
+                      <p class="text-sm text-neutral-400 mt-2 font-bold">Año ${auto.año}</p>
+                    </div>
+                    
+                    <div class="mt-auto space-y-3 relative z-10">
+                      <div class="flex justify-between items-center p-3 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700">
+                        <span class="text-xs font-bold text-neutral-500 uppercase">Precio</span>
+                        <span class="text-lg font-black">${formatMoney(auto.precio)}</span>
+                      </div>
+                      <div class="flex justify-between items-center px-2">
+                        <span class="text-xs text-neutral-500 font-bold">
+                          <i data-lucide="wrench" class="w-3 h-3 inline"></i> Inversión
+                        </span>
+                        <span class="text-sm font-bold">${formatMoney(totalGastos)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      } else {
+        // Vista en Lista (Tabla)
+        container.innerHTML = `
+          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden fade-in">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                    <th class="px-6 py-4 font-bold">Vehículo</th>
+                    <th class="px-6 py-4 font-bold">Patente</th>
+                    <th class="px-6 py-4 font-bold">Sucursal</th>
+                    <th class="px-6 py-4 font-bold">Estado / Docs</th>
+                    <th class="px-6 py-4 font-bold text-right">Precio Venta</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
+                  ${state.autos.map(auto => {
+                    const docsOk = checkDocStatus(auto.documentacion);
+                    const sName = state.sucursales.find(x => x.id === auto.sucursalId)?.nombre || 'Sin Asignar';
+                    
+                    let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300';
+                    if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500';
+                    if(auto.estado === 'Vendido') bClass = 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-500';
+                    if(auto.estado === 'Aprobación Pendiente') bClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
+
+                    return `
+                      <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors ${auto.estado === 'Vendido' ? 'opacity-60' : ''}" onclick="openDetalleAuto('${auto.id}')">
+                        <td class="px-6 py-4">
+                          <p class="font-bold">${auto.marca} ${auto.modelo}</p>
+                          <p class="text-xs text-neutral-500 font-bold mt-1">Año ${auto.año}</p>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-sm font-bold uppercase">${auto.patente}</td>
+                        <td class="px-6 py-4 text-sm text-neutral-600 dark:text-neutral-400 font-bold">${sName}</td>
+                        <td class="px-6 py-4">
+                           <div class="flex items-center space-x-2">
+                             <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${bClass}">${auto.estado}</span>
+                             ${(!docsOk && auto.estado !== 'Vendido') ? `<span class="text-rose-500" title="Papeles Incompletos"><i data-lucide="alert-triangle" class="w-4 h-4"></i></span>` : ''}
+                           </div>
+                        </td>
+                        <td class="px-6 py-4 text-right font-black text-lg">${formatMoney(auto.precio)}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
             </div>
-          `;
-        }).join('');
+          </div>
+        `;
       }
       lucide.createIcons();
     }
@@ -1697,10 +1614,10 @@
     }
     
     window.deleteAuto = async (id) => { 
-      customConfirm('¿Estás seguro de eliminar este vehículo de manera permanente?', async () => {
+      if(confirm('¿Estás seguro de eliminar este vehículo de manera permanente?')) { 
         await window.fbDelete("autos", id); 
         closeModal('modal-detalle-auto'); 
-      });
+      } 
     }
     
     document.getElementById('form-auto').addEventListener('submit', async (e) => {
@@ -1780,7 +1697,7 @@
     window.solicitarCierreVenta = async (id) => { 
       await window.fbUpdate("autos", id, { estado: "Aprobación Pendiente" }); 
       closeModal('modal-detalle-auto'); 
-      customAlert("Solicitud enviada al Administrador para su revisión."); 
+      alert("Solicitud enviada al Administrador."); 
     }
     
     window.toggleMetodoPago = (v) => { 
@@ -1808,14 +1725,14 @@
       
       // Header Actions
       document.getElementById('da-header-actions').innerHTML = `
-        <button type="button" onclick="editAuto('${a.id}')" class="p-2 text-neutral-500 hover:text-green-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors">
-          <i data-lucide="edit-2" class="w-5 h-5"></i>
+        <button type="button" onclick="editAuto('${a.id}')" class="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition">
+          <i data-lucide="edit-2" class="w-4 h-4"></i>
         </button>
-        <button type="button" onclick="deleteAuto('${a.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
-          <i data-lucide="trash-2" class="w-5 h-5"></i>
+        <button type="button" onclick="deleteAuto('${a.id}')" class="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/30 text-rose-500 rounded-full transition">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
         </button>
         <div class="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-2"></div>
-        <button type="button" onclick="closeModal('modal-detalle-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+        <button type="button" onclick="closeModal('modal-detalle-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       `;
@@ -1825,18 +1742,18 @@
       if(!state.isVentaMode) {
         // MODO VISTA NORMAL
         html += `
-          <div class="bg-black text-white dark:bg-white dark:text-black rounded-[2rem] p-8 mb-6 shadow-xl">
+          <div class="bg-black text-white dark:bg-white dark:text-black rounded-[2rem] p-8 mb-6">
             <div class="flex justify-between items-start">
               <div>
-                <span class="bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 text-[10px] uppercase px-3 py-1 rounded-lg font-black tracking-widest">
+                <span class="bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 text-[10px] uppercase px-3 py-1 rounded-lg font-bold">
                   ${a.estado}
                 </span>
-                <h2 class="text-3xl font-black mt-3 leading-tight">${a.marca} <br/> <span class="text-neutral-400 dark:text-neutral-500">${a.modelo}</span></h2>
+                <h2 class="text-3xl font-black mt-3">${a.marca} ${a.modelo}</h2>
                 <p class="text-sm mt-1 opacity-80 font-bold">Año ${a.año}</p>
               </div>
               <div class="text-right">
-                <p class="text-xs uppercase font-bold opacity-60 tracking-wider">Precio Venta</p>
-                <p class="text-3xl font-black mt-1 tracking-tight text-green-400 dark:text-green-600">${formatMoney(a.precio)}</p>
+                <p class="text-xs uppercase font-bold opacity-60">Precio Venta</p>
+                <p class="text-3xl font-black mt-1">${formatMoney(a.precio)}</p>
               </div>
             </div>
         `;
@@ -1846,21 +1763,21 @@
           if (state.currentUser.rol === 'Admin') {
             html += `
               <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
-                <button onclick="state.isVentaMode=true; renderDetalleAuto()" class="w-full py-4 bg-green-600 text-white font-black text-lg rounded-2xl shadow hover:scale-[1.02] transition-transform">
+                <button onclick="state.isVentaMode=true; renderDetalleAuto()" class="w-full py-4 bg-green-600 text-white font-black rounded-2xl shadow hover:bg-green-700 hover:scale-[1.02] transition-all">
                   Cerrar Venta con Cliente
                 </button>
               </div>
             `;
           } else if(a.estado === 'Aprobación Pendiente') {
             html += `
-              <div class="mt-8 p-4 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl font-bold text-center border border-amber-200 dark:border-amber-800/50">
-                Esperando cierre por Administración.
+              <div class="mt-8 p-4 bg-amber-50 text-amber-600 rounded-xl font-bold text-center border border-amber-200">
+                Esperando cierre por Admin.
               </div>
             `;
           } else {
             html += `
               <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
-                <button onclick="solicitarCierreVenta('${a.id}')" class="w-full py-4 bg-amber-500 text-white font-black text-lg rounded-2xl shadow hover:scale-[1.02] transition-transform">
+                <button onclick="solicitarCierreVenta('${a.id}')" class="w-full py-4 bg-amber-500 text-white font-black rounded-2xl shadow hover:scale-[1.02] transition-all">
                   Solicitar Cierre a Administración
                 </button>
               </div>
@@ -1895,25 +1812,25 @@
               <div>
                 <h4 class="font-bold mb-4">Interesados Recientes</h4>
                 ${leads.length ? leads.map(x => `
-                  <div class="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border border-neutral-100 dark:border-neutral-700 mb-3 shadow-sm">
+                  <div class="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border dark:border-neutral-700 mb-3">
                     <div class="flex justify-between items-start mb-2">
                       <h4 class="font-bold">${x.nombre}</h4>
-                      <span class="px-2 py-0.5 text-[10px] font-black rounded-md bg-neutral-200 dark:bg-neutral-700 uppercase tracking-widest">${x.estadoLead}</span>
+                      <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-neutral-200 dark:bg-neutral-700 uppercase">${x.estadoLead}</span>
                     </div>
                     <p class="text-sm text-neutral-600 dark:text-neutral-400 italic mb-3">"${x.notas}"</p>
-                    <a href="${formatWhatsAppLink(x.telefono, 'Hola!')}" target="_blank" class="text-xs font-bold text-green-600 dark:text-green-500 flex items-center hover:underline">
+                    <a href="${formatWhatsAppLink(x.telefono, 'Hola!')}" target="_blank" class="text-xs font-bold text-green-600 flex items-center hover:underline">
                       <i data-lucide="message-circle" class="w-4 h-4 mr-1"></i> Enviar WhatsApp
                     </a>
                   </div>
-                `).join('') : '<p class="text-neutral-500 text-sm font-medium">Sin leads cargados.</p>'}
+                `).join('') : '<p class="text-neutral-500 text-sm font-bold">Sin leads cargados.</p>'}
               </div>
               
               <form onsubmit="handleDA_CRMSubmit(event, '${a.id}')" class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-100 dark:border-neutral-700 h-fit">
-                <h4 class="font-black mb-4 text-sm uppercase text-neutral-500 tracking-wider">Cargar Interesado</h4>
-                <input id="dac-nombre" required placeholder="Nombre Completo" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border outline-none border-neutral-200 dark:border-neutral-800 focus:border-green-500 transition-colors" />
-                <input id="dac-tel" required placeholder="Teléfono" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border outline-none border-neutral-200 dark:border-neutral-800 focus:border-green-500 transition-colors" />
-                <textarea id="dac-nota" placeholder="Notas de la consulta..." class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border outline-none border-neutral-200 dark:border-neutral-800 resize-none focus:border-green-500 transition-colors"></textarea>
-                <button type="submit" class="w-full py-3 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold shadow-lg hover:scale-105 transition-transform">
+                <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500">Cargar Interesado</h4>
+                <input id="dac-nombre" required placeholder="Nombre Completo" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border outline-none dark:border-neutral-800 focus:border-green-500" />
+                <input id="dac-tel" required placeholder="Teléfono" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border outline-none dark:border-neutral-800 focus:border-green-500" />
+                <textarea id="dac-nota" placeholder="Notas de la consulta..." class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border outline-none dark:border-neutral-800 focus:border-green-500 resize-none"></textarea>
+                <button type="submit" class="w-full py-3 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold shadow-lg hover:scale-[1.02] transition-transform">
                   Guardar Lead
                 </button>
               </form>
@@ -1927,16 +1844,16 @@
                 {k:'verificacion', l:'Verificación (12D)'},
                 {k:'libreDeuda', l:'Libre Deuda'}
               ].map(i => `
-                <div onclick="toggleDoc('${a.id}','${i.k}')" class="p-5 rounded-2xl border-2 flex items-center space-x-4 cursor-pointer transition-colors ${a.documentacion[i.k] ? 'border-green-600 bg-green-50 dark:bg-green-900/10' : 'border-neutral-200 dark:border-neutral-700'}">
-                  <div class="w-6 h-6 rounded-full flex items-center justify-center ${a.documentacion[i.k] ? 'bg-green-600 text-white' : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-400'}">
+                <div onclick="toggleDoc('${a.id}','${i.k}')" class="p-5 rounded-2xl border-2 flex items-center space-x-4 cursor-pointer transition-colors ${a.documentacion[i.k] ? 'border-green-600 bg-green-50/50 dark:bg-green-900/10' : 'border-neutral-200 dark:border-neutral-700'}">
+                  <div class="w-6 h-6 rounded-full flex items-center justify-center ${a.documentacion[i.k] ? 'bg-green-600 text-white' : 'bg-neutral-200 dark:bg-neutral-800'}">
                     ${a.documentacion[i.k] ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
                   </div>
                   <span class="font-bold">${i.l}</span>
                 </div>
               `).join('')}
-              <div class="p-5 rounded-2xl border-2 border-neutral-200 dark:border-neutral-700">
-                <label class="text-xs font-black uppercase tracking-wider text-neutral-500 mb-2 block">VTV Vencimiento</label>
-                <input type="date" value="${a.documentacion.vtv}" onchange="updateVTV('${a.id}', this.value)" class="w-full bg-neutral-50 dark:bg-neutral-800 rounded-xl px-3 py-2 outline-none focus:border-green-500 font-bold"/>
+              <div class="p-5 rounded-2xl border-2 dark:border-neutral-700">
+                <label class="text-xs font-bold uppercase text-neutral-500 mb-2 block">VTV Vencimiento</label>
+                <input type="date" value="${a.documentacion.vtv}" onchange="updateVTV('${a.id}', this.value)" class="w-full bg-neutral-50 dark:bg-neutral-800 rounded-xl px-3 py-2 outline-none font-bold focus:border-green-500"/>
               </div>
             </div>
           `;
@@ -1944,16 +1861,16 @@
           html += `
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label class="block text-xs font-black tracking-wider uppercase mb-2 text-neutral-500">Anticipo</label>
-                <input id="fin-ant" type="number" oninput="updateCuotaView(${a.precio})" placeholder="Ej: ${a.precio * 0.5}" class="w-full rounded-2xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-900 border outline-none border-neutral-200 dark:border-neutral-700 font-bold focus:border-green-500 transition-colors" />
+                <label class="block text-xs font-bold uppercase mb-2">Anticipo</label>
+                <input id="fin-ant" type="number" oninput="updateCuotaView(${a.precio})" placeholder="Ej: ${a.precio * 0.5}" class="w-full rounded-2xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-900 border outline-none dark:border-neutral-700 font-bold focus:border-green-500" />
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-xs font-black tracking-wider uppercase mb-2 text-neutral-500">TNA (%)</label>
-                    <input id="fin-tna" type="number" value="65" oninput="updateCuotaView(${a.precio})" class="w-full rounded-2xl px-4 py-3 bg-neutral-50 dark:bg-neutral-900 border outline-none border-neutral-200 dark:border-neutral-700 font-bold focus:border-green-500 transition-colors" />
+                    <label class="block text-xs font-bold uppercase mb-2">TNA (%)</label>
+                    <input id="fin-tna" type="number" value="65" oninput="updateCuotaView(${a.precio})" class="w-full rounded-2xl px-4 py-3 bg-neutral-50 dark:bg-neutral-900 border outline-none dark:border-neutral-700 font-bold focus:border-green-500" />
                   </div>
                   <div>
-                    <label class="block text-xs font-black tracking-wider uppercase mb-2 text-neutral-500">Plazo</label>
-                    <select id="fin-cuotas" onchange="updateCuotaView(${a.precio})" class="w-full rounded-2xl px-4 py-3 bg-neutral-50 dark:bg-neutral-900 border outline-none border-neutral-200 dark:border-neutral-700 font-bold focus:border-green-500 transition-colors">
+                    <label class="block text-xs font-bold uppercase mb-2">Plazo</label>
+                    <select id="fin-cuotas" onchange="updateCuotaView(${a.precio})" class="w-full rounded-2xl px-4 py-3 bg-neutral-50 dark:bg-neutral-900 border outline-none dark:border-neutral-700 font-bold focus:border-green-500">
                       <option value="12">12 Meses</option>
                       <option value="24" selected>24 Meses</option>
                       <option value="36">36 Meses</option>
@@ -1962,8 +1879,8 @@
                   </div>
                 </div>
               </div>
-              <div class="bg-black dark:bg-white text-white dark:text-black rounded-3xl p-8 shadow-2xl flex flex-col justify-center">
-                <p class="text-sm font-black uppercase tracking-widest opacity-70 mb-2">Cuota Est. (Sis. Francés)</p>
+              <div class="bg-black dark:bg-white text-white dark:text-black rounded-3xl p-8 shadow-lg flex flex-col justify-center border border-neutral-800 dark:border-neutral-200">
+                <p class="text-sm font-bold uppercase opacity-70 mb-2">Cuota Est. (Sis. Francés)</p>
                 <p id="fin-res" class="text-5xl font-black text-green-400 dark:text-green-600">${formatMoney(calcCuota(a.precio))}</p>
               </div>
             </div>
@@ -1973,20 +1890,20 @@
             <div>
               <div class="flex justify-between items-center mb-6">
                 <h4 class="font-bold text-lg">Historial Taller y Gastos</h4>
-                <span class="bg-rose-50 text-rose-600 dark:bg-rose-900/30 px-3 py-1 rounded-xl text-sm font-black tracking-wider border border-rose-200 dark:border-rose-800">
+                <span class="bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-white px-3 py-1 rounded-xl text-sm font-bold border border-neutral-200 dark:border-neutral-700">
                   Invertido: ${formatMoney(tg)}
                 </span>
               </div>
               <div class="space-y-3">
                 ${a.gastos?.length ? a.gastos.map(g => `
-                  <div class="flex justify-between items-center p-4 bg-neutral-50 dark:bg-neutral-800 rounded-2xl border border-neutral-100 dark:border-neutral-700">
+                  <div class="flex justify-between items-center p-4 bg-neutral-50 dark:bg-neutral-800 rounded-2xl border dark:border-neutral-700">
                     <div>
                       <p class="font-bold">${g.descripcion}</p>
-                      <p class="text-xs text-neutral-500 mt-1 font-medium">${g.categoria} • ${formatDate(g.fecha)}</p>
+                      <p class="text-xs text-neutral-500 mt-1">${g.categoria} • ${formatDate(g.fecha)}</p>
                     </div>
-                    <span class="font-bold text-rose-600 dark:text-rose-400">${formatMoney(g.monto)}</span>
+                    <span class="font-bold text-rose-600">${formatMoney(g.monto)}</span>
                   </div>
-                `).join('') : '<p class="text-neutral-500 py-6 text-center border border-dashed border-neutral-200 dark:border-neutral-700 rounded-2xl font-medium">Sin gastos registrados.</p>'}
+                `).join('') : '<p class="text-neutral-500 py-6 text-center border border-dashed dark:border-neutral-700 rounded-2xl font-bold">Sin gastos registrados.</p>'}
               </div>
             </div>
           `;
@@ -1994,35 +1911,33 @@
       } else {
         // MODO CERRAR VENTA (Checkout)
         html += `
-          <button type="button" onclick="state.isVentaMode=false; renderDetalleAuto()" class="mb-6 text-sm font-bold flex items-center hover:underline text-neutral-500 hover:text-green-600 transition-colors">
+          <button type="button" onclick="state.isVentaMode=false; renderDetalleAuto()" class="mb-6 text-sm font-bold flex items-center hover:underline text-neutral-500 hover:text-neutral-900 dark:hover:text-white">
             <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Volver a Ficha
           </button>
           
-          <div class="bg-black dark:bg-white text-white dark:text-black rounded-[2rem] p-6 mb-6 flex justify-between shadow-xl">
+          <div class="bg-black dark:bg-white text-white dark:text-black rounded-[2rem] p-6 mb-6 flex justify-between shadow-xl border border-neutral-800 dark:border-neutral-200">
             <div>
-              <p class="text-xs uppercase tracking-wider opacity-70 mb-1 font-black">Costo Base + Inversión</p>
+              <p class="text-xs uppercase opacity-70 mb-1 font-bold">Costo Base + Inversión Taller</p>
               <p class="text-xl font-bold">${formatMoney(a.precio - tg)}</p>
             </div>
             <div class="text-right">
-              <p class="text-xs uppercase tracking-wider opacity-70 mb-1 font-black">Ganancia Neta Est.</p>
+              <p class="text-xs uppercase opacity-70 mb-1 font-bold">Ganancia Bruta Neta</p>
               <p class="text-xl font-black text-green-400 dark:text-green-600">${formatMoney(a.precio - tg)}</p>
             </div>
           </div>
           
           <form onsubmit="handleDAVentaSubmit(event, '${a.id}')">
-            <!-- Datos del Comprador -->
-            <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-6">
-              <h4 class="font-black mb-4 text-sm uppercase text-neutral-500 tracking-widest">Datos Comprador</h4>
+            <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border dark:border-neutral-700 mb-6">
+              <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Datos Comprador</h4>
               <div class="grid grid-cols-2 gap-4">
-                <input id="vent-comp-nombre" required placeholder="Nombre y Apellido" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 transition-colors" />
-                <input id="vent-comp-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 transition-colors" />
+                <input id="vent-comp-nombre" required placeholder="Nombre y Apellido" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+                <input id="vent-comp-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
               </div>
             </div>
             
-            <!-- Datos Financieros -->
-            <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-6">
-              <label class="block text-xs font-black uppercase tracking-widest mb-2 text-neutral-500">Método de Pago Principal</label>
-              <select id="vent-metodo" onchange="toggleMetodoPago(this.value)" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 transition-colors">
+            <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border dark:border-neutral-700 mb-6">
+              <label class="block text-xs font-bold uppercase mb-2 text-neutral-500">Método de Pago Principal</label>
+              <select id="vent-metodo" onchange="toggleMetodoPago(this.value)" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border dark:border-neutral-700 outline-none font-bold focus:border-green-500">
                 <option value="efectivo">Efectivo / Transf. (Inmediato)</option>
                 <option value="credito">Plan Crédito Pre-Aprobado</option>
                 <option value="pagare">Pagaré Personal</option>
@@ -2031,22 +1946,21 @@
               <div id="vent-acreditacion-container" class="hidden mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl">
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-xs font-black uppercase tracking-wider mb-2 text-amber-700 dark:text-amber-400">Total de Cuotas</label>
-                    <input type="number" id="vent-cuotas-totales" min="1" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold focus:border-amber-500 transition-colors" />
+                    <label class="block text-xs font-bold uppercase mb-2 text-amber-700 dark:text-amber-400">Total de Cuotas</label>
+                    <input type="number" id="vent-cuotas-totales" min="1" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold focus:border-green-500" />
                   </div>
                   <div>
-                    <label class="block text-xs font-black uppercase tracking-wider mb-2 text-amber-700 dark:text-amber-400">1º Vencimiento</label>
-                    <input type="date" id="vent-fecha-cobro" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold focus:border-amber-500 transition-colors" />
+                    <label class="block text-xs font-bold uppercase mb-2 text-amber-700 dark:text-amber-400">1º Vencimiento</label>
+                    <input type="date" id="vent-fecha-cobro" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold focus:border-green-500" />
                   </div>
                 </div>
               </div>
               
-              <label class="block text-xs font-black uppercase tracking-widest mb-2 text-neutral-500">Capital Recibido Inicialmente ($)</label>
-              <input id="vent-efectivo" type="number" required placeholder="Monto total entregado hoy" class="w-full rounded-2xl px-4 py-4 text-xl font-black bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 transition-colors" />
+              <label class="block text-xs font-bold uppercase mb-2 text-neutral-500">Capital Recibido Inicialmente ($)</label>
+              <input id="vent-efectivo" type="number" required placeholder="Monto total entregado hoy" class="w-full rounded-2xl px-4 py-4 text-xl font-black bg-white dark:bg-neutral-900 border dark:border-neutral-700 outline-none focus:border-green-500" />
             </div>
             
-            <!-- Permuta -->
-            <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-8">
+            <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border dark:border-neutral-700 mb-8">
               <div class="flex justify-between items-center mb-6">
                 <h4 class="font-bold flex items-center text-neutral-700 dark:text-neutral-300">
                   <i data-lucide="repeat" class="w-5 h-5 mr-2 opacity-60"></i> Recibe Vehículo en Permuta
@@ -2061,19 +1975,19 @@
               
               ${state.ventaData.tienePermuta ? `
                 <div class="grid grid-cols-2 gap-4 fade-in">
-                  <input id="p-marca" required placeholder="Marca" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 transition-colors" />
-                  <input id="p-modelo" required placeholder="Modelo" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 transition-colors" />
-                  <input id="p-anio" type="number" required placeholder="Año" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 transition-colors" />
-                  <input id="p-pat" required placeholder="Patente" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 uppercase outline-none font-bold focus:border-green-500 transition-colors" />
+                  <input id="p-marca" required placeholder="Marca" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+                  <input id="p-modelo" required placeholder="Modelo" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+                  <input id="p-anio" type="number" required placeholder="Año" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+                  <input id="p-pat" required placeholder="Patente" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border dark:border-neutral-700 uppercase outline-none font-bold focus:border-green-500" />
                   <div class="col-span-2 mt-2">
-                    <label class="block text-xs font-black uppercase tracking-widest mb-2 text-neutral-500">Valor de Toma Real ($)</label>
-                    <input id="p-valor" type="number" required placeholder="Costo para la agencia" class="w-full rounded-xl px-4 py-4 text-lg font-black bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 transition-colors" />
+                    <label class="block text-xs font-bold uppercase mb-2 text-neutral-500">Valor de Toma Real ($)</label>
+                    <input id="p-valor" type="number" required placeholder="Costo para la agencia" class="w-full rounded-xl px-4 py-4 text-lg font-black bg-white dark:bg-neutral-900 border dark:border-neutral-700 outline-none focus:border-green-500" />
                   </div>
                 </div>
               ` : ''}
             </div>
             
-            <button type="submit" class="w-full py-5 bg-green-600 text-white font-black text-xl rounded-2xl shadow-xl shadow-green-600/30 hover:bg-green-700 hover:scale-[1.02] transition-transform">
+            <button type="submit" class="w-full py-5 bg-green-600 text-white font-black text-xl rounded-2xl shadow-xl hover:bg-green-700 hover:scale-[1.02] transition-transform">
               Confirmar Operación de Venta
             </button>
           </form>
@@ -2084,7 +1998,7 @@
       lucide.createIcons();
     }
 
-    // Funciones Submit Auto (Ventas y CRM)
+    // Funciones Submit Auto
     window.handleDA_CRMSubmit = async (e, autoId) => { 
       e.preventDefault(); 
       const a = state.autos.find(x => x.id === autoId);
@@ -2100,6 +2014,7 @@
         fecha: new Date().toISOString().split('T')[0] 
       }); 
       
+      // Limpiar campos form modal 360
       document.getElementById('dac-nombre').value = '';
       document.getElementById('dac-tel').value = '';
       document.getElementById('dac-nota').value = '';
@@ -2117,6 +2032,7 @@
       
       const adminUsr = state.usuarios.find(u => u.rol === 'Admin');
 
+      // 1. Ingreso a Caja Central (Admin)
       if(efectivo > 0) {
         await window.fbAdd("transacciones", { 
           fecha: new Date().toISOString().split('T')[0], 
@@ -2133,6 +2049,7 @@
         });
       }
 
+      // 2. Registro de Venta Histórica
       const valP = state.ventaData.tienePermuta ? Number(document.getElementById('p-valor').value) : 0;
       
       await window.fbAdd("ventas", {
@@ -2148,13 +2065,14 @@
         detallePermuta: state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
       });
 
+      // 3. Auto en Permuta a Flota
       if(state.ventaData.tienePermuta) {
         await window.fbAdd("autos", { 
           marca: document.getElementById('p-marca').value, 
           modelo: document.getElementById('p-modelo').value, 
           año: Number(document.getElementById('p-anio').value), 
           patente: document.getElementById('p-pat').value.toUpperCase(), 
-          precio: valP * 1.2, 
+          precio: valP * 1.2, // Sugiere un 20% más por defecto
           estado: 'Disponible', 
           sucursalId: auto.sucursalId, 
           gastos: [], 
@@ -2162,10 +2080,108 @@
         });
       }
       
+      // 4. Cambiar estado auto actual
       await window.fbUpdate("autos", autoId, { estado: 'Vendido' });
       
       closeModal('modal-detalle-auto'); 
-      customAlert("Operación completada exitosamente.");
+      alert("Operación completada exitosamente.");
+    };
+
+
+    // --- RENDERIZADO DE FACTURAS ---
+    window.renderFacturasView = () => {
+      if(state.currentUser?.rol !== 'Admin') return;
+      
+      const facturas = state.transacciones.filter(t => ['A','B','C'].includes(t.tipoComprobante));
+      
+      const totalEmitido = facturas.reduce((a,c) => a + c.valor, 0);
+      const totalIva = facturas.reduce((a,c) => a + (c.iva || 0), 0);
+      
+      document.getElementById('facturas-summary').innerHTML = `
+        <div class="p-8 bg-black dark:bg-neutral-800 rounded-3xl text-white shadow-xl border border-neutral-800 dark:border-neutral-700">
+          <p class="text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">Monto Total Facturado (Global)</p>
+          <p class="text-5xl font-black">${formatMoney(totalEmitido)}</p>
+        </div>
+        <div class="p-8 bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
+          <p class="text-neutral-500 dark:text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">IVA Total Acumulado (Fac. A)</p>
+          <p class="text-5xl font-black text-neutral-900 dark:text-white">${formatMoney(totalIva)}</p>
+        </div>
+      `;
+      
+      const table = document.getElementById('facturas-table');
+      if(facturas.length === 0) {
+        table.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center py-8 text-neutral-500">No hay facturas registradas.</td>
+          </tr>
+        `;
+      } else {
+        table.innerHTML = facturas.slice().reverse().map(f => {
+          const u = state.usuarios.find(x => x.id === f.userId);
+          return `
+            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+              <td class="px-6 py-4">
+                <span class="inline-block bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-bold text-[10px] uppercase tracking-wider px-2 py-1 rounded mb-1">
+                  Tipo ${f.tipoComprobante}
+                </span>
+                <p class="font-mono text-sm font-bold">${f.numComprobante || 'S/N'}</p>
+              </td>
+              <td class="px-6 py-4 text-sm text-neutral-500">${formatDate(f.fecha)}</td>
+              <td class="px-6 py-4">
+                <p class="font-bold">${f.descripcion}</p>
+                <p class="text-xs text-neutral-400 mt-1">Por: ${u ? u.nombre : '-'}</p>
+              </td>
+              <td class="px-6 py-4 text-right font-black text-lg">${formatMoney(f.valor)}</td>
+              <td class="px-6 py-4 text-center">
+                ${f.tipoComprobante === 'A' ? `
+                  <button onclick="openDetalleFactura('${f.id}')" class="text-xs font-bold uppercase tracking-wider bg-black text-white px-4 py-2 rounded-xl hover:bg-neutral-800 transition-colors">
+                    Ver Detalle
+                  </button>
+                ` : '<span class="text-neutral-300">-</span>'}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    };
+    
+    window.openDetalleFactura = (id) => {
+      const t = state.transacciones.find(x => x.id === id);
+      const subtotal = t.valor - (t.iva || 0);
+      
+      document.getElementById('factura-detail-content').innerHTML = `
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 bg-black text-white flex items-center justify-center text-3xl font-black mx-auto mb-3 rounded-2xl shadow-md border border-neutral-800">A</div>
+          <p class="font-mono text-neutral-500 font-bold">${t.numComprobante}</p>
+        </div>
+        
+        <div class="space-y-4 mb-8">
+          <div class="flex justify-between text-sm">
+            <span class="text-neutral-500 font-bold uppercase tracking-wider">Fecha:</span> 
+            <span class="font-bold">${formatDate(t.fecha)}</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-neutral-500 font-bold uppercase tracking-wider">Operación:</span> 
+            <span class="font-bold text-right">${t.descripcion}</span>
+          </div>
+        </div>
+        
+        <div class="border-t border-neutral-200 dark:border-neutral-700 pt-6 space-y-3">
+          <div class="flex justify-between text-sm">
+            <span class="text-neutral-500 font-bold uppercase tracking-wider">Subtotal:</span> 
+            <span class="font-bold text-lg">${formatMoney(subtotal)}</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-neutral-500 font-bold uppercase tracking-wider">IVA:</span> 
+            <span class="font-bold text-lg">${formatMoney(t.iva)}</span>
+          </div>
+          <div class="flex justify-between text-xl mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <span class="font-black uppercase tracking-wider">Total:</span> 
+            <span class="font-black text-2xl text-green-600 dark:text-green-500">${formatMoney(t.valor)}</span>
+          </div>
+        </div>
+      `;
+      openModal('modal-detalle-factura');
     };
 
     // --- RENDERIZADO DE CRM GENERAL ---
@@ -2175,7 +2191,7 @@
       if (state.consultas.length === 0) {
         table.innerHTML = `
           <tr>
-            <td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay clientes en la base de datos.</td>
+            <td colspan="5" class="text-center py-8 text-neutral-500">No hay clientes en la base de datos.</td>
           </tr>
         `;
       } else {
@@ -2183,14 +2199,14 @@
           const a = c.autoId ? state.autos.find(x => x.id === c.autoId) : null;
           
           let lClass = 'bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300';
-          if(c.estadoLead === 'Caliente') lClass = 'bg-green-600 text-white dark:bg-green-500 dark:text-black';
+          if(c.estadoLead === 'Caliente') lClass = 'bg-black text-white dark:bg-white dark:text-black';
           if(c.estadoLead === 'Tibio') lClass = 'bg-neutral-400 text-neutral-900 dark:bg-neutral-600 dark:text-white';
           
           return `
             <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
               <td class="px-6 py-4">
                 <div class="flex items-center">
-                  <div class="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center mr-4 font-black text-lg shadow-inner">
+                  <div class="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center mr-4 font-black text-lg">
                     ${c.nombre.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -2203,12 +2219,12 @@
               </td>
               <td class="px-6 py-4 text-sm font-bold">${c.telefono}</td>
               <td class="px-6 py-4">
-                ${a ? `<span class="font-bold text-sm text-neutral-900 dark:text-white">${a.marca} ${a.modelo}</span>` : `<span class="font-bold text-sm text-neutral-900 dark:text-white">${c.marcaInteres}</span>`}
+                ${a ? `<span class="font-bold text-sm text-green-600 dark:text-green-500 cursor-pointer hover:underline" onclick="openDetalleAuto('${a.id}')">${a.marca} ${a.modelo}</span>` : `<span class="font-bold text-sm">${c.marcaInteres}</span>`}
                 <p class="text-xs text-neutral-500 italic mt-1 max-w-[200px] truncate">"${c.notas}"</p>
               </td>
-              <td class="px-6 py-4 text-sm font-bold text-neutral-600 dark:text-neutral-400">${formatDate(c.recordatorio)}</td>
+              <td class="px-6 py-4 text-sm font-bold">${formatDate(c.recordatorio)}</td>
               <td class="px-6 py-4">
-                <a href="${formatWhatsAppLink(c.telefono, `Hola ${c.nombre}, me comunico de RIVAS AUTO.`)}" target="_blank" class="px-4 py-2 bg-black text-white dark:bg-white dark:text-black text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 inline-block">
+                <a href="${formatWhatsAppLink(c.telefono, `Hola ${c.nombre}, me comunico de RIVAS AUTO.`)}" target="_blank" class="px-4 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 inline-block">
                   Contactar
                 </a>
               </td>
@@ -2216,6 +2232,25 @@
           `;
         }).join('');
       }
+    };
+    
+    // Submit Form Global CRM
+    window.handleGlobalLeadSubmit = async (e) => {
+      e.preventDefault();
+      
+      await window.fbAdd("consultas", {
+        autoId: null, // No hay auto específico atado
+        nombre: document.getElementById('gl-nombre').value,
+        telefono: document.getElementById('gl-tel').value,
+        marcaInteres: document.getElementById('gl-interes').value,
+        estadoLead: document.getElementById('gl-estado').value,
+        notas: document.getElementById('gl-nota').value,
+        recordatorio: new Date().toISOString().split('T')[0],
+        fecha: new Date().toISOString().split('T')[0]
+      });
+      
+      closeModal('modal-nuevo-lead');
+      e.target.reset();
     };
 
     // --- RENDERIZADO DE ADMINISTRACIÓN ---
@@ -2225,10 +2260,10 @@
       // Sucursales
       const sucList = document.getElementById('admin-suc-list');
       if (state.sucursales.length === 0) {
-        sucList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay sucursales.</p>';
+        sucList.innerHTML = '<p class="text-neutral-500 text-center py-4">No hay sucursales.</p>';
       } else {
         sucList.innerHTML = state.sucursales.map(s => `
-          <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
+          <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
             <span class="font-bold text-sm">${s.nombre}</span>
             <div class="flex space-x-1">
               <button onclick="editSucursal('${s.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
@@ -2242,6 +2277,7 @@
         `).join('');
       }
       
+      // Llenar selects de sucursales en formularios de Admin
       document.getElementById('new-user-suc').innerHTML = state.sucursales.map(s => `
         <option value="${s.id}">${s.nombre}</option>
       `).join('');
@@ -2249,15 +2285,15 @@
       // Usuarios
       const usrList = document.getElementById('admin-users-list');
       if (state.usuarios.length === 0) {
-        usrList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay usuarios.</p>';
+        usrList.innerHTML = '<p class="text-neutral-500 text-center py-4">No hay usuarios.</p>';
       } else {
         usrList.innerHTML = state.usuarios.map(u => { 
           const s = state.sucursales.find(x => x.id == u.sucursalId); 
           return `
-            <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
+            <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
               <div>
                 <p class="font-bold text-sm">${u.nombre}</p>
-                <p class="text-[10px] font-black text-neutral-500 mt-1 uppercase tracking-wider">
+                <p class="text-[10px] font-bold text-neutral-500 mt-1 uppercase tracking-wider">
                   ${u.rol} • ${s ? s.nombre : '-'} • ${u.email}
                 </p>
               </div>
@@ -2296,9 +2332,9 @@
     };
     
     window.deleteSucursal = async (id) => { 
-      customConfirm('¿Seguro de eliminar esta sucursal permanentemente?', async () => {
+      if(confirm('¿Seguro de eliminar esta sucursal permanentemente?')) {
         await window.fbDelete("sucursales", id); 
-      });
+      }
     };
     
     window.resetSucForm = () => { 
@@ -2340,13 +2376,10 @@
     };
     
     window.deleteUser = async (id) => { 
-      if(id === state.currentUser.id) {
-        customAlert('No puedes eliminar tu propio usuario en sesión.');
-        return;
-      }
-      customConfirm('¿Eliminar este usuario del sistema permanentemente?', async () => {
+      if(id === state.currentUser.id) return alert('No puedes eliminar tu propio usuario en sesión.'); 
+      if(confirm('¿Eliminar usuario del sistema?')) {
         await window.fbDelete("usuarios", id); 
-      });
+      }
     };
     
     window.resetUserForm = () => { 
@@ -2381,16 +2414,16 @@
       
       let catHTML = '';
       if(Object.keys(cats).length === 0) {
-        catHTML = '<p class="text-neutral-500 py-4 font-bold text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl">Sin datos de gastos en el periodo.</p>';
+        catHTML = '<p class="text-neutral-500 py-4">Sin datos de gastos en el periodo.</p>';
       } else {
         catHTML = Object.entries(cats).sort((a,b) => b[1] - a[1]).map(([c,v]) => `
           <div class="mb-4">
             <div class="flex justify-between text-sm mb-2">
-              <span class="text-neutral-600 dark:text-neutral-300 font-black uppercase tracking-wider text-[10px]">${c}</span>
+              <span class="text-neutral-600 dark:text-neutral-300 font-bold uppercase tracking-wider text-[10px]">${c}</span>
               <span class="font-black">${formatMoney(v)}</span>
             </div>
-            <div class="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-3 overflow-hidden">
-              <div class="bg-black dark:bg-white h-3 rounded-full" style="width: ${(v/max)*100}%"></div>
+            <div class="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-3">
+              <div class="bg-green-600 h-3 rounded-full" style="width: ${(v/max)*100}%"></div>
             </div>
           </div>
         `).join('');
@@ -2409,8 +2442,8 @@
               <span class="font-black text-xl text-rose-600 dark:text-rose-400">${formatMoney(egr)}</span>
             </div>
             <div class="pt-6 border-t border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
-              <span class="font-black text-xl uppercase tracking-tight">Balance Neto</span>
-              <span class="font-black text-3xl tracking-tight ${ing - egr >= 0 ? 'text-neutral-900 dark:text-white' : 'text-rose-600'}">${formatMoney(ing - egr)}</span>
+              <span class="font-black text-xl uppercase">Balance Neto</span>
+              <span class="font-black text-3xl ${ing - egr >= 0 ? 'text-black dark:text-white' : 'text-rose-600'}">${formatMoney(ing - egr)}</span>
             </div>
           </div>
         </div>
@@ -2424,14 +2457,17 @@
 
     // --- SETUP SELECTS INICIALES ---
     window.initSelects = () => {
+      // Categorías en Caja
       document.getElementById('caja-cat').innerHTML = state.categoriasGasto.map(c => `
         <option value="${c}">${c}</option>
       `).join('');
       
+      // Sucursales en Alta de Auto
       document.getElementById('auto-sucursal').innerHTML = state.sucursales.map(s => `
         <option value="${s.id}">${s.nombre}</option>
       `).join('');
       
+      // Autos en Caja
       document.getElementById('caja-auto').innerHTML = `
         <option value="">-- Gasto General de Agencia --</option>
       ` + state.autos.map(a => `
