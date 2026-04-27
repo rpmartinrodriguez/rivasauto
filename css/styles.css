@@ -1,0 +1,129 @@
+/* ========================================== */
+/* styles.css                   */
+/* ========================================== */
+
+/* Personalización de las barras de scroll */
+::-webkit-scrollbar { 
+  width: 6px; 
+  height: 6px; 
+}
+::-webkit-scrollbar-track { 
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb { 
+  background-color: #d4d4d8; 
+  border-radius: 20px; 
+}
+.dark ::-webkit-scrollbar-thumb { 
+  background-color: #3f3f46; 
+}
+.no-scrollbar::-webkit-scrollbar { 
+  display: none; 
+}
+.no-scrollbar { 
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
+}
+
+/* Animaciones del Sistema */
+@keyframes fadeIn { 
+  from { opacity: 0; } 
+  to { opacity: 1; } 
+}
+@keyframes slideUp { 
+  from { opacity: 0; transform: translateY(20px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+
+.fade-in { 
+  animation: fadeIn 0.4s ease-out forwards; 
+}
+.slide-up { 
+  animation: slideUp 0.5s ease-out forwards; 
+}
+
+/* Estilos del Toggle Switch (Interruptores) */
+.toggle-checkbox:checked { 
+  right: 0; 
+  border-color: #16a34a; 
+}
+.toggle-checkbox:checked + .toggle-label { 
+  background-color: #16a34a; 
+}
+.dark .toggle-checkbox:checked + .toggle-label { 
+  background-color: #22c55e; 
+}
+.toggle-checkbox { 
+  right: 0; 
+  z-index: 1; 
+  border-color: #e4e4e7; 
+  transition: all 0.3s; 
+}
+.toggle-label { 
+  width: 3.5rem; 
+  height: 2rem; 
+  background-color: #d4d4d8; 
+  border-radius: 9999px; 
+  transition: all 0.3s; 
+}
+
+/* Pantalla de Carga Inicial */
+#loader-screen { 
+  transition: opacity 0.5s ease-out; 
+}
+
+/* ========================================== */
+/* REGLAS ESTRICTAS DE IMPRESIÓN      */
+/* ========================================== */
+@media print {
+  /* Ocultar toda la app normal al imprimir */
+  body * { 
+    visibility: hidden; 
+  }
+  
+  /* Mostrar solo el contenedor de impresión */
+  #print-section, #print-section * { 
+    visibility: visible; 
+  }
+  
+  /* Configuración de la hoja A4 */
+  #print-section { 
+    position: absolute; 
+    left: 0; 
+    top: 0; 
+    width: 100vw; 
+    min-height: 100vh; 
+    background: white; 
+    
+    /* Espacio exclusivo para que el logo superior derecho no pise el texto */
+    padding-top: 150px !important; 
+    padding-left: 2rem; 
+    padding-right: 2rem; 
+    padding-bottom: 2rem; 
+    z-index: 99999; 
+  }
+  
+  .no-print { 
+    display: none !important; 
+  }
+  
+  /* Marca de agua de Rivas Auto en diagonal */
+  .watermark-bg { 
+    position: fixed; 
+    inset: 0; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: -1; 
+    opacity: 0.05; 
+    pointer-events: none; 
+  }
+  
+  .watermark-text { 
+    font-size: 8rem; 
+    font-weight: 900; 
+    color: black; 
+    transform: rotate(-45deg); 
+    white-space: nowrap; 
+  }
+}
