@@ -90,12 +90,6 @@ window.checkNotifications = () => {
   }
 };
 
-window.toggleAutosViewMode = (mode) => { 
-  window.state.autosViewMode = mode; 
-  localStorage.setItem('autosViewMode', mode);
-  window.renderAutosView(); 
-};
-
 window.renderAutosView = () => {
   const container = document.getElementById('autos-container');
   if(!container) return;
@@ -249,7 +243,7 @@ window.renderDetalleAuto = () => {
           <div class="text-right">
             <p class="text-xs uppercase font-bold opacity-60">Precio Venta</p>
             <p class="text-3xl font-black mt-1">${window.formatMoney(a.precio)}</p>
-            ${tg > 0 ? `<p class="text-xs font-bold mt-2 text-rose-400 dark:text-rose-600 uppercase tracking-widest">+ GASTOS: ${window.formatMoney(tg)}</p>` : ''}
+            ${tg > 0 ? `<p class="text-[10px] font-bold mt-2 text-rose-400 dark:text-rose-600 uppercase tracking-widest">+ Gastos Aplicados: ${window.formatMoney(tg)}</p>` : ''}
           </div>
         </div>
     `;
@@ -309,7 +303,17 @@ window.renderDetalleAuto = () => {
         </div>
       `;
     } else if(window.state.daActiveSection === 'crm') {
-       const leadsAuto = window.state.consultas.filter(c => c.autoId === a.id).sort((x,y) => new Date(y.fecha) - new Date(x.fecha));
+       
+       let leadsAuto = window.state.consultas.filter(c => c.autoId === a.id);
+       
+       // Filtramos leads según rol para que el vendedor solo vea los que él cargó
+       if(window.state.currentUser.rol === 'Vendedor') {
+         leadsAuto = leadsAuto.filter(c => c.userId === window.state.currentUser.id);
+       } else if (window.state.currentUser.rol === 'Encargado') {
+         leadsAuto = leadsAuto.filter(c => c.sucursalId === window.state.currentUser.sucursalId);
+       }
+       
+       leadsAuto = leadsAuto.sort((x,y) => new Date(y.fecha) - new Date(x.fecha));
        
        let listHtml = '';
        if (leadsAuto.length > 0) {
@@ -323,7 +327,7 @@ window.renderDetalleAuto = () => {
            </div>
          `).join('');
        } else {
-         listHtml = '<p class="text-xs text-neutral-500 py-2">No hay leads registrados específicos para este vehículo.</p>';
+         listHtml = '<p class="text-xs text-neutral-500 py-2">No hay leads registrados por tu usuario para este vehículo.</p>';
        }
       
        html += `
@@ -519,12 +523,11 @@ window.renderCajaView = () => {
     }
   }
 
-  if (window.state.currentUser.rol === 'Admin') { 
-    const btnPendientes = document.getElementById('btn-ver-pendientes');
-    if(btnPendientes) {
-      btnPendientes.classList.remove('hidden'); 
-      btnPendientes.classList.add('inline-flex'); 
-    }
+  // Ahora TODOS pueden ver el botón de pendientes (solo cambian los permisos dentro del modal)
+  const btnPendientes = document.getElementById('btn-ver-pendientes');
+  if(btnPendientes) {
+    btnPendientes.classList.remove('hidden'); 
+    btnPendientes.classList.add('inline-flex'); 
   }
 
   const sorted = [...myTrans].sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
@@ -605,17 +608,25 @@ window.renderCajaView = () => {
 };
 
 window.openModalPendientes = () => { 
-  const oldPendientes = window.state.transacciones.filter(t => t.estadoCobro === 'pendiente');
+  let myTrans = window.state.transacciones;
+  let myVentas = window.state.ventas;
   
-  const ventasPendientes = window.state.ventas.filter(v => 
+  if(window.state.currentUser.rol === 'Vendedor') { 
+    myTrans = myTrans.filter(t => t.userId === window.state.currentUser.id); 
+    myVentas = myVentas.filter(v => v.userId === window.state.currentUser.id); 
+  } else if (window.state.currentUser.rol === 'Encargado') { 
+    myTrans = myTrans.filter(t => t.sucursalId === window.state.currentUser.sucursalId); 
+    myVentas = myVentas.filter(v => v.sucursalId === window.state.currentUser.sucursalId); 
+  }
+
+  const oldPendientes = myTrans.filter(t => t.estadoCobro === 'pendiente');
+  const ventasPendientes = myVentas.filter(v => 
     (v.credito && v.credito.pagadas < v.credito.cuotas) ||
     (v.pagare && v.pagare.pagadas < v.pagare.cuotas)
   );
 
   let totalPendiente = 0;
-  
   oldPendientes.forEach(t => totalPendiente += t.valor);
-  
   ventasPendientes.forEach(v => {
     if(v.credito) totalPendiente += (v.credito.cuotas - v.credito.pagadas) * v.credito.valorCuota;
     if(v.pagare) totalPendiente += (v.pagare.cuotas - v.pagare.pagadas) * v.pagare.valorCuota;
@@ -969,15 +980,21 @@ window.openDetalleCierre = (cierreId) => {
 
 // --- RENDERIZADO VENTAS ---
 window.renderVentasView = () => { 
-  if(window.state.currentUser?.rol !== 'Admin') return; 
+  let misVentas = window.state.ventas;
+  
+  if(window.state.currentUser.rol === 'Vendedor') {
+     misVentas = misVentas.filter(v => v.userId === window.state.currentUser.id);
+  } else if (window.state.currentUser.rol === 'Encargado') {
+     misVentas = misVentas.filter(v => v.sucursalId === window.state.currentUser.sucursalId);
+  }
   
   const table = document.getElementById('ventas-table'); 
   if(!table) return;
   
-  if (window.state.ventas.length === 0) { 
+  if (misVentas.length === 0) { 
     table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay ventas registradas.</td></tr>`; 
   } else { 
-    table.innerHTML = window.state.ventas.slice().reverse().map(v => { 
+    table.innerHTML = misVentas.slice().reverse().map(v => { 
       let badge = ''; 
       const metodos = v.metodoPago || ''; 
       
@@ -1207,12 +1224,20 @@ window.renderClientesView = () => {
   const table = document.getElementById('crm-table'); 
   if(!table) return;
   
+  let misConsultas = window.state.consultas;
+  
+  if(window.state.currentUser.rol === 'Vendedor') {
+     misConsultas = misConsultas.filter(c => c.userId === window.state.currentUser.id);
+  } else if (window.state.currentUser.rol === 'Encargado') {
+     misConsultas = misConsultas.filter(c => c.sucursalId === window.state.currentUser.sucursalId);
+  }
+
   const today = new Date();
 
-  if (window.state.consultas.length === 0) { 
+  if (misConsultas.length === 0) { 
     table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay clientes en la base de datos.</td></tr>`; 
   } else { 
-    table.innerHTML = window.state.consultas.slice().reverse().map(c => { 
+    table.innerHTML = misConsultas.slice().reverse().map(c => { 
       const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
       
       const leadDate = new Date(c.fecha + 'T00:00:00');
