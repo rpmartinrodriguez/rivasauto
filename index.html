@@ -55,33 +55,33 @@
 
        <h2 class="text-xl font-bold text-center mb-6" id="auth-title">Iniciar Sesión</h2>
        
-       <form id="login-form" onsubmit="handleLogin(event)">
+       <form id="login-form" onsubmit="window.handleLogin(event)">
          <input type="email" id="login-email" required placeholder="Correo" class="w-full mb-4 rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500" />
          <div class="relative w-full mb-6">
            <input type="password" id="login-pwd" required placeholder="Contraseña" class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500" />
-           <button type="button" onclick="togglePwd('login-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400">
+           <button type="button" onclick="window.togglePwd('login-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400">
              <i data-lucide="eye" class="w-5 h-5"></i>
            </button>
          </div>
          <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 shadow-lg transition-colors">Entrar</button>
          <p id="login-error" class="text-rose-500 text-sm font-bold mt-4 hidden text-center">Datos incorrectos.</p>
          
-         <button id="login-install-btn" type="button" onclick="installPWA()" class="hidden w-full py-3 mt-4 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-200 transition-colors">
+         <button id="login-install-btn" type="button" onclick="window.installPWA()" class="hidden w-full py-3 mt-4 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors">
            <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i> Instalar App
          </button>
        </form>
 
-       <form id="pwd-change-form" class="hidden" onsubmit="handlePwdChange(event)">
+       <form id="pwd-change-form" class="hidden" onsubmit="window.handlePwdChange(event)">
          <p class="text-sm text-neutral-500 text-center mb-6">Establece tu contraseña personal para continuar.</p>
          <div class="relative w-full mb-4">
            <input type="password" id="new-pwd" required placeholder="Nueva contraseña" class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500" />
-           <button type="button" onclick="togglePwd('new-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2">
+           <button type="button" onclick="window.togglePwd('new-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2">
              <i data-lucide="eye" class="w-5 h-5 text-neutral-400"></i>
            </button>
          </div>
          <div class="relative w-full mb-6">
            <input type="password" id="confirm-pwd" required placeholder="Confirmar contraseña" class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500" />
-           <button type="button" onclick="togglePwd('confirm-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2">
+           <button type="button" onclick="window.togglePwd('confirm-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2">
              <i data-lucide="eye" class="w-5 h-5 text-neutral-400"></i>
            </button>
          </div>
@@ -92,7 +92,7 @@
   </div>
 
   <div id="app-wrapper" class="hidden relative z-10 flex h-screen overflow-hidden fade-in">
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden transition-opacity opacity-0" onclick="window.toggleSidebar()"></div>
     
     <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl shadow-2xl transform -translate-x-full transition-transform duration-300 z-50 flex flex-col border-r border-neutral-200 dark:border-neutral-800">
       <div class="p-6 flex justify-between items-center border-b border-neutral-100 dark:border-neutral-800">
@@ -100,7 +100,7 @@
           <img src="icon.png" class="w-10 h-10 rounded-xl" alt="Logo">
           <h1 class="text-xl font-black">RIVAS <span class="text-green-600">AUTO</span></h1>
         </div>
-        <button onclick="toggleSidebar()" class="p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full">
+        <button onclick="window.toggleSidebar()" class="p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -108,7 +108,7 @@
       <nav id="nav-menu" class="flex-1 px-4 py-6 space-y-2 overflow-y-auto no-scrollbar"></nav>
       
       <div class="p-6 border-t border-neutral-100 dark:border-neutral-800">
-        <button id="sidebar-install-btn" onclick="installPWA()" class="hidden w-full mb-4 flex items-center justify-center space-x-2 py-2 px-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold transition-colors">
+        <button id="sidebar-install-btn" onclick="window.installPWA()" class="hidden w-full mb-4 flex items-center justify-center space-x-2 py-2 px-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold transition-colors">
           <i data-lucide="download" class="w-4 h-4"></i><span>Instalar App</span>
         </button>
         <div class="flex items-center justify-between w-full">
@@ -119,7 +119,7 @@
               <p class="text-xs text-neutral-500" id="user-role">Rol</p>
             </div>
           </div>
-          <button onclick="logout()" class="p-2 hover:text-rose-500 transition-colors" title="Cerrar Sesión">
+          <button onclick="window.logout()" class="p-2 hover:text-rose-500 transition-colors" title="Cerrar Sesión">
             <i data-lucide="log-out" class="w-5 h-5"></i>
           </button>
         </div>
@@ -131,14 +131,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between items-center h-20">
             <div class="flex items-center space-x-4">
-              <button onclick="toggleSidebar()" class="p-2.5 bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+              <button onclick="window.toggleSidebar()" class="p-2.5 bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
                 <i data-lucide="menu" class="w-5 h-5"></i>
               </button>
               <h2 id="header-title" class="text-xl font-bold hidden sm:block">Panel de Control</h2>
             </div>
             <div class="flex items-center space-x-3">
               <div class="relative" id="notif-container">
-                <button onclick="toggleNotifications()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full relative transition-colors">
+                <button onclick="window.toggleNotifications()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full relative transition-colors">
                   <i data-lucide="bell" class="w-5 h-5"></i>
                   <span id="notif-badge" class="absolute top-1 right-1 flex h-3 w-3 hidden">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -152,7 +152,7 @@
                    <div id="notif-list" class="max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
               </div>
-              <button onclick="toggleDarkMode()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors">
+              <button onclick="window.toggleDarkMode()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors">
                 <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
               </button>
             </div>
@@ -169,14 +169,14 @@
               <p class="text-neutral-500 mt-2 text-lg">Control de vehículos e inversiones.</p>
             </div>
             <div class="flex items-center space-x-3">
-              <button onclick="imprimirFlota()" class="p-3 bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform" title="Imprimir Flota">
+              <button onclick="window.imprimirFlota()" class="p-3 bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform" title="Imprimir Flota">
                 <i data-lucide="printer" class="w-5 h-5"></i>
               </button>
               <div class="bg-neutral-100 dark:bg-neutral-900 p-1 rounded-xl flex">
-                <button onclick="toggleAutosViewMode('grid')" id="btn-view-grid" class="p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm transition-colors"><i data-lucide="layout-grid" class="w-4 h-4"></i></button>
-                <button onclick="toggleAutosViewMode('list')" id="btn-view-list" class="p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"><i data-lucide="list" class="w-4 h-4"></i></button>
+                <button onclick="window.toggleAutosViewMode('grid')" id="btn-view-grid" class="p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm transition-colors"><i data-lucide="layout-grid" class="w-4 h-4"></i></button>
+                <button onclick="window.toggleAutosViewMode('list')" id="btn-view-list" class="p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"><i data-lucide="list" class="w-4 h-4"></i></button>
               </div>
-              <button onclick="openModalCreateAuto()" class="flex items-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 shadow-lg hover:scale-105 transition-all">
+              <button onclick="window.openModalCreateAuto()" class="flex items-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 shadow-lg hover:scale-105 transition-all">
                 <i data-lucide="plus" class="w-5 h-5 mr-2"></i>Ingresar Auto
               </button>
             </div>
@@ -188,8 +188,8 @@
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div><h2 class="text-4xl font-black">Planilla de Caja</h2></div>
             <div class="flex space-x-3">
-              <button id="btn-ver-pendientes" onclick="openModalPendientes()" class="hidden items-center px-6 py-3 font-bold text-amber-700 bg-amber-100 dark:bg-amber-900/30 rounded-2xl hover:scale-105 transition-all"><i data-lucide="clock" class="w-5 h-5 mr-2"></i>Pendientes</button>
-              <button onclick="openModal('modal-caja')" class="flex items-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 transition-all"><i data-lucide="plus" class="w-5 h-5 mr-2"></i>Movimiento</button>
+              <button id="btn-ver-pendientes" onclick="window.openModalPendientes()" class="hidden items-center px-6 py-3 font-bold text-amber-700 bg-amber-100 dark:bg-amber-900/30 rounded-2xl hover:scale-105 transition-all"><i data-lucide="clock" class="w-5 h-5 mr-2"></i>Pendientes</button>
+              <button onclick="window.openModal('modal-caja')" class="flex items-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 transition-all"><i data-lucide="plus" class="w-5 h-5 mr-2"></i>Movimiento</button>
             </div>
           </div>
           <div id="caja-filters-container" class="bg-white/60 dark:bg-neutral-900/60 p-4 rounded-2xl hidden gap-4 border border-neutral-200 dark:border-neutral-800 shadow-sm"></div>
@@ -215,7 +215,7 @@
                 <h3 class="text-2xl font-black mb-2">Boleto Compra Venta</h3>
                 <p class="text-neutral-500 text-sm mb-6">Contrato estándar.</p>
               </div>
-              <button onclick="openModalBoleto('simple')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:scale-[1.02] transition-transform">Completar</button>
+              <button onclick="window.openModalBoleto('simple')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:scale-[1.02] transition-transform">Completar</button>
             </div>
             <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-8 flex flex-col justify-between hover:border-green-500/50 transition-colors">
               <div>
@@ -223,7 +223,7 @@
                 <h3 class="text-2xl font-black mb-2">Boleto con Permuta</h3>
                 <p class="text-neutral-500 text-sm mb-6">Incluye auto entregado y cuotas.</p>
               </div>
-              <button onclick="openModalBoleto('permuta')" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl hover:bg-green-700 hover:scale-[1.02] transition-transform">Completar</button>
+              <button onclick="window.openModalBoleto('permuta')" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl hover:bg-green-700 hover:scale-[1.02] transition-transform">Completar</button>
             </div>
           </div>
           <h3 class="text-xl font-bold mt-8 mb-4">Historial</h3>
@@ -239,8 +239,8 @@
           <div class="flex justify-between items-end gap-6 mb-6">
             <div><h2 class="text-4xl font-black">Personal</h2></div>
             <div class="flex space-x-3">
-              <button onclick="openModal('modal-comision')" class="px-6 py-3 font-bold bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform">Bono Manual</button>
-              <button onclick="openModal('modal-cerrar-pagos'); window.calcularTotalPagos && window.calcularTotalPagos();" class="px-6 py-3 font-bold text-white bg-rose-600 rounded-2xl hover:bg-rose-700 hover:scale-105 transition-transform">Cerrar Pagos</button>
+              <button onclick="window.openModal('modal-comision')" class="px-6 py-3 font-bold bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform">Bono Manual</button>
+              <button onclick="window.openModal('modal-cerrar-pagos'); window.calcularTotalPagos();" class="px-6 py-3 font-bold text-white bg-rose-600 rounded-2xl hover:bg-rose-700 hover:scale-105 transition-transform">Cerrar Pagos</button>
             </div>
           </div>
           <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
@@ -274,7 +274,7 @@
         <div id="view-clientes" class="view-section slide-up hidden space-y-8">
           <div class="flex justify-between items-end gap-6 mb-6">
             <h2 class="text-4xl font-black">CRM Clientes</h2>
-            <button onclick="openModal('modal-nuevo-lead')" class="px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 transition-transform">Nuevo Lead Global</button>
+            <button onclick="window.openModal('modal-nuevo-lead')" class="px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 transition-transform">Nuevo Lead Global</button>
           </div>
           <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
             <table class="w-full text-left">
@@ -293,7 +293,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm">
                <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="users" class="w-5 h-5 mr-2"></i> Usuarios</h3>
-               <form onsubmit="handleSaveUser(event)" class="mb-6 bg-neutral-100/50 dark:bg-neutral-800/50 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 space-y-3">
+               <form onsubmit="window.handleSaveUser(event)" class="mb-6 bg-neutral-100/50 dark:bg-neutral-800/50 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 space-y-3">
                  <div class="grid grid-cols-2 gap-3">
                    <input id="new-user-name" required placeholder="Nombre" class="w-full rounded-xl px-3 py-2 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700" />
                    <input type="email" id="new-user-email" required placeholder="Correo" class="w-full rounded-xl px-3 py-2 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700" />
@@ -306,12 +306,12 @@
                  </div>
                  <div class="relative w-full">
                    <input type="password" id="new-user-pwd" required placeholder="Contraseña" class="w-full rounded-xl px-3 py-2 pr-10 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700" />
-                   <button type="button" onclick="togglePwdVisibility('new-user-pwd')" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">
-                     <i data-lucide="eye" class="w-4 h-4"></i>
+                   <button type="button" onclick="window.togglePwd('new-user-pwd')" class="absolute right-3 top-1/2 -translate-y-1/2">
+                     <i data-lucide="eye" class="w-4 h-4 text-neutral-400"></i>
                    </button>
                  </div>
                  <div class="flex space-x-2">
-                   <button type="button" id="new-user-cancel" onclick="resetUserForm()" class="hidden flex-1 py-2 bg-neutral-300 text-neutral-800 rounded-xl text-sm font-bold">Cancelar</button>
+                   <button type="button" id="new-user-cancel" onclick="window.resetUserForm()" class="hidden flex-1 py-2 bg-neutral-300 text-neutral-800 rounded-xl text-sm font-bold">Cancelar</button>
                    <button type="submit" id="new-user-submit" class="flex-1 py-2 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold">Crear</button>
                  </div>
                </form>
@@ -320,12 +320,12 @@
             
             <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm h-fit">
                <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="map-pin" class="w-5 h-5 mr-2"></i> Sucursales</h3>
-               <form onsubmit="handleSaveSucursal(event)" class="mb-6 flex flex-col space-y-2">
+               <form onsubmit="window.handleSaveSucursal(event)" class="mb-6 flex flex-col space-y-2">
                  <div class="flex space-x-2">
                    <input id="new-suc-name" required placeholder="Nombre" class="flex-1 rounded-xl px-3 py-2 text-sm outline-none border bg-white dark:bg-neutral-900 dark:border-neutral-700 focus:border-green-500" />
                    <button type="submit" id="new-suc-submit" class="px-4 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold">Crear</button>
                  </div>
-                 <button type="button" id="new-suc-cancel" onclick="resetSucForm()" class="hidden w-full py-1.5 bg-neutral-300 text-neutral-800 rounded-xl text-xs font-bold">Cancelar</button>
+                 <button type="button" id="new-suc-cancel" onclick="window.resetSucForm()" class="hidden w-full py-1.5 bg-neutral-300 text-neutral-800 rounded-xl text-xs font-bold">Cancelar</button>
                </form>
                <div id="admin-suc-list" class="space-y-2"></div>
             </div>
@@ -336,11 +336,11 @@
     </div>
 
     <div id="modal-caja" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-caja')"></div>
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-caja')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
         <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-10 bg-white dark:bg-neutral-900">
           <h3 class="text-2xl font-black">Nuevo Movimiento</h3>
-          <button onclick="closeModal('modal-caja')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button onclick="window.closeModal('modal-caja')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar">
           <form id="form-caja">
@@ -352,7 +352,7 @@
               <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Categoría</label>
               <div class="flex space-x-2">
                 <select id="caja-cat" required class="flex-1 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"></select>
-                <button type="button" onclick="agregarCategoria()" class="px-4 bg-neutral-200 dark:bg-neutral-800 font-bold rounded-2xl hover:bg-neutral-300 transition-colors">+</button>
+                <button type="button" onclick="window.agregarCategoria()" class="px-4 bg-neutral-200 dark:bg-neutral-800 font-bold rounded-2xl hover:bg-neutral-300 transition-colors">+</button>
               </div>
             </div>
             <div class="mb-5"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Descripción</label><input type="text" id="caja-desc" required class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500" /></div>
@@ -360,120 +360,118 @@
             <div class="p-5 bg-neutral-50 dark:bg-neutral-950 rounded-[2rem] border border-neutral-200 dark:border-neutral-800 mb-6">
               <h4 class="font-bold text-sm mb-4">Comprobante</h4>
               <div class="grid grid-cols-2 gap-4 mb-4">
-                <div><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Tipo</label><select id="caja-comprobante" onchange="handleComprobanteChange(this.value)" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500"><option value="X">Recibo (X)</option><option value="A">Fac A</option><option value="B">Fac B</option><option value="C">Fac C</option></select></div>
+                <div><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Tipo</label><select id="caja-comprobante" onchange="window.handleComprobanteChange(this.value)" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500"><option value="X">Recibo (X)</option><option value="A">Fac A</option><option value="B">Fac B</option><option value="C">Fac C</option></select></div>
                 <div><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Nº Comp.</label><input type="text" id="caja-comp-num" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" /></div>
               </div>
               <div class="mb-4"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Total ($)</label><input type="number" id="caja-monto" required class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-green-500" /></div>
               <div id="caja-iva-container" class="hidden"><label class="block text-xs font-bold uppercase mb-2">IVA Incluido ($)</label><input type="number" id="caja-iva" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" /></div>
             </div>
-            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar</button>
+            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Movimiento</button>
           </form>
         </div>
       </div>
     </div>
 
     <div id="modal-pendientes" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-pendientes')"></div>
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-pendientes')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-xl flex flex-col overflow-hidden max-h-[80vh]">
         <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-xl font-black">Cobros Pendientes</h3>
-          <button onclick="closeModal('modal-pendientes')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+          <button onclick="window.closeModal('modal-pendientes')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         <div class="p-6 overflow-y-auto no-scrollbar" id="pendientes-list-content"></div>
       </div>
     </div>
 
     <div id="modal-detalle-factura" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-factura')"></div>
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-detalle-factura')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-xl font-black">Detalle Factura</h3>
-          <button onclick="closeModal('modal-detalle-factura')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+          <button onclick="window.closeModal('modal-detalle-factura')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         <div class="p-6" id="factura-detail-content"></div>
       </div>
     </div>
 
     <div id="modal-detalle-venta" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-venta')"></div>
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-detalle-venta')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
         <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900">
           <h3 class="text-2xl font-black">Ficha de Operación</h3>
-          <button onclick="closeModal('modal-detalle-venta')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button onclick="window.closeModal('modal-detalle-venta')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar" id="venta-detail-content"></div>
       </div>
     </div>
 
     <div id="modal-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-auto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden">
-        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-auto')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden">
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-2xl font-black" id="modal-auto-title">Alta Vehículo</h3>
-          <button onclick="closeModal('modal-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button onclick="window.closeModal('modal-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6 overflow-y-auto max-h-[75vh] no-scrollbar">
           <form id="form-auto">
             <div class="grid grid-cols-2 gap-4 mb-4">
-              <input id="auto-marca" required placeholder="Marca" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-              <input id="auto-modelo" required placeholder="Modelo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-marca" required placeholder="Marca" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-modelo" required placeholder="Modelo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
-              <input id="auto-color" required placeholder="Color" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-              <input id="auto-km" type="number" required placeholder="Kilometraje" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-color" required placeholder="Color" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-km" type="number" required placeholder="Kilometraje" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
-              <input id="auto-anio" type="number" required placeholder="Año" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-              <input id="auto-patente" required placeholder="Patente" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 uppercase outline-none focus:border-green-500 font-bold" />
+              <input id="auto-anio" type="number" required placeholder="Año" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-patente" required placeholder="Patente" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 uppercase outline-none focus:border-green-500 font-bold" />
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Precio Venta Est. ($)</label>
-                <input id="auto-precio" type="number" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Precio V. Est. ($)</label>
+                <input id="auto-precio" type="number" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Costo Original ($)</label>
-                <input id="auto-costo" type="number" required placeholder="Costo ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+                <input id="auto-costo" type="number" required placeholder="Costo ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Condición</label>
-                <select id="auto-condicion" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
+                <select id="auto-condicion" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
                   <option value="Propio">Propio</option>
                   <option value="Consignación">Consignación</option>
                 </select>
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Ubicación</label>
-                <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
+                <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
               </div>
             </div>
-            <button type="submit" id="modal-auto-submit" class="w-full mt-2 py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition">
-              Guardar Vehículo
-            </button>
+            <button type="submit" id="modal-auto-submit" class="w-full mt-2 py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Vehículo</button>
           </form>
         </div>
       </div>
     </div>
 
     <div id="modal-ingreso-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-ingreso-auto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm p-8 text-center overflow-hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-ingreso-auto')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm p-8 text-center overflow-hidden">
          <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8"></i></div>
          <h3 class="text-2xl font-black mb-2">Hacer Disponible</h3>
          <p class="text-sm text-neutral-500 mb-6">Establece el precio de venta final:</p>
-         <input type="number" id="ingreso-precio" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-4 text-lg font-bold mb-6 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 text-center" />
-         <button onclick="confirmarIngresoAuto()" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg mb-4 hover:scale-105 transition-transform">Guardar y Habilitar</button>
+         <input type="number" id="ingreso-precio" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-4 text-lg font-bold mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 text-center" />
+         <button onclick="window.confirmarIngresoAuto()" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg mb-4 hover:scale-105 transition-transform">Guardar y Habilitar</button>
          <p class="text-xs text-rose-500 font-bold hidden" id="ingreso-aviso-gastos">¡No olvides registrar gastos!</p>
-         <button onclick="abrirCajaParaGastos()" id="btn-ingreso-gastos" class="hidden w-full py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold mt-2 rounded-2xl">Cargar Gastos Ahora</button>
+         <button onclick="window.abrirCajaParaGastos()" id="btn-ingreso-gastos" class="hidden w-full py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold mt-2 rounded-2xl hover:bg-neutral-200 transition-colors">Cargar Gastos Ahora</button>
       </div>
     </div>
 
     <div id="modal-detalle-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-auto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
-        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-detalle-auto')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
           <h3 id="da-title" class="text-2xl font-black">Ficha 360º</h3>
           <div class="flex items-center space-x-2" id="da-header-actions"></div>
         </div>
@@ -482,27 +480,27 @@
     </div>
 
     <div id="modal-nuevo-lead" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-nuevo-lead')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-nuevo-lead')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-2xl font-black">Nuevo Interesado</h3>
-          <button onclick="closeModal('modal-nuevo-lead')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button onclick="window.closeModal('modal-nuevo-lead')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6">
-          <form onsubmit="handleGlobalLeadSubmit(event)">
-            <input id="gl-nombre" required placeholder="Nombre" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-            <input id="gl-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+          <form onsubmit="window.handleGlobalLeadSubmit(event)">
+            <input id="gl-nombre" required placeholder="Nombre" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+            <input id="gl-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             <div class="mb-4">
               <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Vehículo Buscado</label>
-              <input id="gl-interes" required placeholder="Ej: Pick-ups..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="gl-interes" required placeholder="Ej: Pick-ups..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             </div>
             <div class="mb-4">
               <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Temperatura</label>
-              <select id="gl-estado" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
+              <select id="gl-estado" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
                 <option value="Caliente">🔥 Caliente</option><option value="Tibio" selected>⭐ Tibio</option><option value="Frío">❄️ Frío</option>
               </select>
             </div>
-            <textarea id="gl-nota" placeholder="Notas..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold"></textarea>
+            <textarea id="gl-nota" placeholder="Notas..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold"></textarea>
             <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Lead</button>
           </form>
         </div>
@@ -510,53 +508,53 @@
     </div>
 
     <div id="modal-boleto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-boleto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden">
-        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-boleto')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden">
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
           <h3 id="boleto-title" class="text-2xl font-black">Completar Boleto</h3>
-          <button onclick="closeModal('modal-boleto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button onclick="window.closeModal('modal-boleto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar relative" id="boleto-form-content"></div>
       </div>
     </div>
 
     <div id="modal-asociar-form" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-asociar-form')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-asociar-form')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
          <h3 class="text-xl font-black mb-4">¿Asociar a auto?</h3>
          <p class="text-sm text-neutral-500 mb-6">Si asocias este boleto a un auto en stock, su estado cambiará a "Vendido".</p>
          <div class="flex justify-center space-x-4 mb-6">
-           <button onclick="document.getElementById('asoc-select-container').classList.remove('hidden')" class="px-6 py-2 bg-green-100 text-green-700 rounded-xl font-bold hover:bg-green-200 transition-colors">Sí, asociar</button>
-           <button onclick="guardarYImprimirFormulario(null)" class="px-6 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl font-bold hover:bg-neutral-200 transition-colors">No, solo imprimir</button>
+           <button onclick="document.getElementById('asoc-select-container').classList.remove('hidden')" class="px-6 py-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500 rounded-xl font-bold hover:bg-green-200 transition-colors">Sí, asociar</button>
+           <button onclick="window.guardarYImprimirFormulario(null)" class="px-6 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl font-bold hover:bg-neutral-200 transition-colors">No, solo imprimir</button>
          </div>
          <div id="asoc-select-container" class="hidden text-left border-t dark:border-neutral-800 pt-6 mt-4">
            <select id="asoc-auto-select" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500"></select>
-           <button onclick="guardarYImprimirFormulario(document.getElementById('asoc-auto-select').value)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">Confirmar e Imprimir</button>
+           <button onclick="window.guardarYImprimirFormulario(document.getElementById('asoc-auto-select').value)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">Confirmar e Imprimir</button>
          </div>
       </div>
     </div>
     
     <div id="modal-confirm-boleto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-confirm-boleto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-confirm-boleto')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
          <h3 class="text-xl font-black mb-4">¡Venta Registrada!</h3>
          <p class="text-sm text-neutral-500 mb-6">El auto se marcó como vendido. ¿Deseas generar el Boleto ahora?</p>
          <div class="flex justify-center space-x-4">
-           <button onclick="closeModal('modal-confirm-boleto')" class="px-6 py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl font-bold hover:bg-neutral-200 transition-colors">Más tarde</button>
+           <button onclick="window.closeModal('modal-confirm-boleto')" class="px-6 py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl font-bold hover:bg-neutral-200 transition-colors">Más tarde</button>
            <button id="btn-go-to-boleto" class="px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-colors">Sí, generar boleto</button>
          </div>
       </div>
     </div>
 
     <div id="modal-comision" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-comision')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-comision')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden">
         <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-xl font-black">Asignar Comisión/Bono</h3>
-          <button onclick="closeModal('modal-comision')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button onclick="window.closeModal('modal-comision')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6">
-          <form id="form-comision" onsubmit="handleComisionSubmit(event)">
+          <form id="form-comision" onsubmit="window.handleComisionSubmit(event)">
             <input type="hidden" id="comision-venta-id" value="">
             <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Personal</label>
             <select id="comision-user" required class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
@@ -569,8 +567,8 @@
     </div>
     
     <div id="modal-cerrar-pagos" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-cerrar-pagos')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden p-8 text-center">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-cerrar-pagos')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden p-8 text-center">
          <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
          <h3 class="text-xl font-black mb-2">Cerrar Pagos</h3>
          <p class="text-sm text-neutral-500 mb-6">Las comisiones pendientes se marcarán pagadas y se debitará el total de la Caja.</p>
@@ -579,14 +577,20 @@
            <p class="text-3xl font-black text-rose-600" id="monto-total-liquidar">$ 0</p>
          </div>
          <div class="flex justify-center space-x-4">
-           <button onclick="closeModal('modal-cerrar-pagos')" class="w-1/2 py-4 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-2xl font-bold hover:bg-neutral-200 transition-colors">Cancelar</button>
-           <button onclick="confirmarCierrePagos()" class="w-1/2 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-700 transition-colors">Pagar</button>
+           <button onclick="window.closeModal('modal-cerrar-pagos')" class="w-1/2 py-4 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-2xl font-bold hover:bg-neutral-200 transition-colors">Cancelar</button>
+           <button onclick="window.confirmarCierrePagos()" class="w-1/2 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-700 transition-colors">Pagar</button>
          </div>
       </div>
     </div>
 
   </div>
 
-  <script src="js/app.js" type="module"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/controllers.js"></script>
+  <script type="module" src="js/app.js"></script>
+
 </body>
 </html>
