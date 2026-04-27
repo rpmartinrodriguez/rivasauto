@@ -240,13 +240,29 @@
             <div><h2 class="text-4xl font-black">Personal</h2></div>
             <div class="flex space-x-3">
               <button onclick="window.openModal('modal-comision')" class="px-6 py-3 font-bold bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform">Bono Manual</button>
-              <button onclick="window.openModal('modal-cerrar-pagos'); window.calcularTotalPagos();" class="px-6 py-3 font-bold text-white bg-rose-600 rounded-2xl hover:bg-rose-700 hover:scale-105 transition-transform">Cerrar Pagos</button>
+              <button onclick="window.openModal('modal-cerrar-pagos'); window.calcularTotalPagos && window.calcularTotalPagos();" class="px-6 py-3 font-bold text-white bg-rose-600 rounded-2xl hover:bg-rose-700 hover:scale-105 transition-transform">Cerrar Pagos</button>
             </div>
           </div>
+          
           <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
             <table class="w-full text-left">
               <thead><tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30"><th class="px-6 py-4">Personal</th><th class="px-6 py-4">Rol</th><th class="px-6 py-4 text-right">Pendiente ($)</th></tr></thead>
               <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="personal-table"></tbody>
+            </table>
+          </div>
+
+          <h3 class="text-xl font-bold mt-8 mb-4">Historial de Cierres</h3>
+          <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                  <th class="px-6 py-4">Fecha de Cierre</th>
+                  <th class="px-6 py-4">Cant. Movimientos</th>
+                  <th class="px-6 py-4 text-right">Total Liquidado</th>
+                  <th class="px-6 py-4 text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="cierres-table"></tbody>
             </table>
           </div>
         </div>
@@ -580,6 +596,28 @@
            <button onclick="window.closeModal('modal-cerrar-pagos')" class="w-1/2 py-4 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-2xl font-bold hover:bg-neutral-200 transition-colors">Cancelar</button>
            <button onclick="window.confirmarCierrePagos()" class="w-1/2 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-700 transition-colors">Pagar</button>
          </div>
+      </div>
+    </div>
+
+    <div id="modal-detalle-personal" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-detalle-personal')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900 z-10">
+          <h3 class="text-2xl font-black" id="dp-title">Detalle de Saldo</h3>
+          <button onclick="window.closeModal('modal-detalle-personal')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar" id="dp-content"></div>
+      </div>
+    </div>
+
+    <div id="modal-detalle-cierre" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-detalle-cierre')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900 z-10">
+          <h3 class="text-2xl font-black" id="dc-title">Detalle de Cierre</h3>
+          <button onclick="window.closeModal('modal-detalle-cierre')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar" id="dc-content"></div>
       </div>
     </div>
 
