@@ -5,7 +5,8 @@
 import { db, collection, addDoc, onSnapshot, getDocs } from "./firebase-config.js";
 
 function setupRealtimeSync() {
-  const collections = ['sucursales', 'usuarios', 'autos', 'transacciones', 'ventas', 'consultas', 'formularios', 'comisiones'];
+  // Se agregó 'cierres_personal' a las colecciones sincronizadas
+  const collections = ['sucursales', 'usuarios', 'autos', 'transacciones', 'ventas', 'consultas', 'formularios', 'comisiones', 'cierres_personal'];
   
   collections.forEach(collName => {
     onSnapshot(collection(db, collName), (snapshot) => {
@@ -22,6 +23,7 @@ function setupRealtimeSync() {
       if(collName === 'consultas') window.state.consultas = arr;
       if(collName === 'formularios') window.state.formularios = arr;
       if(collName === 'comisiones') window.state.comisiones = arr;
+      if(collName === 'cierres_personal') window.state.cierres_personal = arr;
       
       if (window.state.currentUser) { 
         const updatedUser = window.state.usuarios.find(u => u.id === window.state.currentUser.id); 
@@ -82,7 +84,7 @@ async function bootApp() {
   }, 1500);
 }
 
-// Asignamos los Listeners de Formularios Fijos
+// Event Listeners Fijos
 document.addEventListener("DOMContentLoaded", () => {
   const formCaja = document.getElementById('form-caja');
   if(formCaja) formCaja.addEventListener('submit', window.handleCajaSubmit);
