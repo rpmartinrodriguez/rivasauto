@@ -239,7 +239,7 @@
           <div class="flex justify-between items-end gap-6 mb-6">
             <div><h2 class="text-4xl font-black">Personal</h2></div>
             <div class="flex space-x-3">
-              <button onclick="window.openModal('modal-comision')" class="px-6 py-3 font-bold bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform">Bono Manual</button>
+              <button onclick="window.openModal('modal-comision')" class="px-6 py-3 font-bold bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform">Carga Manual</button>
               <button onclick="window.openModal('modal-cerrar-pagos'); window.calcularTotalPagos && window.calcularTotalPagos();" class="px-6 py-3 font-bold text-white bg-rose-600 rounded-2xl hover:bg-rose-700 hover:scale-105 transition-transform">Cerrar Pagos</button>
             </div>
           </div>
@@ -566,7 +566,7 @@
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-comision')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden">
         <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center">
-          <h3 class="text-xl font-black">Asignar Comisión/Bono</h3>
+          <h3 class="text-xl font-black">Carga Manual</h3>
           <button onclick="window.closeModal('modal-comision')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6">
@@ -574,8 +574,13 @@
             <input type="hidden" id="comision-venta-id" value="">
             <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Personal</label>
             <select id="comision-user" required class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
+            
+            <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Descripción del Bono/Descuento</label>
+            <input id="comision-desc" type="text" required placeholder="Ej: Bono por objetivo..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+            
             <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Monto a Pagar ($)</label>
             <input id="comision-monto" type="number" required placeholder="Ej: 50000" class="w-full rounded-xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-lg" />
+            
             <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] transition-transform">Guardar Asignación</button>
           </form>
         </div>
@@ -584,17 +589,21 @@
     
     <div id="modal-cerrar-pagos" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-cerrar-pagos')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden p-8 text-center">
-         <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
-         <h3 class="text-xl font-black mb-2">Cerrar Pagos</h3>
-         <p class="text-sm text-neutral-500 mb-6">Las comisiones pendientes se marcarán pagadas y se debitará el total de la Caja.</p>
-         <div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl p-4 mb-6 border dark:border-neutral-700 text-left">
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden p-8 text-center flex flex-col max-h-[90vh]">
+         <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 shrink-0"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
+         <h3 class="text-xl font-black mb-2 shrink-0">Cerrar Pagos</h3>
+         <p class="text-sm text-neutral-500 mb-6 shrink-0">Selecciona el personal que incluirás en este cierre. Se marcarán como pagados y se debitará de la Caja.</p>
+         
+         <div id="cierre-checkboxes-list" class="space-y-2 mb-6 overflow-y-auto text-left no-scrollbar min-h-[100px] border border-neutral-200 dark:border-neutral-700 p-2 rounded-2xl bg-neutral-50 dark:bg-neutral-800/30">
+            </div>
+
+         <div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl p-4 mb-6 border dark:border-neutral-700 text-left shrink-0">
            <p class="text-xs uppercase text-neutral-500 font-bold mb-1">Total a Liquidar</p>
            <p class="text-3xl font-black text-rose-600" id="monto-total-liquidar">$ 0</p>
          </div>
-         <div class="flex justify-center space-x-4">
+         <div class="flex justify-center space-x-4 shrink-0">
            <button onclick="window.closeModal('modal-cerrar-pagos')" class="w-1/2 py-4 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-2xl font-bold hover:bg-neutral-200 transition-colors">Cancelar</button>
-           <button onclick="window.confirmarCierrePagos()" class="w-1/2 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-700 transition-colors">Pagar</button>
+           <button onclick="window.confirmarCierrePagos()" class="w-1/2 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-700 transition-colors">Pagar Selección</button>
          </div>
       </div>
     </div>
