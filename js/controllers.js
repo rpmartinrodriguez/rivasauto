@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Helper para animar botones y evitar doble click
 window.setBtnLoader = (btn, isLoading) => {
   if(!btn) return;
   if(isLoading) {
@@ -365,7 +364,6 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
   if(monto > 0) {
     const fDate = new Date().toISOString().split('T')[0];
     
-    // El botón recibe disable temporalmente por ID dinámico para la carga visual
     const btnId = tipo === 'credito' ? `btn-txt-credito-${ventaId}` : `btn-txt-pagare-${ventaId}`;
     const btnEl = document.getElementById(btnId)?.parentElement;
     if(btnEl) window.setBtnLoader(btnEl, true);
@@ -396,40 +394,197 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
 };
 
 // --- CONTROLADORES DE FORMULARIOS (BOLETOS Y FLOTA) ---
+window.openModalBoleto = (tipo, prefillData = null) => {
+  let content = ''; 
+  const t = tipo === 'simple' ? 'BOLETO COMPRA VENTA AUTOMOTOR' : 'BOLETO DE VENTA CON PERMUTA'; 
+  document.getElementById('boleto-title').innerText = t;
+
+  if(tipo === 'simple') {
+    content = `
+      <form id="form-real-boleto" onsubmit="window.preGuardarBoleto(event, 'simple')">
+        <h4 class="font-bold text-slate-500 mb-4 uppercase">Datos de Partes</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <input id="bf-vendedor" required placeholder="Vendedor (Nombre)" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.vendedor || ''}"/>
+          <input id="bf-comprador" required placeholder="Comprador (Nombre)" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.comprador || ''}"/>
+          <input id="bf-dni" required placeholder="D.N.I Comprador" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.dni || ''}"/>
+          <input id="bf-domicilio" required placeholder="Domicilio Comprador" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.domicilio || ''}"/>
+        </div>
+        
+        <h4 class="font-bold text-slate-500 mb-4 uppercase">Datos del Vehículo</h4>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <input id="bf-marca" required placeholder="Marca" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.marca || prefillData?.marca || ''}" />
+          <input id="bf-modelo" required placeholder="Modelo y Tipo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.modelo || prefillData?.modelo || ''}"/>
+          <input id="bf-anio" required placeholder="Año" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.año || prefillData?.año || ''}"/>
+          <input id="bf-dominio" required placeholder="Dominio (Patente)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none uppercase font-bold" value="${prefillData?.auto?.patente || prefillData?.dominio || ''}"/>
+          <input id="bf-motor" required placeholder="Motor N°" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.motor || ''}" />
+          <input id="bf-chasis" required placeholder="Chasis N°" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.chasis || ''}" />
+        </div>
+        
+        <h4 class="font-bold text-slate-500 mb-4 uppercase">Monto, Pago y Observaciones</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <input id="bf-monto" type="number" required placeholder="Suma Total ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-lg" value="${prefillData?.monto || ''}"/>
+          <input id="bf-formapago" required placeholder="Forma de pago (Ej: EFECTIVO)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.formaPago || 'EFECTIVO EN ESTE ACTO'}" />
+        </div>
+        <textarea id="bf-obs" maxlength="1000" rows="4" placeholder="Observaciones..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold resize-none mb-6">${prefillData?.observaciones || ''}</textarea>
+        
+        <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center">
+          <span>Guardar e Imprimir</span>
+        </button>
+      </form>
+    `;
+  } else {
+    // NUEVA ESTRUCTURA BOLETO DE PERMUTA
+    content = `
+      <form id="form-real-boleto" onsubmit="window.preGuardarBoleto(event, 'permuta')">
+        <h4 class="font-bold text-slate-500 mb-4 uppercase">Datos de Partes</h4>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+          <input id="bf-comprador" required placeholder="Comprador (Nombre y Apellido)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.comprador || ''}"/>
+          <input id="bf-dni" required placeholder="D.N.I" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.dni || ''}"/>
+          <input id="bf-telefono" required placeholder="Celular" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.telefono || ''}"/>
+        </div>
+        <div class="grid grid-cols-3 md:grid-cols-5 gap-4 mb-6">
+          <input id="bf-domicilio" required placeholder="Calle (Domicilio)" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.domicilio || ''}"/>
+          <input id="bf-altura" required placeholder="Altura (Nro)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.altura || ''}"/>
+          <input id="bf-loc-comp" required placeholder="Localidad, Provincia" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.locComp || ''}"/>
+        </div>
+        
+        <div class="mb-6">
+          <input id="bf-vendedor" required placeholder="Por cuenta y orden de (Apoderado)" class="w-full md:w-1/2 rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.vendedor || 'RIVAS AUTO'}"/>
+        </div>
+
+        <h4 class="font-bold text-slate-500 mb-4 uppercase">Vehículo Vendido</h4>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <input id="bf-marca" required placeholder="Marca" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.marca || prefillData?.marca || ''}" />
+          <input id="bf-modelo" required placeholder="Modelo y Tipo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.modelo || prefillData?.modelo || ''}"/>
+          <input id="bf-anio" required placeholder="Año" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.año || prefillData?.año || ''}"/>
+          <input id="bf-motor" required placeholder="Motor N°" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.motor || ''}" />
+          <input id="bf-chasis" required placeholder="Chasis N°" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.chasis || ''}" />
+          <input id="bf-dominio" required placeholder="Patente Nro" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none uppercase font-bold" value="${prefillData?.auto?.patente || prefillData?.dominio || ''}"/>
+          <input id="bf-loc-pat" required placeholder="Patentado en localidad de..." class="col-span-2 md:col-span-3 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.locPat || ''}"/>
+        </div>
+        
+        <h4 class="font-bold text-slate-500 mb-4 uppercase">Importes (Venta)</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <input id="bf-monto" type="number" required placeholder="Suma Total ($)" oninput="window.calcRemanentePermuta()" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-lg" value="${prefillData?.monto || ''}"/>
+          <input id="bf-monto-letras" required placeholder="Suma Total (En letras)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.montoLetras || ''}"/>
+          <input id="bf-efectivo" type="number" placeholder="Efectivo abonado ($) - Si corresponde" class="col-span-1 md:col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.efectivo || ''}"/>
+        </div>
+        
+        <h4 class="font-bold text-slate-500 mb-4 uppercase text-amber-600">Vehículo Recibido en Permuta</h4>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800">
+          <input id="bp-marca" required placeholder="Permuta: Marca" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.permuta?.marca || prefillData?.p_marca || ''}"/>
+          <input id="bp-modelo" required placeholder="Permuta: Modelo" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.permuta?.modelo || prefillData?.p_modelo || ''}"/>
+          <input id="bp-anio" required type="number" placeholder="Permuta: Año" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.permuta?.anio || prefillData?.p_anio || ''}"/>
+          <input id="bp-motor" required placeholder="Permuta: Motor N°" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.p_motor || ''}"/>
+          <input id="bp-chasis" required placeholder="Permuta: Chasis N°" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.p_chasis || ''}"/>
+          <input id="bp-dominio" required placeholder="Permuta: Patente" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none uppercase font-bold" value="${prefillData?.permuta?.patente || prefillData?.p_dominio || ''}"/>
+          <input id="bp-loc-pat" required placeholder="Permuta patentada en localidad de..." class="col-span-2 md:col-span-3 w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.p_locPat || ''}"/>
+          
+          <input id="bp-tasado" type="number" required placeholder="Valor Tasado / Toma ($)" oninput="window.calcRemanentePermuta()" class="col-span-2 md:col-span-1 w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-amber-700" value="${prefillData?.permuta?.tasado || prefillData?.p_tasado || ''}"/>
+          <input id="bp-tasado-letras" required placeholder="Valor Tasado (En letras)" class="col-span-2 w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-amber-700" value="${prefillData?.p_tasadoLetras || ''}"/>
+        </div>
+        
+        <h4 class="font-bold text-slate-500 mb-4 uppercase">Detalle del Remanente</h4>
+        <div class="mb-6 p-6 bg-neutral-100 dark:bg-neutral-800 rounded-[2rem] border border-neutral-200 dark:border-neutral-700">
+           <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Diferencia Automática (Monto Venta - Valor Toma)</label>
+           <input id="bf-remanente-num" readonly class="w-full rounded-xl px-4 py-3 bg-neutral-200 dark:bg-neutral-900 border border-transparent outline-none font-black text-rose-500 mb-4 cursor-not-allowed" value="0"/>
+           <input id="bf-remanente-letras" required placeholder="Remanente (En letras)" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold mb-4" value="${prefillData?.remanenteLetras || ''}"/>
+           <textarea id="bf-detalle-remanente" required maxlength="1500" rows="6" placeholder="Detalle exacto de cómo se cancela el remanente (Ej. en cuotas de $X con vencimiento X)..." class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold resize-none">${prefillData?.detalleRemanente || ''}</textarea>
+        </div>
+        
+        <textarea id="bf-obs" maxlength="1000" rows="3" placeholder="Observaciones adicionales..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold resize-none mb-6">${prefillData?.observaciones || ''}</textarea>
+        
+        <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center">
+          <span>Guardar e Imprimir</span>
+        </button>
+      </form>
+    `;
+  }
+  
+  document.getElementById('boleto-form-content').innerHTML = content;
+  
+  if (prefillData && prefillData.auto) { 
+    window.state.tempFormData = { autoIdAsociado: prefillData.auto.id, id: prefillData.id }; 
+  } else if (prefillData && prefillData.id) {
+    window.state.tempFormData = { id: prefillData.id }; 
+  } else { 
+    window.state.tempFormData = {}; 
+  }
+  
+  window.openModal('modal-boleto');
+  
+  if (tipo === 'permuta') {
+    window.calcRemanentePermuta();
+  }
+};
+
+window.calcRemanentePermuta = () => {
+  const monto = Number(document.getElementById('bf-monto')?.value || 0);
+  const tasado = Number(document.getElementById('bp-tasado')?.value || 0);
+  const diff = monto - tasado;
+  const remInput = document.getElementById('bf-remanente-num');
+  if(remInput) remInput.value = window.formatMoney(diff);
+};
+
 window.preGuardarBoleto = (e, tipo) => {
   e.preventDefault();
   
-  const baseData = {
-    tipo: tipo === 'simple' ? 'Boleto Compra Venta' : 'Boleto Venta con Permuta', 
-    fecha: new Date().toISOString().split('T')[0],
-    vendedor: document.getElementById('bf-vendedor').value, 
-    comprador: document.getElementById('bf-comprador').value, 
-    dni: document.getElementById('bf-dni').value, 
-    domicilio: document.getElementById('bf-domicilio').value,
-    marca: document.getElementById('bf-marca').value, 
-    modelo: document.getElementById('bf-modelo').value, 
-    año: document.getElementById('bf-anio').value, 
-    dominio: document.getElementById('bf-dominio').value.toUpperCase(),
-    motor: document.getElementById('bf-motor').value, 
-    chasis: document.getElementById('bf-chasis').value, 
-    monto: document.getElementById('bf-monto').value, 
-    observaciones: document.getElementById('bf-obs').value,
-    estado: 'Completado' 
-  };
+  let baseData = {};
   
   if(tipo === 'simple') { 
-    baseData.formaPago = document.getElementById('bf-formapago').value; 
+    baseData = {
+      tipo: 'Boleto Compra Venta', 
+      fecha: new Date().toISOString().split('T')[0],
+      vendedor: document.getElementById('bf-vendedor').value, 
+      comprador: document.getElementById('bf-comprador').value, 
+      dni: document.getElementById('bf-dni').value, 
+      domicilio: document.getElementById('bf-domicilio').value,
+      marca: document.getElementById('bf-marca').value, 
+      modelo: document.getElementById('bf-modelo').value, 
+      año: document.getElementById('bf-anio').value, 
+      dominio: document.getElementById('bf-dominio').value.toUpperCase(),
+      motor: document.getElementById('bf-motor').value, 
+      chasis: document.getElementById('bf-chasis').value, 
+      monto: document.getElementById('bf-monto').value, 
+      formaPago: document.getElementById('bf-formapago').value,
+      observaciones: document.getElementById('bf-obs').value,
+      estado: 'Completado' 
+    };
   } else { 
-    baseData.telefono = document.getElementById('bf-telefono').value; 
-    baseData.efectivo = document.getElementById('bf-efectivo').value; 
-    baseData.p_marca = document.getElementById('bp-marca').value; 
-    baseData.p_modelo = document.getElementById('bp-modelo').value; 
-    baseData.p_anio = document.getElementById('bp-anio').value; 
-    baseData.p_dominio = document.getElementById('bp-dominio').value.toUpperCase(); 
-    baseData.p_tasado = document.getElementById('bp-tasado').value; 
-    baseData.saldo = document.getElementById('bf-saldo').value; 
-    baseData.cuotas = document.getElementById('bf-cuotas').value; 
-    baseData.valCuota = document.getElementById('bf-valcuota').value; 
+    baseData = {
+      tipo: 'Boleto Venta con Permuta', 
+      fecha: new Date().toISOString().split('T')[0],
+      vendedor: document.getElementById('bf-vendedor').value, 
+      comprador: document.getElementById('bf-comprador').value, 
+      dni: document.getElementById('bf-dni').value, 
+      telefono: document.getElementById('bf-telefono').value, 
+      domicilio: document.getElementById('bf-domicilio').value,
+      altura: document.getElementById('bf-altura').value,
+      locComp: document.getElementById('bf-loc-comp').value,
+      marca: document.getElementById('bf-marca').value, 
+      modelo: document.getElementById('bf-modelo').value, 
+      año: document.getElementById('bf-anio').value, 
+      dominio: document.getElementById('bf-dominio').value.toUpperCase(),
+      motor: document.getElementById('bf-motor').value, 
+      chasis: document.getElementById('bf-chasis').value, 
+      locPat: document.getElementById('bf-loc-pat').value,
+      monto: document.getElementById('bf-monto').value, 
+      montoLetras: document.getElementById('bf-monto-letras').value, 
+      efectivo: document.getElementById('bf-efectivo').value, 
+      p_marca: document.getElementById('bp-marca').value, 
+      p_modelo: document.getElementById('bp-modelo').value, 
+      p_anio: document.getElementById('bp-anio').value, 
+      p_dominio: document.getElementById('bp-dominio').value.toUpperCase(), 
+      p_motor: document.getElementById('bp-motor').value, 
+      p_chasis: document.getElementById('bp-chasis').value, 
+      p_locPat: document.getElementById('bp-loc-pat').value,
+      p_tasado: document.getElementById('bp-tasado').value, 
+      p_tasadoLetras: document.getElementById('bp-tasado-letras').value, 
+      remanenteLetras: document.getElementById('bf-remanente-letras').value,
+      detalleRemanente: document.getElementById('bf-detalle-remanente').value,
+      observaciones: document.getElementById('bf-obs').value,
+      estado: 'Completado' 
+    };
   }
   
   const autoId = window.state.tempFormData.autoIdAsociado; 
@@ -449,32 +604,42 @@ window.preGuardarBoleto = (e, tipo) => {
 
 window.guardarYImprimirFormulario = async (autoIdAsociado) => {
   const data = { ...window.state.tempFormData };
+  const btn = document.getElementById('form-real-boleto')?.querySelector('button[type="submit"]') || event?.target;
+  window.setBtnLoader(btn, true);
   
-  if (autoIdAsociado) { 
-    data.autoIdAsociado = autoIdAsociado; 
-    await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' }); 
+  try {
+    if (autoIdAsociado) { 
+      data.autoIdAsociado = autoIdAsociado; 
+      await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' }); 
+    }
+    
+    if (data.id) {
+      const copyData = {...data};
+      delete copyData.id; 
+      await window.fbUpdate("formularios", data.id, copyData);
+    } else {
+      await window.fbAdd("formularios", data);
+    }
+    
+    window.closeModal('modal-asociar-form'); 
+    window.closeModal('modal-boleto');
+    
+    window.imprimirBoletoHtml(data);
+  } finally {
+    window.setBtnLoader(btn, false);
   }
-  
-  if (data.id) {
-    const copyData = {...data};
-    delete copyData.id; 
-    await window.fbUpdate("formularios", data.id, copyData);
-  } else {
-    await window.fbAdd("formularios", data);
-  }
-  
-  window.closeModal('modal-asociar-form'); 
-  window.closeModal('modal-boleto');
-  
-  window.imprimirBoletoHtml(data);
 };
 
 window.imprimirBoletoHtml = (data) => {
   let printHtml = ''; 
-  const date = new Date(data.fecha); 
-  const fDate = `${date.getDate() + 1} de ${date.toLocaleString('es-ES', { month: 'long' })} del ${date.getFullYear()}`;
+  const dateObj = new Date(data.fecha + 'T00:00:00');
+  const dia = dateObj.getDate();
+  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const mes = meses[dateObj.getMonth()];
+  const anio = dateObj.getFullYear();
   
   if(data.tipo === 'Boleto Compra Venta') {
+    const fDate = `${dia} de ${mes} del ${anio}`;
     printHtml = `
       <h2 class="text-center text-2xl font-black mb-8 underline uppercase">${data.tipo}</h2>
       <p class="mb-4">Conste por el presente que entre el Señor/a: <strong>${data.vendedor}</strong> como VENDEDOR y el Señor/a: <strong>${data.comprador}</strong>, D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong> como COMPRADOR se conviene lo siguiente:</p>
@@ -499,35 +664,32 @@ window.imprimirBoletoHtml = (data) => {
       </div>
     `;
   } else {
+    // Exact text format for Permuta requested by user
     printHtml = `
       <h2 class="text-center text-xl font-black mb-8 underline uppercase">BOLETO DE VENTA CON PERMUTA</h2>
-      <p class="mb-4 text-justify">Conste por el presente que hemos vendido a Sr./Sra: <strong>${data.comprador}</strong><br>
-      D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong><br>
-      De la localidad de __________________ Celular: <strong>${data.telefono}</strong><br>
-      Por cuenta y orden de Sr./Sra. <strong>${data.vendedor}</strong> un automovil usado, en las condiciones vistas y que se encuentran libre de gravamenes y/o deudas nacionales, municipales o provinciales, dejando contancia que en la fecha el comprador toma posesion del mismo de conformidad, siendo sus caracteristicas las que se detallan a continuacion:</p>
+      <p class="mb-4 text-justify">Conste por el presente que hemos vendido a Sr./Sra: <strong>${data.comprador}</strong> con D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong> Nro.: <strong>${data.altura}</strong> de la localidad de <strong>${data.locComp}</strong> con Celular: <strong>${data.telefono}</strong>.</p>
       
-      <p class="mb-4 font-bold">Marca: ${data.marca} Modelo: ${data.modelo}<br>
-      Año: ${data.año} Motor: ${data.motor || '___________'} Nro. serie o chasis: ${data.chasis || '___________'}<br>
-      Patentado en la localidad de __________________ bajo Nro. ${data.dominio}</p>
+      <p class="mb-4 text-justify">Por cuenta y orden de Sr./Sra. <strong>${data.vendedor}</strong> un automóvil usado, en las condiciones vistas y que se encuentran libre de gravámenes y/o deudas nacionales, municipales o provinciales, dejando constancia que en la fecha el comprador toma posesión del mismo de conformidad, siendo sus características las que se detallan a continuación:</p>
       
-      <p class="mb-4 text-justify">La venta se realiza por la suma total de ($) <strong>${data.monto}</strong> , (____________________________________)<br>
-      Discriminados en la siguiente manera:<br>
+      <p class="mb-4 font-bold">Marca: ${data.marca} Modelo: ${data.modelo} Año: ${data.año} Motor: ${data.motor || '___________'}, Nro. serie o chasis: ${data.chasis || '___________'}<br>
+      Patentado en la localidad de: ${data.locPat || '___________'} bajo Nro.: ${data.dominio}</p>
+      
+      <p class="mb-4 text-justify">La venta se realiza por la suma total de ($) <strong>${data.monto}</strong> , (<strong>${data.montoLetras}</strong>); Discriminados en la siguiente manera:<br>
       Efectivo: ($) <strong>${data.efectivo || 0}</strong></p>
       
-      <p class="mb-4 text-justify">Se recibe como parte de pago, un automovil marca: <strong>${data.p_marca}</strong> Modelo: <strong>${data.p_modelo}</strong><br>
-      Año: <strong>${data.p_anio}</strong> Motor Nro.: ________________ Nro. de serie o chasis: ________________<br>
-      Patente de: <strong>${data.p_dominio}</strong> Nro.: ____________ libre de deuda y gravamenes, tasado en la suma de ($): <strong>${data.p_tasado}</strong> , (____________________________________)<br>
-      debiendo cancelarse el remanente de ($): <strong>${data.saldo}</strong> , (____________________________________)</p>
+      <p class="mb-4 text-justify">Se recibe como parte de pago un automovil marca: <strong>${data.p_marca}</strong> Modelo: <strong>${data.p_modelo}</strong> Año: <strong>${data.p_anio}</strong> Motor Nro.: <strong>${data.p_motor || '___________'}</strong> Nro. de serie o chasis: <strong>${data.p_chasis || '___________'}</strong> patentado en la localidad de: <strong>${data.p_locPat || '___________'}</strong>, Nro.: <strong>${data.p_dominio}</strong>, libre de deuda y gravamenes, tasado en la suma de ($): <strong>${data.p_tasado}</strong> , (<strong>${data.p_tasadoLetras}</strong>), debiendo cancelarse el remanente de ($): <strong>${window.formatMoney((Number(data.monto) || 0) - (Number(data.p_tasado) || 0))}</strong> , (<strong>${data.remanenteLetras || '___________'}</strong>).</p>
       
-      <p class="mb-6 text-justify">En <strong>${data.cuotas}</strong> cuotas de ($) <strong>${data.valCuota}</strong> cada una, con vencimiento la primera de ellas el dia ______ del mes ____________ del año ________. Y las cuotas restantes a cancelar cada treinta (30) dias, sucesivamente, hasta la cancelacion de la deuda total, cuyo efecto se firma de igual numero de Pagares que representan las cuotas convenidas y prenda con Registro, gravandose con todas las formalidades establecidas en la Ley Nro. 12.962 el automovil vendido, garantia del saldo deudor.</p>
+      <p class="mb-6 text-justify uppercase font-bold">${data.detalleRemanente}</p>
+      
+      <p class="mb-6 text-justify">Y las cuotas restantes a cancelar cada treinta (30) dias, sucesivamente, hasta la cancelacion de la deuda total, cuyo efecto se firma de igual numero de Pagares que representan las cuotas convenidas y prenda con Registro, gravandose con todas las formalidades stablecidas en la Ley Nro. 12.962 el automovil vendido, garantia del saldo deudor.</p>
       
       <p class="mb-4 font-bold text-justify">Observaciones: ${data.observaciones}</p>
       
-      <p class="mb-12">En conformidad se forman dos ejemplares del mismo tenor y a un solo efecto, en Gualeguaychu a los ${fDate}.</p>
+      <p class="mb-12">En conformidad se forman dos ejemplares del mismo tenor y a un solo efecto, en Gualeguaychu a los ${dia} dias del mes de ${mes} del año ${anio}.</p>
       
       <div class="mt-12 flex justify-between px-16">
-        <div class="text-center border-t border-black w-48 pt-2 font-bold">Firma Agencia</div>
-        <div class="text-center border-t border-black w-48 pt-2 font-bold">Firma Comprador</div>
+        <div class="text-center border-t border-black w-48 pt-2 font-bold">Firmas</div>
+        <div class="text-center border-t border-black w-48 pt-2 font-bold">Firmas</div>
       </div>
     `;
   }
@@ -586,7 +748,6 @@ window.imprimirFlota = () => {
    }, 500);
 };
 
-// --- CONTROLADORES DE CIERRE DE VENTA MAESTRO ---
 window.handleDAVentaSubmit = async (e, autoId) => {
   e.preventDefault(); 
   const btn = e.submitter || document.getElementById('txt-submit-venta')?.parentElement;
@@ -614,7 +775,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 
     const fDate = new Date().toISOString().split('T')[0];
 
-    // 1. Efectivo Inmediato a Caja
     if(vEf > 0) {
       await window.fbAdd("transacciones", { 
         fecha: fDate, 
@@ -632,7 +792,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       });
     }
 
-    // 2. Preparar Objetos de Cuotas
     let objCredito = null;
     if (vCr > 0 && cCr > 0) {
       objCredito = {
@@ -653,7 +812,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       };
     }
 
-    // 3. Registro Histórico de la Venta
     let metodos = [];
     if(vEf > 0) metodos.push('Efectivo');
     if(vCr > 0) metodos.push('Crédito');
@@ -677,7 +835,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       detallePermuta: window.state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
     });
 
-    // 4. Alta de Auto Recibido en Permuta
     if(window.state.ventaData.tienePermuta) {
       await window.fbAdd("autos", { 
         marca: document.getElementById('p-marca').value, 
@@ -696,10 +853,8 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       });
     }
     
-    // 5. Marcar Auto actual como Vendido
     await window.fbUpdate("autos", autoId, { estado: 'Vendido' }); 
     
-    // 6. FLUJO AUTOMATIZADO: Crear Borrador del Boleto en DB
     const cuotasMax = Math.max(cCr, cPa);
     const boletoData = {
       tipo: window.state.ventaData.tienePermuta ? 'Boleto Venta con Permuta' : 'Boleto Compra Venta',
@@ -737,7 +892,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 
     await window.fbAdd("formularios", boletoData);
 
-    // 7. Enrutamiento directo a la sección Formularios
     window.closeModal('modal-detalle-auto'); 
     window.switchTab('formularios');
     
@@ -746,8 +900,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
   }
 };
 
-
-// --- CRM GLOBALES Y DE AUTO ---
 window.handleGlobalLeadSubmit = async (e) => { 
   e.preventDefault(); 
   const btn = e.submitter;
@@ -802,7 +954,6 @@ window.handleDA_CRMSubmit = async (e, autoId) => {
   }
 };
 
-// --- COMISIONES Y PERSONAL (CARGA MANUAL Y CIERRE) ---
 window.openModalAsignarBono = () => { 
   document.getElementById('form-comision').reset(); 
   document.getElementById('comision-venta-id').value = ""; 
