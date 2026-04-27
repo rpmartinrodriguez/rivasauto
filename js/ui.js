@@ -54,19 +54,21 @@ window.toggleNotifications = () => {
 
 window.renderNav = () => {
   if(!window.state.currentUser) return; 
-  const isAd = window.state.currentUser.rol === 'Admin';
+  const rol = window.state.currentUser.rol;
   
+  // Base común para TODOS (Admin, Encargado, Vendedor)
   let tabs = [ 
     { id: 'autos', icon: 'car', label: 'Flota' }, 
     { id: 'caja', icon: 'wallet', label: 'Caja' }, 
-    { id: 'clientes', icon: 'users', label: 'CRM' } 
+    { id: 'clientes', icon: 'users', label: 'CRM' },
+    { id: 'ventas', icon: 'shopping-bag', label: 'Historial Ventas' },
+    { id: 'formularios', icon: 'printer', label: 'Formularios' }
   ];
   
-  if(isAd) { 
-    tabs.splice(2, 0, { id: 'ventas', icon: 'shopping-bag', label: 'Historial Ventas' }); 
-    tabs.splice(3, 0, { id: 'facturas', icon: 'file-text', label: 'Facturas' }); 
-    tabs.splice(4, 0, { id: 'personal', icon: 'briefcase', label: 'Personal' }); 
-    tabs.splice(6, 0, { id: 'formularios', icon: 'printer', label: 'Formularios' }); 
+  // Exclusivo para el Administrador
+  if(rol === 'Admin') { 
+    tabs.splice(4, 0, { id: 'facturas', icon: 'file-text', label: 'Facturas' }); 
+    tabs.splice(5, 0, { id: 'personal', icon: 'briefcase', label: 'Personal' }); 
     tabs.push( 
       { id: 'resumenes', icon: 'pie-chart', label: 'Resúmenes' }, 
       { id: 'admin', icon: 'settings', label: 'Administración' } 
@@ -74,7 +76,7 @@ window.renderNav = () => {
   }
   
   document.getElementById('nav-menu').innerHTML = tabs.map(t => `
-    <button onclick="switchTab('${t.id}')" class="w-full flex items-center space-x-3 py-3 px-4 rounded-2xl transition-all font-bold text-sm ${window.state.activeTab === t.id ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'}">
+    <button onclick="window.switchTab('${t.id}')" class="w-full flex items-center space-x-3 py-3 px-4 rounded-2xl transition-all font-bold text-sm ${window.state.activeTab === t.id ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'}">
       <i data-lucide="${t.icon}" class="w-5 h-5"></i>
       <span>${t.label}</span>
     </button>
