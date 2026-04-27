@@ -1,0 +1,854 @@
+// ==========================================
+// js/render.js
+// ==========================================
+
+// --- RENDERIZADO GLOBAL ---
+window.renderAllViews = () => { 
+  if(!window.state.currentUser) return; 
+  
+  if(window.renderCajaView) window.renderCajaView(); 
+  if(window.renderVentasView) window.renderVentasView();
+  if(window.renderFacturasView) window.renderFacturasView(); 
+  if(window.renderAutosView) window.renderAutosView(); 
+  if(window.renderClientesView) window.renderClientesView(); 
+  if(window.renderFormulariosView) window.renderFormulariosView();
+  if(window.renderPersonalView) window.renderPersonalView();
+  if(window.renderResumenesView) window.renderResumenesView(); 
+  if(window.renderAdminView) window.renderAdminView(); 
+  
+  window.checkNotifications();
+  lucide.createIcons(); 
+};
+
+// --- INICIALIZADOR DE DESPLEGABLES ---
+window.initSelects = () => { 
+  document.getElementById('caja-cat').innerHTML = window.state.categoriasGasto.map(c => `<option value="${c}">${c}</option>`).join(''); 
+  document.getElementById('auto-sucursal').innerHTML = window.state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
+  document.getElementById('caja-auto').innerHTML = `<option value="">-- Gasto General de Agencia --</option>` + window.state.autos.map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
+  document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0]; 
+};
+
+// --- ALERTAS DE RECOMPRA ---
+window.checkNotifications = () => {
+  if(!window.state.currentUser || window.state.currentUser.rol !== 'Admin') {
+    document.getElementById('notif-container').classList.add('hidden');
+    return;
+  }
+  
+  document.getElementById('notif-container').classList.remove('hidden');
+  const notifs = [];
+  const today = new Date();
+  
+  window.state.ventas.forEach(v => {
+    if (v.metodoPago.includes('Crédito') || v.metodoPago.includes('Pagaré')) {
+      const pendientes = v.cuotasTotales - v.cuotasPagadas;
+      if (pendientes <= 0) return; 
+      
+      const fechaFin = new Date(v.fecha + 'T00:00:00');
+      fechaFin.setMonth(fechaFin.getMonth() + v.cuotasTotales);
+      
+      const diffDays = Math.ceil((fechaFin - today) / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 60 && diffDays > 20) {
+        notifs.push({ v, msg: 'Aprox. 2 meses para finalizar.', days: diffDays });
+      } else if (diffDays <= 20 && diffDays >= 0) {
+        notifs.push({ v, msg: '¡Menos de 20 días para terminar!', days: diffDays });
+      }
+    }
+  });
+  
+  const badge = document.getElementById('notif-badge');
+  const list = document.getElementById('notif-list');
+  
+  if (notifs.length > 0) {
+    badge.classList.remove('hidden');
+    list.innerHTML = notifs.map(n => `
+      <div class="p-4 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
+        <p class="font-bold text-sm">${n.v.compradorNombre}</p>
+        <p class="text-xs text-neutral-500 mb-3">${n.v.autoDesc} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span></p>
+        <a href="${window.formatWhatsAppLink(n.v.compradorTelefono, `Hola ${n.v.compradorNombre}, vimos que estás por finalizar tu plan en RIVAS AUTO. ¿Te interesaría charlar para renovar tu unidad?`)}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
+          <i data-lucide="message-circle" class="w-3.5 h-3.5 mr-1.5"></i> Ofrecer Recompra
+        </a>
+      </div>
+    `).join('');
+  } else {
+    badge.classList.add('hidden');
+    list.innerHTML = '<div class="p-6 text-center text-sm text-neutral-500">No hay alertas de recompra en este momento.</div>';
+  }
+};
+
+// --- FLOTA Y AUTOS ---
+window.toggleAutosViewMode = (mode) => { 
+  window.state.autosViewMode = mode; 
+  window.renderAutosView(); 
+};
+
+window.renderAutosView = () => {
+  const container = document.getElementById('autos-container');
+  
+  document.getElementById('btn-view-grid').className = window.state.autosViewMode === 'grid' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
+  document.getElementById('btn-view-list').className = window.state.autosViewMode === 'list' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
+  
+  const autosValidos = window.state.autos.filter(a => a.estado !== 'Vendido');
+  
+  if (autosValidos.length === 0) { 
+    container.innerHTML = '<div class="col-span-full py-12 text-center text-neutral-500 font-bold">No hay vehículos en la flota.</div>'; 
+    return; 
+  }
+
+  if (window.state.autosViewMode === 'grid') {
+    container.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
+        ${autosValidos.map(auto => {
+          const totalGastos = auto.gastos?.reduce((s, g) => s + Number(g.monto), 0) || 0; 
+          const sName = window.state.sucursales.find(x => x.id === auto.sucursalId)?.nombre || 'Sin Asignar';
+          
+          let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
+          if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
+          if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 border border-amber-300 dark:border-amber-700';
+          
+          return `
+            <div onclick="window.openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
+              <div class="bg-neutral-50/50 dark:bg-neutral-800/50 rounded-[2rem] p-6 h-full flex flex-col relative">
+                <div class="flex justify-between items-start mb-4">
+                  <div class="flex flex-col space-y-1">
+                    <div class="flex space-x-2">
+                      <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-xl ${bClass}">
+                        ${auto.estado}
+                      </span>
+                    </div>
+                    <span class="text-xs text-neutral-500 font-bold ml-1">
+                      <i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${sName} | <span class="uppercase text-[10px]">${auto.condicion || 'Propio'}</span>
+                    </span>
+                  </div>
+                  <div class="bg-white dark:bg-neutral-900 p-2 rounded-xl border border-neutral-200 dark:border-neutral-700">
+                    <span class="font-mono text-sm font-bold">${auto.patente}</span>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <h3 class="text-2xl font-black">${auto.marca} <br/><span class="text-neutral-500">${auto.modelo}</span></h3>
+                  <p class="text-sm text-neutral-400 mt-1 font-bold">Año ${auto.año} • ${auto.color || ''} • ${auto.km || 0} km</p>
+                </div>
+                <div class="mt-auto space-y-3">
+                  <div class="flex justify-between items-center p-3 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700">
+                    <span class="text-xs font-bold text-neutral-500 uppercase">Precio</span>
+                    <span class="text-lg font-black">${window.formatMoney(auto.precio)}</span>
+                  </div>
+                  <div class="flex justify-between items-center px-2">
+                    <span class="text-xs text-neutral-500 font-bold">
+                      <i data-lucide="wrench" class="w-3 h-3 inline"></i> Inversión
+                    </span>
+                    <span class="text-sm font-bold">${window.formatMoney(totalGastos)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden fade-in">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                <th class="px-6 py-4 font-bold">Vehículo</th>
+                <th class="px-6 py-4 font-bold">Patente</th>
+                <th class="px-6 py-4 font-bold">Detalles</th>
+                <th class="px-6 py-4 font-bold">Estado</th>
+                <th class="px-6 py-4 font-bold text-right">Precio Venta</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
+              ${autosValidos.map(auto => {
+                let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
+                if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
+                if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500';
+                
+                return `
+                  <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="window.openDetalleAuto('${auto.id}')">
+                    <td class="px-6 py-4">
+                      <p class="font-bold">${auto.marca} ${auto.modelo}</p>
+                      <p class="text-xs text-neutral-500 font-bold mt-1">Año ${auto.año}</p>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-sm font-bold uppercase">${auto.patente}</td>
+                    <td class="px-6 py-4 text-xs text-neutral-600 dark:text-neutral-400 font-bold capitalize">
+                      ${auto.color || '-'} • ${auto.km || 0} km • <span class="uppercase">${auto.condicion || 'Propio'}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${bClass}">${auto.estado}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right font-black text-lg">${window.formatMoney(auto.precio)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+  lucide.createIcons();
+};
+
+window.renderDetalleAuto = () => {
+  const a = window.state.autos.find(x => x.id === window.state.selectedAutoId); 
+  if(!a) return;
+  
+  const tg = a.gastos?.reduce((ac, g) => ac + g.monto, 0) || 0;
+  
+  document.getElementById('da-header-actions').innerHTML = `
+    <button type="button" onclick="window.editAuto('${a.id}')" class="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition">
+      <i data-lucide="edit-2" class="w-4 h-4"></i>
+    </button>
+    <button type="button" onclick="window.deleteAuto('${a.id}')" class="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/30 text-rose-500 rounded-full transition">
+      <i data-lucide="trash-2" class="w-4 h-4"></i>
+    </button>
+    <div class="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-2"></div>
+    <button type="button" onclick="window.closeModal('modal-detalle-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+  `;
+  
+  let html = '';
+  
+  if(!window.state.isVentaMode) {
+    
+    // MODO VISTA NORMAL
+    html += `
+      <div class="bg-black text-white dark:bg-white dark:text-black rounded-[2rem] p-8 mb-6 relative overflow-hidden border border-neutral-800 dark:border-neutral-200">
+        <div class="flex justify-between items-start relative z-10">
+          <div>
+            <span class="bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 text-[10px] uppercase px-3 py-1 rounded-lg font-bold">
+              ${a.estado}
+            </span>
+            <span class="ml-2 bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 text-[10px] uppercase px-3 py-1 rounded-lg font-bold">
+              ${a.condicion || 'Propio'}
+            </span>
+            <h2 class="text-3xl font-black mt-3">${a.marca} ${a.modelo}</h2>
+            <p class="text-sm mt-1 opacity-80 font-bold">Año ${a.año} • ${a.color||''} • ${a.km||0} km</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs uppercase font-bold opacity-60">Precio Venta</p>
+            <p class="text-3xl font-black mt-1">${window.formatMoney(a.precio)}</p>
+          </div>
+        </div>
+    `;
+    
+    if (window.state.currentUser.rol === 'Admin' && a.costo > 0) { 
+      html += `<p class="mt-4 text-xs font-bold text-neutral-400">Costo Base Original: ${window.formatMoney(a.costo)}</p>`; 
+    }
+    
+    if(a.estado === 'A Ingresar') {
+      html += `
+        <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
+          <button onclick="window.openModalIngreso('${a.id}')" class="w-full py-4 bg-amber-500 text-black font-black rounded-2xl shadow hover:bg-amber-400 transition-all">
+            Marcar como Disponible / Fijar Precio
+          </button>
+        </div>
+      `;
+    } else if (a.estado !== 'Vendido') { 
+      if (window.state.currentUser.rol === 'Admin' || window.state.currentUser.rol === 'Vendedor' || window.state.currentUser.rol === 'Encargado') { 
+        html += `
+          <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
+            <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="w-full py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all">
+              Cerrar Venta con Cliente
+            </button>
+          </div>
+        `; 
+      } 
+    } else {
+      html += `
+        <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
+          <button onclick="window.generarBoletoDesdeVendido('${a.id}')" class="w-full py-4 bg-white text-black font-black rounded-2xl shadow hover:bg-neutral-200 transition-all">
+            <i data-lucide="file-text" class="w-5 h-5 inline mr-2"></i> Generar Boleto de esta Unidad
+          </button>
+        </div>
+      `;
+    }
+    
+    html += `</div>`;
+    
+    html += `
+      <div class="flex space-x-4 border-b border-neutral-200 dark:border-neutral-800 mb-6 overflow-x-auto no-scrollbar">
+        <button onclick="window.switchDASection('crm')" class="pb-3 font-bold border-b-2 flex items-center ${window.state.daActiveSection === 'crm' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
+          <i data-lucide="users" class="w-4 h-4 mr-2"></i> Leads
+        </button>
+        <button onclick="window.switchDASection('doc')" class="pb-3 font-bold border-b-2 flex items-center ${window.state.daActiveSection === 'doc' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
+          <i data-lucide="file-check" class="w-4 h-4 mr-2"></i> Papeles
+        </button>
+      </div>
+    `;
+    
+    if(window.state.daActiveSection === 'doc') {
+      html += `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          ${[{k:'c08', l:'08 Firmado'},{k:'verificacion', l:'Verificación (12D)'},{k:'libreDeuda', l:'Libre Deuda'}].map(i => `
+            <div onclick="window.toggleDoc('${a.id}','${i.k}')" class="p-5 rounded-2xl border-2 flex items-center space-x-4 cursor-pointer transition-colors ${a.documentacion[i.k] ? 'border-green-600 bg-green-50/50 dark:bg-green-900/10' : 'border-neutral-200 dark:border-neutral-700'}">
+              <div class="w-6 h-6 rounded-full flex items-center justify-center ${a.documentacion[i.k] ? 'bg-green-600 text-white' : 'bg-neutral-200 dark:bg-neutral-800'}">
+                ${a.documentacion[i.k] ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
+              </div>
+              <span class="font-bold">${i.l}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if(window.state.daActiveSection === 'crm') {
+       html += `
+         <div>
+           <form onsubmit="window.handleDA_CRMSubmit(event, '${a.id}')" class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700 mb-6">
+             <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Cargar Interesado</h4>
+             <div class="grid grid-cols-2 gap-4">
+               <input id="dac-nombre" required placeholder="Nombre" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+               <input id="dac-tel" required placeholder="Teléfono" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+             </div>
+             <textarea id="dac-nota" placeholder="Notas..." class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none resize-none focus:border-green-500 font-bold"></textarea>
+             <button type="submit" class="w-full py-3 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold shadow-lg hover:scale-[1.02] transition-transform">
+               Guardar Lead
+             </button>
+           </form>
+         </div>
+       `;
+    }
+  } else {
+    
+    // MODO CERRAR VENTA (Checkout Modal)
+    html += `
+      <button type="button" onclick="window.state.isVentaMode=false; window.renderDetalleAuto()" class="mb-6 text-sm font-bold flex items-center hover:underline text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors">
+        <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Volver a Ficha
+      </button>
+    `;
+    
+    // Ganancia visible sólo para Admin
+    if (window.state.currentUser.rol === 'Admin') {
+      html += `
+        <div class="bg-black dark:bg-white text-white dark:text-black rounded-[2rem] p-6 mb-6 flex justify-between shadow-xl border border-neutral-800 dark:border-neutral-200">
+          <div>
+            <p class="text-xs uppercase opacity-70 mb-1 font-bold">Costo Inversión Total</p>
+            <p class="text-xl font-bold">${window.formatMoney((a.costo||0) + tg)}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs uppercase opacity-70 mb-1 font-bold">Ganancia Bruta Est.</p>
+            <p class="text-xl font-black text-green-400 dark:text-green-600">${window.formatMoney(a.precio - ((a.costo||0) + tg))}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    html += `
+      <form onsubmit="window.handleDAVentaSubmit(event, '${a.id}')">
+        
+        <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-6">
+          <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Datos Comprador</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <input id="vent-comp-nombre" required placeholder="Nombre y Apellido" class="col-span-2 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="vent-comp-tel" required placeholder="Teléfono" class="col-span-2 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="vent-comp-dni" required placeholder="D.N.I" class="col-span-2 md:col-span-1 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="vent-comp-domicilio" required placeholder="Domicilio" class="col-span-2 md:col-span-3 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+          </div>
+        </div>
+        
+        <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-6">
+          <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Formas de Pago Aplicadas</h4>
+          
+          <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
+            <input type="checkbox" id="chk-efectivo" onchange="document.getElementById('div-efectivo').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
+            <span>Efectivo / Transferencia (Inmediato a Caja)</span>
+          </label>
+          <div id="div-efectivo" class="hidden pl-8 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 fade-in">
+            <input id="val-efectivo" type="number" placeholder="Monto ($)" class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 font-bold text-lg outline-none focus:border-green-500">
+            <input id="nota-efectivo" type="text" placeholder="Nota / Banco..." class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none focus:border-green-500 font-bold">
+          </div>
+          
+          <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
+            <input type="checkbox" id="chk-credito" onchange="document.getElementById('div-credito').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
+            <span>Crédito Pre-Aprobado (Pendiente)</span>
+          </label>
+          <div id="div-credito" class="hidden pl-8 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl fade-in">
+            <input id="val-credito" type="number" placeholder="Monto ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+            <input id="cuotas-credito" type="number" placeholder="Cant. Cuotas" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+            <input id="venc-credito" type="date" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 text-xs font-bold outline-none focus:border-green-500" title="1º Vencimiento">
+            <input id="nota-credito" type="text" placeholder="Entidad / Financiera..." class="col-span-4 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+          </div>
+          
+          <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
+            <input type="checkbox" id="chk-pagare" onchange="document.getElementById('div-pagare').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
+            <span>Pagaré Personal (Pendiente)</span>
+          </label>
+          <div id="div-pagare" class="hidden pl-8 mb-4 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl fade-in">
+            <input id="val-pagare" type="number" placeholder="Monto ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+            <input id="cuotas-pagare" type="number" placeholder="Cant. Cuotas" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+            <input id="venc-pagare" type="date" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 text-xs font-bold outline-none focus:border-green-500" title="1º Vencimiento">
+            <input id="nota-pagare" type="text" placeholder="Detalle / Aval..." class="col-span-4 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+          </div>
+        </div>
+        
+        <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-8">
+          <div class="flex justify-between items-center mb-6">
+            <h4 class="font-bold flex items-center text-neutral-700 dark:text-neutral-300">
+              <i data-lucide="repeat" class="w-5 h-5 mr-2 opacity-60"></i> Recibe Vehículo en Permuta
+            </h4>
+            
+            <label class="flex items-center cursor-pointer">
+              <input type="checkbox" id="vent-hasperm" class="sr-only toggle-checkbox" onchange="document.getElementById('permuta-fields').classList.toggle('hidden', !this.checked); window.state.ventaData.tienePermuta=this.checked;" ${window.state.ventaData.tienePermuta ? 'checked' : ''} />
+              <div class="toggle-label bg-neutral-300 dark:bg-neutral-600 relative">
+                <div class="absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${window.state.ventaData.tienePermuta ? 'translate-x-6' : ''}"></div>
+              </div>
+            </label>
+          </div>
+          
+          <div id="permuta-fields" class="${window.state.ventaData.tienePermuta ? '' : 'hidden'} grid grid-cols-2 md:grid-cols-3 gap-4 fade-in">
+            <input id="p-marca" placeholder="Marca" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="p-modelo" placeholder="Modelo" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="p-color" placeholder="Color" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="p-km" type="number" placeholder="Km" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="p-anio" type="number" placeholder="Año" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="p-pat" placeholder="Patente" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 uppercase outline-none font-bold focus:border-green-500" />
+            
+            <select id="p-condicion" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500">
+              <option value="Propio">Propio</option>
+              <option value="Consignación">Consignación</option>
+            </select>
+            
+            <div class="col-span-2 mt-2">
+              <label class="block text-xs font-bold uppercase mb-2 text-neutral-500">Valor Real de Toma / Costo ($)</label>
+              <input id="p-valor" type="number" placeholder="Ingresará a la flota con este costo base" class="w-full rounded-xl px-4 py-4 text-lg font-black bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
+            </div>
+          </div>
+        </div>
+        
+        <button type="submit" class="w-full py-5 bg-green-600 text-white font-black text-lg rounded-2xl shadow-xl hover:bg-green-700 hover:scale-[1.01] transition-transform">
+          Confirmar Cierre de Venta
+        </button>
+      </form>
+    `;
+  }
+  
+  document.getElementById('da-content').innerHTML = html;
+  lucide.createIcons();
+};
+
+// --- RENDERIZADO CAJA ---
+window.renderCajaView = () => {
+  let myTrans = window.state.transacciones;
+  
+  if(window.state.currentUser.rol === 'Vendedor') { 
+    myTrans = myTrans.filter(t => t.userId === window.state.currentUser.id); 
+  } else if (window.state.currentUser.rol === 'Encargado') { 
+    myTrans = myTrans.filter(t => t.sucursalId === window.state.currentUser.sucursalId); 
+  }
+
+  if(window.state.currentUser.rol !== 'Vendedor') {
+    const fc = document.getElementById('caja-filters-container'); 
+    fc.classList.remove('hidden');
+    
+    let users = window.state.currentUser.rol === 'Encargado' ? window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId) : window.state.usuarios;
+    
+    fc.innerHTML = `
+      <div class="flex-1 min-w-[200px]">
+        <label class="text-xs font-bold text-neutral-500 block mb-1">Filtrar por Vendedor</label>
+        <select onchange="window.state.cajaFilterUser=this.value; window.renderCajaView()" class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500">
+          <option value="all">Todas las cajas permitidas</option>
+          ${users.map(u => `
+            <option value="${u.id}" ${window.state.cajaFilterUser === u.id ? 'selected' : ''}>${u.nombre}</option>
+          `).join('')}
+        </select>
+      </div>
+    `;
+    
+    if(window.state.cajaFilterUser !== 'all') { 
+      myTrans = myTrans.filter(t => t.userId === window.state.cajaFilterUser); 
+    }
+  }
+
+  if (window.state.currentUser.rol === 'Admin') { 
+    document.getElementById('btn-ver-pendientes').classList.remove('hidden'); 
+    document.getElementById('btn-ver-pendientes').classList.add('inline-flex'); 
+  }
+
+  const sorted = [...myTrans].sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+  let saldo = 0; 
+  
+  const transWithSaldo = sorted.map(t => { 
+    if(t.estadoCobro !== 'pendiente') { 
+      saldo += t.tipo === 'ingreso' ? Number(t.valor) : -Number(t.valor); 
+    } 
+    return { ...t, saldoDisponible: saldo }; 
+  });
+  
+  const ing = transWithSaldo.filter(t => t.tipo === 'ingreso' && t.estadoCobro !== 'pendiente').reduce((a,c) => a + c.valor, 0); 
+  const egr = transWithSaldo.filter(t => t.tipo === 'gasto').reduce((a,c) => a + c.valor, 0);
+
+  document.getElementById('caja-stats').innerHTML = `
+    <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
+      <h3 class="text-sm font-medium text-neutral-500 mb-1">Saldo Real Disponible</h3>
+      <p class="text-3xl font-black ${saldo >= 0 ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">${window.formatMoney(saldo)}</p>
+    </div>
+    <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
+      <h3 class="text-sm font-medium text-neutral-500 mb-1">Ingresos Efectivizados</h3>
+      <p class="text-3xl font-black text-green-600 dark:text-green-500">${window.formatMoney(ing)}</p>
+    </div>
+    <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
+      <h3 class="text-sm font-medium text-neutral-500 mb-1">Egresos Registrados</h3>
+      <p class="text-3xl font-black text-rose-600 dark:text-rose-400">${window.formatMoney(egr)}</p>
+    </div>
+  `;
+
+  if (transWithSaldo.length === 0) { 
+    document.getElementById('caja-table').innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">Sin movimientos en la caja seleccionada.</td></tr>`; 
+  } else {
+    document.getElementById('caja-table').innerHTML = transWithSaldo.slice().reverse().map(t => {
+      const u = window.state.usuarios.find(x => x.id === t.userId); 
+      const s = window.state.sucursales.find(x => x.id === t.sucursalId);
+      
+      return `
+        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors ${t.estadoCobro === 'pendiente' ? 'opacity-50' : ''}">
+          <td class="px-6 py-4">
+            <div class="flex items-center space-x-4">
+              <div class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${t.tipo === 'ingreso' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'}">
+                <i data-lucide="${t.tipo === 'ingreso' ? 'trending-up' : 'trending-down'}" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-sm font-bold flex items-center">
+                  ${t.descripcion}
+                  ${t.estadoCobro === 'pendiente' ? '<span class="ml-2 text-[10px] bg-amber-200 text-amber-800 dark:bg-amber-900 dark:text-amber-300 px-1 rounded">Pendiente</span>' : ''}
+                </p>
+                <div class="flex items-center space-x-2 mt-1">
+                  <span class="text-xs text-neutral-500 uppercase">${t.categoria}</span>
+                  ${t.tipoComprobante !== 'X' ? `<span class="bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300 text-[10px] font-bold px-1.5 py-0.5 rounded">Fac ${t.tipoComprobante}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <p class="text-sm font-bold">${u ? u.nombre : '-'}</p>
+            <p class="text-xs text-neutral-500">${s ? s.nombre : ''}</p>
+          </td>
+          <td class="px-6 py-4 text-sm font-bold text-right ${t.tipo === 'ingreso' ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">
+            ${t.tipo === 'ingreso' ? '+' : '-'}${window.formatMoney(t.valor)}
+          </td>
+          <td class="px-6 py-4 text-sm font-bold text-right">
+            ${t.estadoCobro === 'pendiente' ? '-' : window.formatMoney(t.saldoDisponible)}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+  lucide.createIcons();
+};
+
+// --- RENDERIZADO FORMULARIOS ---
+window.renderFormulariosView = () => {
+   const table = document.getElementById('formularios-table');
+   
+   if(window.state.formularios.length === 0) { 
+     table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay formularios generados.</td></tr>`; 
+   } else {
+     table.innerHTML = window.state.formularios.slice().reverse().map(f => `
+       <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+         <td class="px-6 py-4 text-sm font-bold text-neutral-500">${window.formatDate(f.fecha)}</td>
+         <td class="px-6 py-4 font-bold">
+           <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500 px-2 py-1 rounded text-xs uppercase tracking-wider">
+             ${f.tipo}
+           </span>
+         </td>
+         <td class="px-6 py-4 font-bold text-sm">${f.comprador}</td>
+         <td class="px-6 py-4 text-center">
+           <button onclick='window.imprimirBoletoHtml(${JSON.stringify(f)})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform">
+             <i data-lucide="printer" class="w-4 h-4 inline"></i> Reimprimir
+           </button>
+         </td>
+       </tr>
+     `).join('');
+   }
+   lucide.createIcons();
+};
+
+// --- RENDERIZADO PERSONAL Y COMISIONES ---
+window.renderPersonalView = () => {
+  if(window.state.currentUser?.rol !== 'Admin') return;
+  const table = document.getElementById('personal-table');
+  
+  const usuariosAgencia = window.state.usuarios.filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado');
+  
+  let totLiq = 0;
+  
+  const dataRows = usuariosAgencia.map(u => {
+    const pdtes = window.state.comisiones.filter(c => c.userId === u.id && c.estado === 'Pendiente');
+    const totPdte = pdtes.reduce((a,c) => a + c.monto, 0);
+    totLiq += totPdte;
+    
+    const suc = window.state.sucursales.find(s => s.id == u.sucursalId)?.nombre || '-';
+    
+    return `
+      <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+        <td class="px-6 py-4 font-bold">${u.nombre}</td>
+        <td class="px-6 py-4 text-xs font-bold text-neutral-500 uppercase">${u.rol}</td>
+        <td class="px-6 py-4 text-sm">${suc}</td>
+        <td class="px-6 py-4 text-right font-black text-lg ${totPdte > 0 ? 'text-green-600 dark:text-green-500' : 'text-neutral-400'}">${window.formatMoney(totPdte)}</td>
+      </tr>
+    `;
+  }).join('');
+  
+  table.innerHTML = dataRows || `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay personal para comisionar.</td></tr>`;
+  
+  // Actualizar el select del modal de asignación manual de bonos
+  document.getElementById('comision-user').innerHTML = `<option value="">-- Seleccione Empleado --</option>` + usuariosAgencia.map(u => `<option value="${u.id}">${u.nombre} (${u.rol})</option>`).join('');
+};
+
+// --- RENDERIZADO VENTAS ---
+window.renderVentasView = () => { 
+  if(window.state.currentUser?.rol !== 'Admin') return; 
+  
+  const table = document.getElementById('ventas-table'); 
+  if (window.state.ventas.length === 0) { 
+    table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay ventas registradas.</td></tr>`; 
+  } else { 
+    table.innerHTML = window.state.ventas.slice().reverse().map(v => { 
+      let badge = ''; 
+      if (v.metodoPago.includes('Crédito') || v.metodoPago.includes('Pagaré')) { 
+        const p = v.cuotasTotales - v.cuotasPagadas; 
+        badge = `<span class="block mt-1 text-[10px] ${p > 0 ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/30' : 'text-green-600 bg-green-50 dark:bg-green-900/30'} px-2 py-0.5 rounded font-bold">${p} Pendientes</span>`; 
+      } 
+      
+      return `
+        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="window.openDetalleVenta('${v.id}')">
+          <td class="px-6 py-4 text-sm text-neutral-500">${window.formatDate(v.fecha)}</td>
+          <td class="px-6 py-4">
+            <p class="font-bold text-sm">${v.compradorNombre}</p>
+            <p class="text-xs text-neutral-500 flex items-center mt-1"><i data-lucide="phone" class="w-3 h-3 mr-1"></i>${v.compradorTelefono}</p>
+          </td>
+          <td class="px-6 py-4 font-bold text-sm">${v.autoDesc}</td>
+          <td class="px-6 py-4 text-right font-black">${window.formatMoney(v.montoTotal)}</td>
+          <td class="px-6 py-4 text-center">
+            <span class="text-xs uppercase font-bold text-neutral-700 dark:text-neutral-300">${v.metodoPago}</span>
+            ${badge}
+          </td>
+        </tr>
+      `; 
+    }).join(''); 
+  } 
+  lucide.createIcons(); 
+};
+
+// --- RENDERIZADO FACTURAS ---
+window.renderFacturasView = () => { 
+  if(window.state.currentUser?.rol !== 'Admin') return; 
+  
+  const facturas = window.state.transacciones.filter(t => ['A','B','C'].includes(t.tipoComprobante)); 
+  const totalEmitido = facturas.reduce((a,c) => a + c.valor, 0); 
+  const totalIva = facturas.reduce((a,c) => a + (c.iva || 0), 0); 
+  
+  document.getElementById('facturas-summary').innerHTML = `
+    <div class="p-8 bg-black dark:bg-neutral-800 rounded-3xl text-white shadow-xl border border-neutral-800 dark:border-neutral-700">
+      <p class="text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">Monto Facturado (Global)</p>
+      <p class="text-5xl font-black">${window.formatMoney(totalEmitido)}</p>
+    </div>
+    <div class="p-8 bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
+      <p class="text-neutral-500 dark:text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">IVA Acumulado (Fac. A)</p>
+      <p class="text-5xl font-black text-neutral-900 dark:text-white">${window.formatMoney(totalIva)}</p>
+    </div>
+  `; 
+  
+  const table = document.getElementById('facturas-table'); 
+  
+  if(facturas.length === 0) { 
+    table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay facturas.</td></tr>`; 
+  } else { 
+    table.innerHTML = facturas.slice().reverse().map(f => { 
+      const u = window.state.usuarios.find(x => x.id === f.userId); 
+      return `
+        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+          <td class="px-6 py-4">
+            <span class="inline-block bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-bold text-[10px] uppercase px-2 py-1 rounded mb-1">
+              Tipo ${f.tipoComprobante}
+            </span>
+            <p class="font-mono text-sm font-bold">${f.numComprobante || 'S/N'}</p>
+          </td>
+          <td class="px-6 py-4 text-sm text-neutral-500">${window.formatDate(f.fecha)}</td>
+          <td class="px-6 py-4">
+            <p class="font-bold">${f.descripcion}</p>
+            <p class="text-xs text-neutral-400 mt-1">Por: ${u ? u.nombre : '-'}</p>
+          </td>
+          <td class="px-6 py-4 text-right font-black text-lg">${window.formatMoney(f.valor)}</td>
+          <td class="px-6 py-4 text-center">
+            ${f.tipoComprobante === 'A' ? `
+              <button onclick="window.openDetalleFactura('${f.id}')" class="text-xs font-bold uppercase tracking-wider bg-black text-white dark:bg-neutral-700 px-4 py-2 rounded-xl hover:bg-neutral-800 transition-colors">
+                Ver Detalle
+              </button>
+            ` : '<span class="text-neutral-300 dark:text-neutral-700">-</span>'}
+          </td>
+        </tr>
+      `; 
+    }).join(''); 
+  } 
+};
+
+// --- RENDERIZADO CRM ---
+window.renderClientesView = () => { 
+  const table = document.getElementById('crm-table'); 
+  
+  if (window.state.consultas.length === 0) { 
+    table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay clientes en la base de datos.</td></tr>`; 
+  } else { 
+    table.innerHTML = window.state.consultas.slice().reverse().map(c => { 
+      const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
+      let lClass = 'bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'; 
+      if(c.estadoLead === 'Caliente') lClass = 'bg-black text-white dark:bg-white dark:text-black'; 
+      if(c.estadoLead === 'Tibio') lClass = 'bg-neutral-400 text-neutral-900 dark:bg-neutral-600 dark:text-white'; 
+      
+      return `
+        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+          <td class="px-6 py-4">
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center mr-4 font-black text-lg">
+                ${c.nombre.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p class="font-bold">${c.nombre}</p>
+                <span class="inline-flex px-2 py-0.5 mt-1 rounded-md text-[10px] font-black uppercase tracking-widest ${lClass}">
+                  ${c.estadoLead}
+                </span>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm font-bold">
+            ${c.telefono}
+          </td>
+          <td class="px-6 py-4">
+            ${a ? `<span class="font-bold text-sm text-green-600 dark:text-green-500 cursor-pointer hover:underline" onclick="window.openDetalleAuto('${a.id}')">${a.marca} ${a.modelo}</span>` : `<span class="font-bold text-sm">${c.marcaInteres}</span>`}
+            <p class="text-xs text-neutral-500 italic mt-1 max-w-[200px] truncate">"${c.notas}"</p>
+          </td>
+          <td class="px-6 py-4 text-sm font-bold">
+            ${window.formatDate(c.recordatorio)}
+          </td>
+          <td class="px-6 py-4">
+            <a href="${window.formatWhatsAppLink(c.telefono, `Hola ${c.nombre}, me comunico de RIVAS AUTO.`)}" target="_blank" class="px-4 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 inline-block">
+              Contactar
+            </a>
+          </td>
+        </tr>
+      `; 
+    }).join(''); 
+  } 
+};
+
+// --- RENDERIZADO DASHBOARD EJECUTIVO ---
+window.renderResumenesView = () => { 
+  if(window.state.currentUser?.rol !== 'Admin') return; 
+  
+  const ing = window.state.transacciones.filter(t => t.tipo === 'ingreso').reduce((a,c) => a + c.valor, 0); 
+  let egr = window.state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => a + c.valor, 0); 
+  
+  const cats = window.state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => { 
+    a[c.categoria] = (a[c.categoria] || 0) + c.valor; 
+    return a; 
+  }, {}); 
+  
+  window.state.autos.forEach(a => { 
+    a.gastos?.forEach(g => { 
+      cats[g.categoria] = (cats[g.categoria] || 0) + g.monto; 
+      egr += g.monto; 
+    }); 
+  }); 
+  
+  const max = Math.max(...Object.values(cats), 1); 
+  
+  let catHTML = ''; 
+  if(Object.keys(cats).length === 0) { 
+    catHTML = '<p class="text-neutral-500 py-4 font-bold">Sin datos de gastos en el periodo.</p>'; 
+  } else { 
+    catHTML = Object.entries(cats).sort((a,b) => b[1] - a[1]).map(([c,v]) => `
+      <div class="mb-4">
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-neutral-600 dark:text-neutral-300 font-bold uppercase tracking-wider text-[10px]">${c}</span>
+          <span class="font-black">${window.formatMoney(v)}</span>
+        </div>
+        <div class="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-3">
+          <div class="bg-green-600 h-3 rounded-full" style="width: ${(v/max)*100}%"></div>
+        </div>
+      </div>
+    `).join(''); 
+  } 
+  
+  document.getElementById('dashboard-content').innerHTML = `
+    <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2rem] shadow-sm">
+      <h3 class="font-black text-2xl mb-8">Flujo de Fondos Operativo</h3>
+      <div class="space-y-6">
+        <div class="flex justify-between items-center">
+          <span class="text-neutral-500 font-bold uppercase tracking-wider text-xs">Ingresos Totales</span>
+          <span class="font-black text-xl text-green-600 dark:text-green-500">${window.formatMoney(ing)}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-neutral-500 font-bold uppercase tracking-wider text-xs">Egresos (Caja + Taller)</span>
+          <span class="font-black text-xl text-rose-600 dark:text-rose-400">${window.formatMoney(egr)}</span>
+        </div>
+        <div class="pt-6 border-t border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
+          <span class="font-black text-xl uppercase">Balance Neto</span>
+          <span class="font-black text-3xl ${ing - egr >= 0 ? 'text-black dark:text-white' : 'text-rose-600'}">${window.formatMoney(ing - egr)}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2rem] shadow-sm">
+      <h3 class="font-black text-2xl mb-8">Distribución de Gastos</h3>
+      ${catHTML}
+    </div>
+  `; 
+};
+
+// --- RENDERIZADO ADMINISTRACIÓN ---
+window.renderAdminView = () => { 
+  if(window.state.currentUser?.rol !== 'Admin') return; 
+  
+  const sucList = document.getElementById('admin-suc-list'); 
+  if (window.state.sucursales.length === 0) { 
+    sucList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay sucursales.</p>'; 
+  } else { 
+    sucList.innerHTML = window.state.sucursales.map(s => `
+      <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+        <span class="font-bold text-sm">${s.nombre}</span>
+        <div class="flex space-x-1">
+          <button onclick="window.editSucursal('${s.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
+            <i data-lucide="edit-2" class="w-4 h-4"></i>
+          </button>
+          <button onclick="window.deleteSucursal('${s.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    `).join(''); 
+  } 
+  
+  document.getElementById('new-user-suc').innerHTML = window.state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
+  
+  const usrList = document.getElementById('admin-users-list'); 
+  if (window.state.usuarios.length === 0) { 
+    usrList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay usuarios.</p>'; 
+  } else { 
+    usrList.innerHTML = window.state.usuarios.map(u => { 
+      const s = window.state.sucursales.find(x => x.id == u.sucursalId); 
+      return `
+        <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+          <div>
+            <p class="font-bold text-sm">${u.nombre}</p>
+            <p class="text-[10px] font-bold text-neutral-500 mt-1 uppercase tracking-wider">
+              ${u.rol} • ${s ? s.nombre : '-'} • ${u.email}
+            </p>
+          </div>
+          <div class="flex space-x-1">
+            <button onclick="window.editUser('${u.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </button>
+            <button onclick="window.deleteUser('${u.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      `; 
+    }).join(''); 
+  } 
+  lucide.createIcons(); 
+};
