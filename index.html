@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RIVAS AUTO | ERP 2026</title>
+  <title>RIVAS AUTO | ERP</title>
   <meta name="theme-color" content="#000000">
   
   <link rel="icon" href="icon.png" type="image/png">
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="manifest" href="manifest.json">
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,255 +18,108 @@
     }
   </script>
 
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Custom CSS -->
-  <style>
-    /* Scrollbars */
-    ::-webkit-scrollbar { 
-      width: 6px; 
-      height: 6px; 
-    }
-    ::-webkit-scrollbar-track { 
-      background: transparent; 
-    }
-    ::-webkit-scrollbar-thumb { 
-      background-color: #d4d4d8; 
-      border-radius: 20px; 
-    }
-    .dark ::-webkit-scrollbar-thumb { 
-      background-color: #3f3f46; 
-    }
-    .no-scrollbar::-webkit-scrollbar { 
-      display: none; 
-    }
-    .no-scrollbar { 
-      -ms-overflow-style: none; 
-      scrollbar-width: none; 
-    }
-
-    /* Animaciones */
-    @keyframes fadeIn { 
-      from { opacity: 0; } 
-      to { opacity: 1; } 
-    }
-    @keyframes slideUp { 
-      from { opacity: 0; transform: translateY(20px); } 
-      to { opacity: 1; transform: translateY(0); } 
-    }
-    
-    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    .slide-up { animation: slideUp 0.5s ease-out forwards; }
-    
-    /* Toggle Switch */
-    .toggle-checkbox:checked { 
-      right: 0; 
-      border-color: #16a34a; 
-    }
-    .toggle-checkbox:checked + .toggle-label { 
-      background-color: #16a34a; 
-    }
-    .dark .toggle-checkbox:checked + .toggle-label { 
-      background-color: #22c55e; 
-    }
-    .toggle-checkbox { 
-      right: 0; 
-      z-index: 1; 
-      border-color: #e4e4e7; 
-      transition: all 0.3s; 
-    }
-    .toggle-label { 
-      width: 3.5rem; 
-      height: 2rem; 
-      background-color: #d4d4d8; 
-      border-radius: 9999px; 
-      transition: all 0.3s; 
-    }
-    
-    #loader-screen { 
-      transition: opacity 0.5s ease-out; 
-    }
-
-    /* ESTILOS DE IMPRESIÓN MEJORADOS */
-    @media print {
-      body * { 
-        visibility: hidden; 
-      }
-      #print-section, #print-section * { 
-        visibility: visible; 
-      }
-      
-      #print-section { 
-        position: absolute; 
-        left: 0; 
-        top: 0; 
-        width: 100vw; 
-        min-height: 100vh; 
-        background: white; 
-        /* Separación extra superior para no pisar el logo */
-        padding-top: 150px !important; 
-        padding-left: 2rem; 
-        padding-right: 2rem; 
-        padding-bottom: 2rem; 
-        z-index: 99999; 
-      }
-      
-      .no-print { 
-        display: none !important; 
-      }
-      
-      .watermark-bg { 
-        position: fixed; 
-        inset: 0; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        z-index: -1; 
-        opacity: 0.05; 
-        pointer-events: none; 
-      }
-      
-      .watermark-text { 
-        font-size: 8rem; 
-        font-weight: 900; 
-        color: black; 
-        transform: rotate(-45deg); 
-        white-space: nowrap; 
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white font-sans selection:bg-green-200 selection:text-neutral-900 dark:selection:bg-green-900 dark:selection:text-white transition-colors duration-300 overflow-hidden">
-
-  <!-- ÁREA EXCLUSIVA DE IMPRESIÓN (Oculta por defecto) -->
+<body class="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white font-sans transition-colors duration-300 overflow-hidden">
+  
   <div id="print-section" class="hidden text-black bg-white min-h-screen">
     <div class="watermark-bg">
       <span class="watermark-text">RIVAS AUTO</span>
     </div>
     <div class="absolute top-8 right-8 w-24 h-24">
-      <img src="icon.png" alt="RIVAS AUTO Logo" class="w-full h-full object-contain">
+      <img src="icon.png" class="w-full h-full object-contain" alt="Logo">
     </div>
-    <div id="print-content" class="relative z-10 text-sm leading-relaxed">
-      <!-- Contenido inyectado por JS -->
-    </div>
+    <div id="print-content" class="relative z-10 text-sm leading-relaxed"></div>
   </div>
 
-  <!-- Ambient Background -->
   <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-green-200/30 dark:bg-green-900/20 rounded-full blur-[120px]"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neutral-200/50 dark:bg-neutral-900/30 rounded-full blur-[120px]"></div>
   </div>
 
-  <!-- LOADER INICIAL FIREBASE -->
   <div id="loader-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black text-white">
     <i data-lucide="loader-2" class="w-12 h-12 animate-spin text-green-500 mb-4"></i>
     <h2 class="text-xl font-bold">Conectando con Servidores...</h2>
   </div>
 
-  <!-- PANTALLA DE AUTHENTICACION -->
   <div id="auth-wrapper" class="hidden relative z-50 flex items-center justify-center min-h-screen bg-neutral-900/40 backdrop-blur-xl">
     <div class="bg-white dark:bg-neutral-900 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 dark:border-neutral-800 fade-in">
        
-       <!-- Logo Login -->
        <div class="flex flex-col items-center justify-center mb-8">
-         <img src="icon.png" alt="Rivas Auto Logo" class="w-24 h-24 mb-4 drop-shadow-xl rounded-3xl object-cover" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTZhMzRhIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PG1hdGggZD0iTTE5IDE3aDJjLjYgMCAxLS40IDEtMXYtM2MtMi0uMy00LS44LTYtMWwtMS40LTEuNEExIDEgMCAwIDAgMTQgMTBINkExIDEgMCAwIDAgNSAxMS4xaC0yYTEgMSAwIDAgMC0xIDF2M2MwIC42LjQgMSAxIDFoMiIvPjxjaXJjbGUgY3g9IjciIGN5PSIxNyIgcj0iMiIvPjxjaXJjbGUgY3g9IjE3IiBjeT0iMTciIHI9IjIiPjwvc3ZnPg=='">
-         <h1 class="text-3xl font-black tracking-tight text-neutral-900 dark:text-white">
-           RIVAS <span class="text-green-600 dark:text-green-500">AUTO</span>
-         </h1>
+         <img src="icon.png" class="w-24 h-24 mb-4 drop-shadow-xl rounded-3xl object-cover" alt="Logo">
+         <h1 class="text-3xl font-black tracking-tight">RIVAS <span class="text-green-600">AUTO</span></h1>
          <p class="text-sm font-bold text-neutral-400 tracking-widest uppercase mt-1">ERP System</p>
        </div>
 
-       <h2 class="text-xl font-bold text-center mb-6 text-neutral-600 dark:text-neutral-300" id="auth-title">Iniciar Sesión</h2>
+       <h2 class="text-xl font-bold text-center mb-6" id="auth-title">Iniciar Sesión</h2>
        
-       <!-- Formulario Login Normal -->
        <form id="login-form" onsubmit="handleLogin(event)">
-         <input type="email" id="login-email" required placeholder="Correo electrónico" class="w-full mb-4 rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500" />
-         
+         <input type="email" id="login-email" required placeholder="Correo" class="w-full mb-4 rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500" />
          <div class="relative w-full mb-6">
-           <input type="password" id="login-pwd" required placeholder="Contraseña" class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500" />
-           <button type="button" onclick="togglePwdVisibility('login-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
+           <input type="password" id="login-pwd" required placeholder="Contraseña" class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500" />
+           <button type="button" onclick="togglePwd('login-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400">
              <i data-lucide="eye" class="w-5 h-5"></i>
            </button>
          </div>
+         <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 shadow-lg transition-colors">Entrar</button>
+         <p id="login-error" class="text-rose-500 text-sm font-bold mt-4 hidden text-center">Datos incorrectos.</p>
          
-         <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-lg">
-           Entrar al Sistema
-         </button>
-         
-         <p id="login-error" class="text-rose-500 text-sm font-bold mt-4 hidden text-center">Credenciales incorrectas.</p>
-         
-         <!-- Botón de instalación PWA -->
-         <button id="login-install-btn" type="button" onclick="installPWA()" class="hidden w-full py-3 mt-4 bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 font-bold rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700 transition border border-neutral-200 dark:border-neutral-700 flex justify-center items-center">
-            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Instalar Aplicación
+         <button id="login-install-btn" type="button" onclick="installPWA()" class="hidden w-full py-3 mt-4 bg-neutral-100 dark:bg-neutral-800 font-bold rounded-xl hover:bg-neutral-200 transition-colors">
+           <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i> Instalar App
          </button>
        </form>
 
-       <!-- Formulario Cambio de Contraseña Inicial -->
        <form id="pwd-change-form" class="hidden" onsubmit="handlePwdChange(event)">
-         <p class="text-sm text-neutral-500 dark:text-neutral-400 text-center mb-6">Por motivos de seguridad, debes establecer una nueva contraseña personal antes de continuar.</p>
-         
+         <p class="text-sm text-neutral-500 text-center mb-6">Establece tu contraseña personal para continuar.</p>
          <div class="relative w-full mb-4">
-           <input type="password" id="new-pwd" required placeholder="Nueva contraseña" class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500" />
-           <button type="button" onclick="togglePwdVisibility('new-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400">
-             <i data-lucide="eye" class="w-5 h-5"></i>
+           <input type="password" id="new-pwd" required placeholder="Nueva contraseña" class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500" />
+           <button type="button" onclick="togglePwd('new-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2">
+             <i data-lucide="eye" class="w-5 h-5 text-neutral-400"></i>
            </button>
          </div>
-         
          <div class="relative w-full mb-6">
-           <input type="password" id="confirm-pwd" required placeholder="Confirmar contraseña" class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 focus:outline-none focus:ring-2 focus:ring-green-500" />
-           <button type="button" onclick="togglePwdVisibility('confirm-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400">
-             <i data-lucide="eye" class="w-5 h-5"></i>
+           <input type="password" id="confirm-pwd" required placeholder="Confirmar contraseña" class="w-full rounded-xl px-4 py-3 pr-12 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500" />
+           <button type="button" onclick="togglePwd('confirm-pwd')" class="absolute right-4 top-1/2 -translate-y-1/2">
+             <i data-lucide="eye" class="w-5 h-5 text-neutral-400"></i>
            </button>
          </div>
-         
-         <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-lg">
-           Guardar y Entrar
-         </button>
+         <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-colors">Guardar y Entrar</button>
          <p id="pwd-error" class="text-rose-500 text-sm font-bold mt-4 hidden text-center">Las contraseñas no coinciden.</p>
        </form>
     </div>
   </div>
 
-  <!-- CONTENEDOR PRINCIPAL ERP -->
   <div id="app-wrapper" class="hidden relative z-10 flex h-screen overflow-hidden fade-in">
-    
-    <!-- Backdrop del Sidebar para móviles -->
     <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
     
-    <!-- SIDEBAR (MENÚ LATERAL) -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl shadow-2xl transform -translate-x-full transition-transform duration-300 z-50 flex flex-col border-r border-neutral-200 dark:border-neutral-800">
-      
       <div class="p-6 flex justify-between items-center border-b border-neutral-100 dark:border-neutral-800">
         <div class="flex items-center space-x-3">
-          <img src="icon.png" alt="Logo" class="w-10 h-10 rounded-xl shadow-md object-cover">
-          <h1 class="text-xl font-black tracking-tight">RIVAS <span class="text-green-600">AUTO</span></h1>
+          <img src="icon.png" class="w-10 h-10 rounded-xl" alt="Logo">
+          <h1 class="text-xl font-black">RIVAS <span class="text-green-600">AUTO</span></h1>
         </div>
         <button onclick="toggleSidebar()" class="p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
       
-      <!-- Opciones del Menú (Renderizadas dinámicamente) -->
       <nav id="nav-menu" class="flex-1 px-4 py-6 space-y-2 overflow-y-auto no-scrollbar"></nav>
-
+      
       <div class="p-6 border-t border-neutral-100 dark:border-neutral-800">
-        
-        <!-- Botón Instalar en Sidebar -->
-        <button id="sidebar-install-btn" onclick="installPWA()" class="hidden w-full mb-4 flex items-center justify-center space-x-2 py-2 px-4 bg-black text-white dark:bg-white dark:text-black rounded-xl transition-colors font-bold shadow-lg">
-          <i data-lucide="download" class="w-4 h-4"></i>
-          <span>Instalar App</span>
+        <button id="sidebar-install-btn" onclick="installPWA()" class="hidden w-full mb-4 flex items-center justify-center space-x-2 py-2 px-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold transition-colors">
+          <i data-lucide="download" class="w-4 h-4"></i><span>Instalar App</span>
         </button>
-
         <div class="flex items-center justify-between w-full">
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-700 flex items-center justify-center font-bold text-neutral-900 dark:text-white shadow-sm" id="user-avatar"></div>
+            <div class="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 border-2 border-white dark:border-neutral-700 flex items-center justify-center font-bold" id="user-avatar"></div>
             <div>
               <p class="text-sm font-bold" id="user-name">Usuario</p>
               <p class="text-xs text-neutral-500" id="user-role">Rol</p>
             </div>
           </div>
-          <button onclick="logout()" title="Cerrar Sesión" class="p-2 text-neutral-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition">
+          <button onclick="logout()" class="p-2 hover:text-rose-500 transition-colors" title="Cerrar Sesión">
             <i data-lucide="log-out" class="w-5 h-5"></i>
           </button>
         </div>
@@ -275,45 +127,32 @@
     </aside>
 
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-      
-      <!-- HEADER PRINCIPAL FIJO -->
       <header class="shrink-0 z-30 w-full backdrop-blur-2xl bg-white/80 dark:bg-neutral-950/80 border-b border-neutral-200/50 dark:border-neutral-800 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between items-center h-20">
-            
             <div class="flex items-center space-x-4">
-              <button onclick="toggleSidebar()" class="p-2.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors shadow-sm">
+              <button onclick="toggleSidebar()" class="p-2.5 bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
                 <i data-lucide="menu" class="w-5 h-5"></i>
               </button>
-              
-              <!-- APP LOGO (Header móvil) -->
-              <img src="icon.png" alt="Logo" class="w-8 h-8 rounded-lg shadow-sm sm:hidden object-cover" onerror="this.style.display='none'">
-              
-              <h2 id="header-title" class="text-xl font-bold hidden sm:block text-neutral-900 dark:text-white">Panel de Control</h2>
+              <h2 id="header-title" class="text-xl font-bold hidden sm:block">Panel de Control</h2>
             </div>
-
             <div class="flex items-center space-x-3">
-              
-              <!-- Campanita Notificaciones -->
               <div class="relative" id="notif-container">
-                <button onclick="toggleNotifications()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors shadow-sm border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 relative">
+                <button onclick="toggleNotifications()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full relative transition-colors">
                   <i data-lucide="bell" class="w-5 h-5"></i>
                   <span id="notif-badge" class="absolute top-1 right-1 flex h-3 w-3 hidden">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border-2 border-white dark:border-neutral-900"></span>
                   </span>
                 </button>
-                
                 <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden z-50">
                    <div class="p-4 border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
-                     <h3 class="font-bold text-sm">Alertas de Recompra (Créditos)</h3>
+                     <h3 class="font-bold text-sm">Alertas de Recompra</h3>
                    </div>
                    <div id="notif-list" class="max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
               </div>
-
-              <!-- Switch Modo Oscuro -->
-              <button onclick="toggleDarkMode()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors shadow-sm border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700">
+              <button onclick="toggleDarkMode()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors">
                 <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
               </button>
             </div>
@@ -321,324 +160,171 @@
         </div>
       </header>
 
-      <!-- CUERPO PRINCIPAL DESLIZABLE -->
       <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 overflow-y-auto no-scrollbar pb-32" id="main-content">
         
-        <!-- =================== VIEW: AUTOS (AHORA ES LA PRINCIPAL) =================== -->
         <div id="view-autos" class="view-section slide-up hidden space-y-8">
-          
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-              <h2 class="text-4xl font-black tracking-tight">Flota y Stock</h2>
+              <h2 class="text-4xl font-black">Flota y Stock</h2>
               <p class="text-neutral-500 mt-2 text-lg">Control de vehículos e inversiones.</p>
             </div>
             <div class="flex items-center space-x-3">
-              
-              <!-- Botón Imprimir Flota -->
-              <button onclick="imprimirFlota()" class="flex items-center justify-center px-4 py-3 font-bold text-neutral-700 bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 rounded-2xl hover:scale-105 shadow-sm transition-all duration-300" title="Imprimir Flota">
+              <button onclick="imprimirFlota()" class="p-3 bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform" title="Imprimir Flota">
                 <i data-lucide="printer" class="w-5 h-5"></i>
               </button>
-              
-              <!-- Botones Alternar Vista (Grid/Lista) -->
-              <div class="bg-neutral-100 dark:bg-neutral-900 p-1 rounded-xl flex items-center shadow-sm border border-neutral-200 dark:border-neutral-800">
-                 <button onclick="toggleAutosViewMode('grid')" id="btn-view-grid" class="p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors" title="Vista Tarjetas">
-                   <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                 </button>
-                 <button onclick="toggleAutosViewMode('list')" id="btn-view-list" class="p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors" title="Vista Lista">
-                   <i data-lucide="list" class="w-4 h-4"></i>
-                 </button>
+              <div class="bg-neutral-100 dark:bg-neutral-900 p-1 rounded-xl flex">
+                <button onclick="toggleAutosViewMode('grid')" id="btn-view-grid" class="p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm transition-colors"><i data-lucide="layout-grid" class="w-4 h-4"></i></button>
+                <button onclick="toggleAutosViewMode('list')" id="btn-view-list" class="p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"><i data-lucide="list" class="w-4 h-4"></i></button>
               </div>
-              
-              <button onclick="openModalCreateAuto()" class="flex items-center justify-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 shadow-xl shadow-green-600/20 transition-all duration-300">
-                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>Ingresar Vehículo
+              <button onclick="openModalCreateAuto()" class="flex items-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 shadow-lg hover:scale-105 transition-all">
+                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>Ingresar Auto
               </button>
             </div>
           </div>
-          
-          <!-- Contenedor Dinámico para Autos (Grid o Lista) -->
           <div id="autos-container"></div>
-          
         </div>
 
-        <!-- =================== VIEW: CAJA =================== -->
         <div id="view-caja" class="view-section slide-up hidden space-y-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div>
-              <h2 class="text-4xl font-black tracking-tight">Planilla de Caja</h2>
-              <p class="text-neutral-500 mt-2 text-lg">Ingresos y egresos operativos.</p>
-            </div>
+            <div><h2 class="text-4xl font-black">Planilla de Caja</h2></div>
             <div class="flex space-x-3">
-              <button id="btn-ver-pendientes" onclick="openModalPendientes()" class="hidden items-center justify-center px-6 py-3 font-bold text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 rounded-2xl hover:scale-105 transition-all duration-300">
-                <i data-lucide="clock" class="w-5 h-5 mr-2"></i>Cobros Pendientes
-              </button>
-              <button onclick="openModal('modal-caja')" class="flex items-center justify-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 shadow-xl shadow-green-600/20 transition-all duration-300">
-                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>Registrar Movimiento
-              </button>
+              <button id="btn-ver-pendientes" onclick="openModalPendientes()" class="hidden items-center px-6 py-3 font-bold text-amber-700 bg-amber-100 dark:bg-amber-900/30 rounded-2xl hover:scale-105 transition-all"><i data-lucide="clock" class="w-5 h-5 mr-2"></i>Pendientes</button>
+              <button onclick="openModal('modal-caja')" class="flex items-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 transition-all"><i data-lucide="plus" class="w-5 h-5 mr-2"></i>Movimiento</button>
             </div>
           </div>
-
-          <div id="caja-filters-container" class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 p-4 rounded-2xl shadow-sm hidden flex-wrap gap-4 items-end"></div>
-          
+          <div id="caja-filters-container" class="bg-white/60 dark:bg-neutral-900/60 p-4 rounded-2xl hidden gap-4 border border-neutral-200 dark:border-neutral-800 shadow-sm"></div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="caja-stats"></div>
-          
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                    <th class="px-6 py-4 font-bold">Concepto</th>
-                    <th class="px-6 py-4 font-bold">Usuario / Sucursal</th>
-                    <th class="px-6 py-4 font-bold text-right">Monto</th>
-                    <th class="px-6 py-4 font-bold text-right">Saldo Parcial</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="caja-table"></tbody>
-              </table>
-            </div>
+          <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                  <th class="px-6 py-4">Concepto</th><th class="px-6 py-4">Usuario</th><th class="px-6 py-4 text-right">Monto</th><th class="px-6 py-4 text-right">Saldo</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="caja-table"></tbody>
+            </table>
           </div>
         </div>
 
-        <!-- =================== VIEW: FORMULARIOS =================== -->
         <div id="view-formularios" class="view-section slide-up hidden space-y-8">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div>
-              <h2 class="text-4xl font-black tracking-tight">Formularios y Contratos</h2>
-              <p class="text-neutral-500 mt-2 text-lg">Generación de boletos para impresión.</p>
-            </div>
-          </div>
-          
+          <h2 class="text-4xl font-black">Formularios</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Formulario Simple -->
-            <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-8 shadow-sm flex flex-col justify-between hover:border-green-500/50 transition-colors">
+            <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-8 flex flex-col justify-between hover:border-green-500/50 transition-colors">
               <div>
-                <div class="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 text-green-600 rounded-2xl flex items-center justify-center mb-6">
-                  <i data-lucide="file-text" class="w-6 h-6"></i>
-                </div>
+                <div class="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 text-green-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="file-text" class="w-6 h-6"></i></div>
                 <h3 class="text-2xl font-black mb-2">Boleto Compra Venta</h3>
-                <p class="text-neutral-500 text-sm mb-6">Genera un contrato de compra-venta estándar de contado para un vehículo, sin entregas en permuta.</p>
+                <p class="text-neutral-500 text-sm mb-6">Contrato estándar.</p>
               </div>
-              <button onclick="openModalBoleto('simple')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:scale-[1.02] transition-transform">
-                Completar Formulario
-              </button>
+              <button onclick="openModalBoleto('simple')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:scale-[1.02] transition-transform">Completar</button>
             </div>
-
-            <!-- Formulario Permuta -->
-            <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-8 shadow-sm flex flex-col justify-between hover:border-green-500/50 transition-colors">
+            <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-8 flex flex-col justify-between hover:border-green-500/50 transition-colors">
               <div>
-                <div class="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 text-green-600 rounded-2xl flex items-center justify-center mb-6">
-                  <i data-lucide="file-text" class="w-6 h-6"></i>
-                  <i data-lucide="repeat" class="w-4 h-4 -ml-2 mt-2"></i>
-                </div>
+                <div class="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 text-green-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="file-text" class="w-6 h-6"></i><i data-lucide="repeat" class="w-4 h-4 -ml-2 mt-2"></i></div>
                 <h3 class="text-2xl font-black mb-2">Boleto con Permuta</h3>
-                <p class="text-neutral-500 text-sm mb-6">Contrato avanzado que incluye los datos del vehículo entregado en parte de pago y el cronograma de cuotas/pagarés.</p>
+                <p class="text-neutral-500 text-sm mb-6">Incluye auto entregado y cuotas.</p>
               </div>
-              <button onclick="openModalBoleto('permuta')" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl hover:bg-green-700 hover:scale-[1.02] transition-transform">
-                Completar Formulario
-              </button>
+              <button onclick="openModalBoleto('permuta')" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl hover:bg-green-700 hover:scale-[1.02] transition-transform">Completar</button>
             </div>
           </div>
-          
-          <h3 class="text-xl font-bold mt-8 mb-4">Historial de Formularios Generados</h3>
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-             <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                    <th class="px-6 py-4 font-bold">Fecha</th>
-                    <th class="px-6 py-4 font-bold">Tipo</th>
-                    <th class="px-6 py-4 font-bold">Comprador</th>
-                    <th class="px-6 py-4 font-bold text-center">Acción</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="formularios-table"></tbody>
-              </table>
-             </div>
+          <h3 class="text-xl font-bold mt-8 mb-4">Historial</h3>
+          <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
+            <table class="w-full text-left">
+              <thead><tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30"><th class="px-6 py-4 font-bold">Fecha</th><th class="px-6 py-4 font-bold">Tipo</th><th class="px-6 py-4 font-bold">Comprador</th><th class="px-6 py-4 font-bold text-center">Acción</th></tr></thead>
+              <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="formularios-table"></tbody>
+            </table>
           </div>
         </div>
 
-        <!-- =================== VIEW: HISTORIAL VENTAS =================== -->
+        <div id="view-personal" class="view-section slide-up hidden space-y-8">
+          <div class="flex justify-between items-end gap-6 mb-6">
+            <div><h2 class="text-4xl font-black">Personal</h2></div>
+            <div class="flex space-x-3">
+              <button onclick="openModal('modal-comision')" class="px-6 py-3 font-bold bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform">Bono Manual</button>
+              <button onclick="openModal('modal-cerrar-pagos'); calcularTotalPagos();" class="px-6 py-3 font-bold text-white bg-rose-600 rounded-2xl hover:bg-rose-700 hover:scale-105 transition-transform">Cerrar Pagos</button>
+            </div>
+          </div>
+          <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
+            <table class="w-full text-left">
+              <thead><tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30"><th class="px-6 py-4">Personal</th><th class="px-6 py-4">Rol</th><th class="px-6 py-4 text-right">Pendiente ($)</th></tr></thead>
+              <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="personal-table"></tbody>
+            </table>
+          </div>
+        </div>
+
         <div id="view-ventas" class="view-section slide-up hidden space-y-8">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div>
-              <h2 class="text-4xl font-black tracking-tight">Historial de Ventas</h2>
-              <p class="text-neutral-500 mt-2 text-lg">Registro completo de operaciones y créditos.</p>
-            </div>
-          </div>
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                    <th class="px-6 py-4 font-bold">Fecha</th>
-                    <th class="px-6 py-4 font-bold">Comprador</th>
-                    <th class="px-6 py-4 font-bold">Vehículo</th>
-                    <th class="px-6 py-4 font-bold text-right">Valor Op.</th>
-                    <th class="px-6 py-4 font-bold text-center">Detalle / Pago</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="ventas-table"></tbody>
-              </table>
-            </div>
+          <h2 class="text-4xl font-black">Historial Ventas</h2>
+          <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
+            <table class="w-full text-left">
+              <thead><tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30"><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Comprador</th><th class="px-6 py-4">Auto</th><th class="px-6 py-4 text-right">Valor</th><th class="px-6 py-4 text-center">Detalle</th></tr></thead>
+              <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="ventas-table"></tbody>
+            </table>
           </div>
         </div>
-
-        <!-- =================== VIEW: FACTURAS =================== -->
+        
         <div id="view-facturas" class="view-section slide-up hidden space-y-8">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div>
-              <h2 class="text-4xl font-black tracking-tight">Control de Facturación</h2>
-              <p class="text-neutral-500 mt-2 text-lg">Resumen global de comprobantes emitidos.</p>
-            </div>
-          </div>
+          <h2 class="text-4xl font-black">Facturación</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="facturas-summary"></div>
-          <h3 class="text-xl font-bold mt-8 mb-4">Registro Histórico</h3>
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-             <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                    <th class="px-6 py-4 font-bold">Tipo y Nº</th>
-                    <th class="px-6 py-4 font-bold">Fecha</th>
-                    <th class="px-6 py-4 font-bold">Descripción</th>
-                    <th class="px-6 py-4 font-bold text-right">Total</th>
-                    <th class="px-6 py-4 font-bold text-center">Acción</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="facturas-table"></tbody>
-              </table>
-             </div>
+          <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
+            <table class="w-full text-left">
+              <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="facturas-table"></tbody>
+            </table>
           </div>
         </div>
-
-        <!-- =================== VIEW: CLIENTES (CRM) =================== -->
+        
         <div id="view-clientes" class="view-section slide-up hidden space-y-8">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-6">
-            <div>
-              <h2 class="text-4xl font-black tracking-tight">CRM Clientes</h2>
-              <p class="text-neutral-500 mt-2 text-lg">Base de datos de leads e interesados.</p>
-            </div>
-            
-            <!-- Botón para Cargar Leads Globales -->
-            <button onclick="openModal('modal-nuevo-lead')" class="flex items-center justify-center px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 shadow-xl shadow-green-600/20 transition-all duration-300">
-              <i data-lucide="user-plus" class="w-5 h-5 mr-2"></i>Nuevo Lead Global
-            </button>
+          <div class="flex justify-between items-end gap-6 mb-6">
+            <h2 class="text-4xl font-black">CRM Clientes</h2>
+            <button onclick="openModal('modal-nuevo-lead')" class="px-6 py-3 font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 hover:scale-105 transition-transform">Nuevo Lead Global</button>
           </div>
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                    <th class="px-6 py-4 font-bold">Lead</th>
-                    <th class="px-6 py-4 font-bold">Contacto</th>
-                    <th class="px-6 py-4 font-bold">Interés / Vehículo Buscado</th>
-                    <th class="px-6 py-4 font-bold">Registro</th>
-                    <th class="px-6 py-4 font-bold">Acción</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="crm-table"></tbody>
-              </table>
-            </div>
+          <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
+            <table class="w-full text-left">
+              <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50" id="crm-table"></tbody>
+            </table>
           </div>
         </div>
-
-        <!-- =================== VIEW: RESUMENES =================== -->
+        
         <div id="view-resumenes" class="view-section slide-up hidden space-y-8">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div>
-              <h2 class="text-4xl font-black tracking-tight">Dashboard Ejecutivo</h2>
-              <p class="text-neutral-500 mt-2 text-lg">Análisis de rendimiento integral.</p>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dashboard-content"></div>
+          <h2 class="text-4xl font-black">Dashboard Ejecutivo</h2>
+          <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </div>
-
-        <!-- =================== VIEW: ADMINISTRACIÓN =================== -->
+        
         <div id="view-admin" class="view-section slide-up hidden space-y-8">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div>
-              <h2 class="text-4xl font-black tracking-tight">Ajustes del Sistema</h2>
-              <p class="text-neutral-500 mt-2 text-lg">Gestión de usuarios y sucursales.</p>
-            </div>
-          </div>
+          <h2 class="text-4xl font-black mb-6">Ajustes del Sistema</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            <!-- ABM Usuarios -->
-            <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm">
-               <h3 class="text-xl font-bold mb-4 flex items-center">
-                 <i data-lucide="users" class="w-5 h-5 mr-2 text-neutral-700 dark:text-neutral-300"></i> Usuarios
-               </h3>
-               
+            <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm">
+               <h3 class="text-xl font-bold mb-4">Usuarios</h3>
                <form onsubmit="handleSaveUser(event)" class="mb-6 bg-neutral-100/50 dark:bg-neutral-800/50 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 space-y-3">
-                  <div class="grid grid-cols-2 gap-3">
-                    <input 
-                      id="new-user-name" 
-                      required 
-                      placeholder="Nombre completo" 
-                      class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500" 
-                    />
-                    <input 
-                      type="email" 
-                      id="new-user-email" 
-                      required 
-                      placeholder="correo@rivasauto.com" 
-                      class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 placeholder-neutral-400 focus:border-green-500" 
-                    />
-                  </div>
-                  <div class="grid grid-cols-2 gap-3">
-                    <select id="new-user-rol" required class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500">
-                      <option value="Vendedor">Vendedor</option>
-                      <option value="Encargado">Encargado</option>
-                      <option value="Admin">Administrador</option>
-                    </select>
-                    <select id="new-user-suc" required class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500"></select>
-                  </div>
-                  <div class="relative w-full">
-                    <input 
-                      type="password" 
-                      id="new-user-pwd" 
-                      required 
-                      placeholder="Contraseña Temporal" 
-                      class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 pr-10 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500" 
-                    />
-                    <button type="button" onclick="togglePwdVisibility('new-user-pwd')" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">
-                      <i data-lucide="eye" class="w-4 h-4"></i>
-                    </button>
-                  </div>
-                  <p class="text-[10px] text-neutral-500 mb-2">Pedirá cambio de clave al inicio.</p>
-                  
-                  <div class="flex space-x-2">
-                    <button type="button" id="new-user-cancel" onclick="resetUserForm()" class="hidden flex-1 py-2 bg-neutral-300 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-xl text-sm font-bold">
-                      Cancelar
-                    </button>
-                    <button type="submit" id="new-user-submit" class="flex-1 py-2 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold">
-                      Crear Usuario
-                    </button>
-                  </div>
+                 <div class="grid grid-cols-2 gap-3">
+                   <input id="new-user-name" required placeholder="Nombre" class="w-full rounded-xl px-3 py-2 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700" />
+                   <input type="email" id="new-user-email" required placeholder="Correo" class="w-full rounded-xl px-3 py-2 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700" />
+                 </div>
+                 <div class="grid grid-cols-2 gap-3">
+                   <select id="new-user-rol" required class="w-full rounded-xl px-3 py-2 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700">
+                     <option value="Vendedor">Vendedor</option><option value="Encargado">Encargado</option><option value="Admin">Administrador</option>
+                   </select>
+                   <select id="new-user-suc" required class="w-full rounded-xl px-3 py-2 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700"></select>
+                 </div>
+                 <div class="relative w-full">
+                   <input type="password" id="new-user-pwd" required placeholder="Contraseña" class="w-full rounded-xl px-3 py-2 pr-10 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700" />
+                   <button type="button" onclick="togglePwd('new-user-pwd')" class="absolute right-3 top-1/2 -translate-y-1/2">
+                     <i data-lucide="eye" class="w-4 h-4 text-neutral-400"></i>
+                   </button>
+                 </div>
+                 <div class="flex space-x-2">
+                   <button type="button" id="new-user-cancel" onclick="resetUserForm()" class="hidden flex-1 py-2 bg-neutral-300 text-neutral-800 rounded-xl text-sm font-bold">Cancelar</button>
+                   <button type="submit" id="new-user-submit" class="flex-1 py-2 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold">Crear</button>
+                 </div>
                </form>
-               <div id="admin-users-list" class="space-y-2 max-h-64 overflow-y-auto pr-2 no-scrollbar"></div>
+               <div id="admin-users-list" class="space-y-2 max-h-64 overflow-y-auto no-scrollbar"></div>
             </div>
-
-            <!-- ABM Sucursales -->
-            <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm h-fit">
-               <h3 class="text-xl font-bold mb-4 flex items-center">
-                 <i data-lucide="map-pin" class="w-5 h-5 mr-2 text-neutral-700 dark:text-neutral-300"></i> Sucursales
-               </h3>
-               
+            <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm h-fit">
+               <h3 class="text-xl font-bold mb-4">Sucursales</h3>
                <form onsubmit="handleSaveSucursal(event)" class="mb-6 flex flex-col space-y-2">
-                  <div class="flex space-x-2">
-                    <input 
-                      id="new-suc-name" 
-                      required 
-                      placeholder="Nombre de Sucursal" 
-                      class="flex-1 bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm outline-none border border-neutral-200 dark:border-neutral-700 focus:border-green-500" 
-                    />
-                    <button type="submit" id="new-suc-submit" class="px-4 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold">
-                      Crear
-                    </button>
-                  </div>
-                  <button type="button" id="new-suc-cancel" onclick="resetSucForm()" class="hidden w-full py-1.5 bg-neutral-300 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-xl text-xs font-bold">
-                    Cancelar Edición
-                  </button>
+                 <div class="flex space-x-2">
+                   <input id="new-suc-name" required placeholder="Nombre" class="flex-1 rounded-xl px-3 py-2 text-sm outline-none border bg-white dark:bg-neutral-900 dark:border-neutral-700 focus:border-green-500" />
+                   <button type="submit" id="new-suc-submit" class="px-4 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-bold">Crear</button>
+                 </div>
+                 <button type="button" id="new-suc-cancel" onclick="resetSucForm()" class="hidden w-full py-1.5 bg-neutral-300 text-neutral-800 rounded-xl text-xs font-bold">Cancelar</button>
                </form>
                <div id="admin-suc-list" class="space-y-2"></div>
             </div>
@@ -648,143 +334,79 @@
       </main>
     </div>
 
-    <!-- ========================================== -->
-    <!--          MODALES GLOBALES DE LA APP        -->
-    <!-- ========================================== -->
-
-    <!-- Modal Caja: Nuevo Movimiento -->
     <div id="modal-caja" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-caja')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
-        
-        <div class="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-10 bg-white dark:bg-neutral-900">
-          <h3 class="text-2xl font-black tracking-tight">Nuevo Movimiento</h3>
-          <button onclick="closeModal('modal-caja')" class="bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 p-2 rounded-full transition-colors">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-10 bg-white dark:bg-neutral-900">
+          <h3 class="text-2xl font-black">Nuevo Movimiento</h3>
+          <button onclick="closeModal('modal-caja')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar">
           <form id="form-caja">
             <div class="grid grid-cols-2 gap-4 mb-5">
-              <div>
-                <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Fecha</label>
-                <input type="date" id="caja-fecha" required class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500" />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Tipo</label>
-                <select id="caja-tipo" class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500">
-                  <option value="ingreso">Ingreso (+)</option>
-                  <option value="gasto">Gasto (-)</option>
-                </select>
-              </div>
+              <div><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Fecha</label><input type="date" id="caja-fecha" required class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500" /></div>
+              <div><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Tipo</label><select id="caja-tipo" class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"><option value="ingreso">Ingreso (+)</option><option value="gasto">Gasto (-)</option></select></div>
             </div>
-            
             <div class="mb-5">
               <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Categoría</label>
-              <div class="flex space-x-2">
-                <select id="caja-cat" required class="flex-1 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"></select>
-                <button type="button" onclick="agregarCategoria()" class="px-4 bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 rounded-2xl font-bold hover:bg-neutral-300 transition-colors">+</button>
-              </div>
+              <div class="flex space-x-2"><select id="caja-cat" required class="flex-1 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"></select><button type="button" onclick="agregarCategoria()" class="px-4 bg-neutral-200 dark:bg-neutral-800 font-bold rounded-2xl hover:bg-neutral-300 transition-colors">+</button></div>
             </div>
-            
-            <div class="mb-5">
-              <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Descripción General</label>
-              <input type="text" id="caja-desc" required class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500" placeholder="Detalle..." />
-            </div>
-            
-            <div class="mb-5">
-              <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Vehículo Asociado (Opcional)</label>
-              <select id="caja-auto" class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"></select>
-            </div>
-
-            <!-- TIPO DE COMPROBANTE -->
+            <div class="mb-5"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Descripción</label><input type="text" id="caja-desc" required class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500" /></div>
+            <div class="mb-5"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Auto (Opcional)</label><select id="caja-auto" class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"></select></div>
             <div class="p-5 bg-neutral-50 dark:bg-neutral-950 rounded-[2rem] border border-neutral-200 dark:border-neutral-800 mb-6">
               <h4 class="font-bold text-sm mb-4">Comprobante</h4>
               <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Tipo</label>
-                  <select id="caja-comprobante" onchange="handleComprobanteChange(this.value)" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500">
-                    <option value="X">Recibo (X)</option>
-                    <option value="A">Factura A</option>
-                    <option value="B">Factura B</option>
-                    <option value="C">Factura C</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Nº Comp.</label>
-                  <input type="text" id="caja-comp-num" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" />
-                </div>
+                <div><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Tipo</label><select id="caja-comprobante" onchange="handleComprobanteChange(this.value)" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500"><option value="X">Recibo (X)</option><option value="A">Fac A</option><option value="B">Fac B</option><option value="C">Fac C</option></select></div>
+                <div><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Nº Comp.</label><input type="text" id="caja-comp-num" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" /></div>
               </div>
-              <div class="mb-4">
-                <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Total ($)</label>
-                <input type="number" id="caja-monto" required class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-green-500" />
-              </div>
-              <div id="caja-iva-container" class="hidden">
-                 <label class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 uppercase mb-2">IVA Incluido ($)</label>
-                 <input type="number" id="caja-iva" class="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" />
-              </div>
+              <div class="mb-4"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Total ($)</label><input type="number" id="caja-monto" required class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-green-500" /></div>
+              <div id="caja-iva-container" class="hidden"><label class="block text-xs font-bold uppercase mb-2">IVA Incluido ($)</label><input type="number" id="caja-iva" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" /></div>
             </div>
-
-            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition">
-              Guardar Movimiento
-            </button>
+            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar</button>
           </form>
         </div>
       </div>
     </div>
 
-    <!-- Modal Cobros Pendientes (Admin) -->
     <div id="modal-pendientes" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-pendientes')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-xl flex flex-col overflow-hidden max-h-[80vh]">
-        <div class="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
-          <h3 class="text-xl font-black tracking-tight">Cobros Pendientes</h3>
-          <button onclick="closeModal('modal-pendientes')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
+        <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
+          <h3 class="text-xl font-black">Cobros Pendientes</h3>
+          <button onclick="closeModal('modal-pendientes')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         <div class="p-6 overflow-y-auto no-scrollbar" id="pendientes-list-content"></div>
       </div>
     </div>
 
-    <!-- Modal Detalle Factura -->
     <div id="modal-detalle-factura" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-factura')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
-          <h3 class="text-xl font-black tracking-tight">Detalle Factura</h3>
-          <button onclick="closeModal('modal-detalle-factura')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
+        <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
+          <h3 class="text-xl font-black">Detalle Factura</h3>
+          <button onclick="closeModal('modal-detalle-factura')" class="bg-neutral-100 dark:bg-neutral-800 p-1.5 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         <div class="p-6" id="factura-detail-content"></div>
       </div>
     </div>
 
-    <!-- Modal Detalle Venta -->
     <div id="modal-detalle-venta" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-venta')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-10 bg-white dark:bg-neutral-900">
-          <h3 class="text-2xl font-black tracking-tight">Ficha de Operación</h3>
-          <button onclick="closeModal('modal-detalle-venta')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full transition-colors">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900">
+          <h3 class="text-2xl font-black">Ficha de Operación</h3>
+          <button onclick="closeModal('modal-detalle-venta')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar" id="venta-detail-content"></div>
       </div>
     </div>
 
-    <!-- Modal Alta/Edición de Auto (ACTUALIZADO: Color, Km, Costo, Condición) -->
     <div id="modal-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-auto')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-2xl font-black" id="modal-auto-title">Alta Vehículo</h3>
-          <button onclick="closeModal('modal-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+          <button onclick="closeModal('modal-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6 overflow-y-auto max-h-[75vh] no-scrollbar">
           <form id="form-auto">
@@ -800,10 +422,9 @@
               <input id="auto-anio" type="number" required placeholder="Año" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
               <input id="auto-patente" required placeholder="Patente" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 uppercase outline-none focus:border-green-500 font-bold" />
             </div>
-            
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Precio Venta Est. ($)</label>
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Precio V. Est. ($)</label>
                 <input id="auto-precio" type="number" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
               </div>
               <div>
@@ -811,7 +432,6 @@
                 <input id="auto-costo" type="number" required placeholder="Costo ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
               </div>
             </div>
-            
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Condición</label>
@@ -821,157 +441,148 @@
                 </select>
               </div>
               <div>
-                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Ubicación Fís.</label>
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Ubicación</label>
                 <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
               </div>
             </div>
-            
-            <button type="submit" id="modal-auto-submit" class="w-full mt-2 py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition">
-              Guardar Vehículo
-            </button>
+            <button type="submit" id="modal-auto-submit" class="w-full mt-2 py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Vehículo</button>
           </form>
         </div>
       </div>
     </div>
 
-    <!-- Modal Cambio Estado "A Ingresar" -> "Disponible" -->
     <div id="modal-ingreso-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-ingreso-auto')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm p-8 text-center overflow-hidden">
-         <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-           <i data-lucide="check-circle" class="w-8 h-8"></i>
-         </div>
+         <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8"></i></div>
          <h3 class="text-2xl font-black mb-2">Hacer Disponible</h3>
-         <p class="text-sm text-neutral-500 mb-6">El vehículo ingresará formalmente al salón de ventas. Establece su precio de venta final:</p>
-         
-         <input type="number" id="ingreso-precio" required placeholder="Precio Venta ($)" class="w-full rounded-xl px-4 py-4 text-lg font-bold mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 text-center" />
-         
-         <button onclick="confirmarIngresoAuto()" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg hover:scale-105 transition-transform mb-4">
-           Guardar y Habilitar
-         </button>
-         
-         <p class="text-xs text-rose-500 font-bold hidden" id="ingreso-aviso-gastos">¡No olvides registrar los gastos de acondicionamiento en la caja!</p>
-         
-         <button onclick="abrirCajaParaGastos()" id="btn-ingreso-gastos" class="hidden w-full py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 rounded-2xl font-bold mt-2">
-           Cargar Gastos Ahora
-         </button>
+         <p class="text-sm text-neutral-500 mb-6">Establece el precio de venta final:</p>
+         <input type="number" id="ingreso-precio" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-4 text-lg font-bold mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 text-center" />
+         <button onclick="confirmarIngresoAuto()" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg hover:scale-105 transition-transform mb-4">Guardar y Habilitar</button>
+         <p class="text-xs text-rose-500 font-bold hidden" id="ingreso-aviso-gastos">¡No olvides registrar gastos!</p>
+         <button onclick="abrirCajaParaGastos()" id="btn-ingreso-gastos" class="hidden w-full py-3 bg-neutral-100 dark:bg-neutral-800 font-bold mt-2 rounded-2xl hover:bg-neutral-200 transition-colors">Cargar Gastos Ahora</button>
       </div>
     </div>
 
-    <!-- Modal Detalle Auto 360 -->
     <div id="modal-detalle-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-auto')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-100/50 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
-          <h3 id="da-title" class="text-2xl font-black tracking-tight">Ficha 360º</h3>
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
+          <h3 id="da-title" class="text-2xl font-black">Ficha 360º</h3>
           <div class="flex items-center space-x-2" id="da-header-actions"></div>
         </div>
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar relative" id="da-content"></div>
       </div>
     </div>
 
-    <!-- Modal Nuevo Lead Global -->
     <div id="modal-nuevo-lead" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-nuevo-lead')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-2xl font-black">Nuevo Interesado</h3>
-          <button onclick="closeModal('modal-nuevo-lead')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+          <button onclick="closeModal('modal-nuevo-lead')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6">
           <form onsubmit="handleGlobalLeadSubmit(event)">
-            <input id="gl-nombre" required placeholder="Nombre y Apellido" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+            <input id="gl-nombre" required placeholder="Nombre" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             <input id="gl-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-            
             <div class="mb-4">
-              <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Vehículo / Marca Buscada</label>
-              <input id="gl-interes" required placeholder="Ej: Pick-ups, Ford Fiesta, etc." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Vehículo Buscado</label>
+              <input id="gl-interes" required placeholder="Ej: Pick-ups..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             </div>
-
             <div class="mb-4">
-              <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Temperatura del Lead</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Temperatura</label>
               <select id="gl-estado" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
-                <option value="Caliente">🔥 Caliente (Alta intención de compra)</option>
-                <option value="Tibio" selected>⭐ Tibio (Consultando/Comparando)</option>
-                <option value="Frío">❄️ Frío (Solo mirando)</option>
+                <option value="Caliente">🔥 Caliente</option><option value="Tibio" selected>⭐ Tibio</option><option value="Frío">❄️ Frío</option>
               </select>
             </div>
-
-            <textarea id="gl-nota" placeholder="Notas de la consulta..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 resize-none font-bold"></textarea>
-            
-            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition">
-              Guardar Lead
-            </button>
+            <textarea id="gl-nota" placeholder="Notas..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold"></textarea>
+            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Lead</button>
           </form>
         </div>
       </div>
     </div>
 
-    <!-- MODAL FORMULARIO COMPLETO -->
     <div id="modal-boleto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-boleto')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
-          <h3 id="boleto-title" class="text-2xl font-black tracking-tight">Completar Boleto</h3>
-          <button onclick="closeModal('modal-boleto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
+          <h3 id="boleto-title" class="text-2xl font-black">Completar Boleto</h3>
+          <button onclick="closeModal('modal-boleto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar relative" id="boleto-form-content">
-          <!-- Injectable Form -->
-        </div>
+        <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar relative" id="boleto-form-content"></div>
       </div>
     </div>
 
-    <!-- MODAL ASOCIAR FORMULARIO A AUTO -->
     <div id="modal-asociar-form" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-asociar-form')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden p-8 text-center">
-         <h3 class="text-xl font-black mb-4">¿Asociar a un vehículo del sistema?</h3>
-         <p class="text-sm text-neutral-500 mb-6">Si asocias este boleto a un vehículo en stock, su estado cambiará a "Vendido".</p>
-         
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
+         <h3 class="text-xl font-black mb-4">¿Asociar a auto?</h3>
+         <p class="text-sm text-neutral-500 mb-6">Si asocias este boleto a un auto en stock, su estado cambiará a "Vendido".</p>
          <div class="flex justify-center space-x-4 mb-6">
-           <button onclick="document.getElementById('asoc-select-container').classList.remove('hidden')" class="px-6 py-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500 rounded-xl font-bold">
-             Sí, asociar
-           </button>
-           <button onclick="guardarYImprimirFormulario(null)" class="px-6 py-2 bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 rounded-xl font-bold">
-             No, solo imprimir
-           </button>
+           <button onclick="document.getElementById('asoc-select-container').classList.remove('hidden')" class="px-6 py-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500 rounded-xl font-bold hover:bg-green-200 transition-colors">Sí, asociar</button>
+           <button onclick="guardarYImprimirFormulario(null)" class="px-6 py-2 bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 rounded-xl font-bold hover:bg-neutral-200 transition-colors">No, solo imprimir</button>
          </div>
-
          <div id="asoc-select-container" class="hidden text-left border-t border-neutral-200 dark:border-neutral-800 pt-6 mt-4">
-           <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Selecciona el Vehículo Vendido</label>
            <select id="asoc-auto-select" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500"></select>
-           <button onclick="guardarYImprimirFormulario(document.getElementById('asoc-auto-select').value)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-lg">
-             Confirmar e Imprimir
-           </button>
+           <button onclick="guardarYImprimirFormulario(document.getElementById('asoc-auto-select').value)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">Confirmar e Imprimir</button>
+         </div>
+      </div>
+    </div>
+    
+    <div id="modal-confirm-boleto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-confirm-boleto')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
+         <h3 class="text-xl font-black mb-4">¡Venta Registrada!</h3>
+         <p class="text-sm text-neutral-500 mb-6">El auto se marcó como vendido. ¿Deseas generar el Boleto ahora?</p>
+         <div class="flex justify-center space-x-4">
+           <button onclick="closeModal('modal-confirm-boleto')" class="px-6 py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl font-bold hover:bg-neutral-200 transition-colors">Más tarde</button>
+           <button id="btn-go-to-boleto" class="px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-colors">Sí, generar boleto</button>
          </div>
       </div>
     </div>
 
-    <!-- MODAL PREGUNTA IR A BOLETO (DESPUÉS DE CERRAR VENTA DIRECTA) -->
-    <div id="modal-confirm-boleto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-confirm-boleto')"></div>
+    <div id="modal-comision" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-comision')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden">
+        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
+          <h3 class="text-xl font-black">Asignar Comisión/Bono</h3>
+          <button onclick="closeModal('modal-comision')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="p-6">
+          <form id="form-comision" onsubmit="handleComisionSubmit(event)">
+            <input type="hidden" id="comision-venta-id" value="">
+            <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Personal</label>
+            <select id="comision-user" required class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
+            <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Monto a Pagar ($)</label>
+            <input id="comision-monto" type="number" required placeholder="Ej: 50000" class="w-full rounded-xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-lg" />
+            <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] transition-transform">Guardar Asignación</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div id="modal-cerrar-pagos" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-cerrar-pagos')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden p-8 text-center">
-         <h3 class="text-xl font-black mb-4">¡Venta Registrada!</h3>
-         <p class="text-sm text-neutral-500 mb-6">La venta se ha cerrado con éxito y el auto fue marcado como vendido. ¿Deseas ir a Formularios para generar y descargar el Boleto de Compra Venta ahora?</p>
-         
-         <div class="flex justify-center space-x-4 mb-2">
-           <button onclick="closeModal('modal-confirm-boleto')" class="px-6 py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl font-bold">
-             No, más tarde
-           </button>
-           <button id="btn-go-to-boleto" class="px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg">
-             Sí, generar boleto
-           </button>
+         <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+           <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+         </div>
+         <h3 class="text-xl font-black mb-2">Cerrar Pagos</h3>
+         <p class="text-sm text-neutral-500 mb-6">Las comisiones pendientes se marcarán pagadas y se debitará el total de la Caja.</p>
+         <div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl p-4 mb-6 border border-neutral-200 dark:border-neutral-700 text-left">
+           <p class="text-xs uppercase text-neutral-500 font-bold mb-1">Total a Liquidar</p>
+           <p class="text-3xl font-black text-rose-600" id="monto-total-liquidar">$ 0</p>
+         </div>
+         <div class="flex justify-center space-x-4">
+           <button onclick="closeModal('modal-cerrar-pagos')" class="w-1/2 py-4 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-2xl font-bold hover:bg-neutral-200 transition-colors">Cancelar</button>
+           <button onclick="confirmarCierrePagos()" class="w-1/2 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-700 transition-colors">Pagar</button>
          </div>
       </div>
     </div>
 
   </div>
 
-  <!-- JAVASCRIPT LOGIC (FIREBASE & UI) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -993,29 +604,26 @@
       try { 
         return await addDoc(collection(db, collName), data); 
       } catch (e) { 
-        console.error("Error adding doc: ", e); 
+        console.error(e); 
       } 
     };
-    
     window.fbUpdate = async (collName, idStr, data) => { 
       try { 
         await updateDoc(doc(db, collName, idStr), data); 
       } catch (e) { 
-        console.error("Error updating doc: ", e); 
+        console.error(e); 
       } 
     };
-    
     window.fbDelete = async (collName, idStr) => { 
       try { 
         await deleteDoc(doc(db, collName, idStr)); 
       } catch (e) { 
-        console.error("Error deleting doc: ", e); 
+        console.error(e); 
       } 
     };
 
     function setupRealtimeSync() {
-      const collections = ['sucursales', 'usuarios', 'autos', 'transacciones', 'ventas', 'consultas', 'formularios'];
-      
+      const collections = ['sucursales', 'usuarios', 'autos', 'transacciones', 'ventas', 'consultas', 'formularios', 'comisiones'];
       collections.forEach(collName => {
         onSnapshot(collection(db, collName), (snapshot) => {
           const arr = []; 
@@ -1030,10 +638,11 @@
           if(collName === 'ventas') state.ventas = arr;
           if(collName === 'consultas') state.consultas = arr;
           if(collName === 'formularios') state.formularios = arr;
+          if(collName === 'comisiones') state.comisiones = arr;
           
           if (state.currentUser) { 
-            const updatedUser = state.usuarios.find(u => u.id === state.currentUser.id); 
-            if(updatedUser) state.currentUser = updatedUser; 
+            const u = state.usuarios.find(u => u.id === state.currentUser.id); 
+            if(u) state.currentUser = u; 
             initSelects(); 
             if(window.renderAllViews) window.renderAllViews(); 
           }
@@ -1056,11 +665,11 @@
                 sucursalId: sucRef.id, 
                 isFirstLogin: false 
               });
-            } catch (err) {}
-            setTimeout(checkSessionAndReady, 1500);
-         } else { 
-           checkSessionAndReady(); 
+            } catch (err) {
+              console.error("Error al crear admin", err);
+            }
          }
+         checkSessionAndReady();
       }, 1500);
     }
 
@@ -1083,12 +692,10 @@
         } 
       }, 500);
     }
-    
     bootApp();
   </script>
 
   <script>
-    // ESTADO
     const state = {
       activeTab: 'autos', 
       isDarkMode: false, 
@@ -1100,8 +707,9 @@
       transacciones: [], 
       ventas: [], 
       consultas: [], 
-      formularios: [],
-      categoriasGasto: ['Mecánica', 'Estética', 'Gestoría', 'Impuestos', 'Servicios Generales', 'Venta Vehículos', 'Gastos Varios'],
+      formularios: [], 
+      comisiones: [],
+      categoriasGasto: ['Mecánica', 'Estética', 'Gestoría', 'Impuestos', 'Servicios Generales', 'Venta Vehículos', 'Gastos Varios', 'Liquidación Personal'],
       cajaFilterUser: 'all', 
       selectedAutoId: null, 
       daActiveSection: 'crm', 
@@ -1110,7 +718,7 @@
       ventaData: { tienePermuta: false }, 
       editingUserId: null, 
       editingSucursalId: null, 
-      editingAutoId: null,
+      editingAutoId: null, 
       tempFormData: null, 
       pendingIngresoAutoId: null
     };
@@ -1141,7 +749,6 @@
     const formatWhatsAppLink = (phone, text) => `https://wa.me/549${phone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
     const generateId = () => Math.random().toString(36).substring(2, 9);
 
-    // UTILES
     window.toggleDarkMode = () => { 
       state.isDarkMode = !state.isDarkMode; 
       document.documentElement.classList.toggle('dark', state.isDarkMode); 
@@ -1149,7 +756,7 @@
       lucide.createIcons(); 
     }
     
-    window.togglePwdVisibility = (id) => { 
+    window.togglePwd = (id) => { 
       const i = document.getElementById(id); 
       i.type = i.type === 'password' ? 'text' : 'password'; 
     }
@@ -1158,7 +765,6 @@
       state.isSidebarOpen = !state.isSidebarOpen; 
       document.getElementById('sidebar').classList.toggle('-translate-x-full', !state.isSidebarOpen); 
       const b = document.getElementById('sidebar-backdrop'); 
-      
       if(state.isSidebarOpen) { 
         b.classList.remove('hidden'); 
         setTimeout(() => b.classList.remove('opacity-0'), 10); 
@@ -1192,20 +798,18 @@
       document.getElementById('notif-dropdown').classList.toggle('hidden'); 
     }
 
-    // LOGIN Y AUTH
     window.handleLogin = (e) => { 
       e.preventDefault(); 
-      const email = document.getElementById('login-email').value; 
-      const pwd = document.getElementById('login-pwd').value; 
+      const em = document.getElementById('login-email').value.toLowerCase(); 
+      const pw = document.getElementById('login-pwd').value; 
       const err = document.getElementById('login-error'); 
       
-      const user = state.usuarios.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === pwd); 
+      const u = state.usuarios.find(x => x.email.toLowerCase() === em && x.password === pw); 
       
-      if(user) { 
+      if(u) { 
         err.classList.add('hidden'); 
-        state.currentUser = user; 
-        
-        if(user.isFirstLogin) { 
+        state.currentUser = u; 
+        if(u.isFirstLogin) { 
           document.getElementById('login-form').classList.add('hidden'); 
           document.getElementById('pwd-change-form').classList.remove('hidden'); 
           document.getElementById('auth-title').innerText = "Cambiar Contraseña"; 
@@ -1219,17 +823,17 @@
     
     window.handlePwdChange = async (e) => { 
       e.preventDefault(); 
-      const pwd1 = document.getElementById('new-pwd').value; 
-      const pwd2 = document.getElementById('confirm-pwd').value; 
+      const p1 = document.getElementById('new-pwd').value; 
+      const p2 = document.getElementById('confirm-pwd').value; 
       const err = document.getElementById('pwd-error'); 
       
-      if(pwd1 !== pwd2) { 
+      if(p1 !== p2) { 
         err.classList.remove('hidden'); 
       } else { 
         err.classList.add('hidden'); 
-        state.currentUser.password = pwd1; 
+        state.currentUser.password = p1; 
         state.currentUser.isFirstLogin = false; 
-        await window.fbUpdate("usuarios", state.currentUser.id, { password: pwd1, isFirstLogin: false }); 
+        await window.fbUpdate("usuarios", state.currentUser.id, { password: p1, isFirstLogin: false }); 
         launchApp(); 
       } 
     }
@@ -1252,67 +856,15 @@
     window.logout = () => { 
       state.currentUser = null; 
       localStorage.removeItem('erp_session'); 
-      
       document.getElementById('app-wrapper').classList.add('hidden'); 
       document.getElementById('auth-wrapper').classList.remove('hidden'); 
       document.getElementById('login-form').classList.remove('hidden'); 
       document.getElementById('pwd-change-form').classList.add('hidden'); 
       document.getElementById('auth-title').innerText = "Iniciar Sesión"; 
-      
       document.getElementById('login-form').reset(); 
       document.getElementById('pwd-change-form').reset(); 
     };
 
-    // --- ALERTAS (MANTENIDO) ---
-    window.checkNotifications = () => {
-      if(!state.currentUser || state.currentUser.rol !== 'Admin') {
-        document.getElementById('notif-container').classList.add('hidden');
-        return;
-      }
-      
-      document.getElementById('notif-container').classList.remove('hidden');
-      const notifs = [];
-      const today = new Date();
-      
-      state.ventas.forEach(v => {
-        if (v.metodoPago.includes('Crédito') || v.metodoPago.includes('Pagaré')) {
-          const pendientes = v.cuotasTotales - v.cuotasPagadas;
-          if (pendientes <= 0) return; 
-          
-          const fechaFin = new Date(v.fecha + 'T00:00:00');
-          fechaFin.setMonth(fechaFin.getMonth() + v.cuotasTotales);
-          
-          const diffDays = Math.ceil((fechaFin - today) / (1000 * 60 * 60 * 24));
-
-          if (diffDays <= 60 && diffDays > 20) {
-            notifs.push({ v, msg: 'Aprox. 2 meses para finalizar.', days: diffDays });
-          } else if (diffDays <= 20 && diffDays >= 0) {
-            notifs.push({ v, msg: '¡Menos de 20 días para terminar!', days: diffDays });
-          }
-        }
-      });
-      
-      const badge = document.getElementById('notif-badge');
-      const list = document.getElementById('notif-list');
-      
-      if (notifs.length > 0) {
-        badge.classList.remove('hidden');
-        list.innerHTML = notifs.map(n => `
-          <div class="p-4 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
-            <p class="font-bold text-sm">${n.v.compradorNombre}</p>
-            <p class="text-xs text-neutral-500 mb-3">${n.v.autoDesc} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span></p>
-            <a href="${formatWhatsAppLink(n.v.compradorTelefono, `Hola ${n.v.compradorNombre}, vimos que estás por finalizar tu plan. ¿Te interesaría charlar para renovar tu unidad?`)}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
-              <i data-lucide="message-circle" class="w-3.5 h-3.5 mr-1.5"></i> Ofrecer Recompra
-            </a>
-          </div>
-        `).join('');
-      } else {
-        badge.classList.add('hidden');
-        list.innerHTML = '<div class="p-6 text-center text-sm text-neutral-500">No hay alertas de recompra.</div>';
-      }
-    }
-
-    // --- RENDERIZADO NAVEGACIÓN ---
     window.renderNav = () => {
       if(!state.currentUser) return; 
       const isAd = state.currentUser.rol === 'Admin';
@@ -1326,6 +878,7 @@
       if(isAd) { 
         tabs.splice(2, 0, { id: 'ventas', icon: 'shopping-bag', label: 'Historial Ventas' }); 
         tabs.splice(3, 0, { id: 'facturas', icon: 'file-text', label: 'Facturas' }); 
+        tabs.splice(4, 0, { id: 'personal', icon: 'briefcase', label: 'Personal' }); 
         tabs.splice(6, 0, { id: 'formularios', icon: 'printer', label: 'Formularios' }); 
         tabs.push( 
           { id: 'resumenes', icon: 'pie-chart', label: 'Resúmenes' }, 
@@ -1343,14 +896,12 @@
       lucide.createIcons();
     }
 
-    // ==========================================
-    //            LÓGICA DE FORMULARIOS
-    // ==========================================
+    // BOLETOS
     window.openModalBoleto = (tipo, prefillData = null) => {
       let content = ''; 
       const t = tipo === 'simple' ? 'BOLETO COMPRA VENTA AUTOMOTOR' : 'BOLETO DE VENTA CON PERMUTA'; 
       document.getElementById('boleto-title').innerText = t;
-
+      
       if(tipo === 'simple') {
         content = `
           <form id="form-real-boleto" onsubmit="preGuardarBoleto(event, 'simple')">
@@ -1374,9 +925,10 @@
             
             <h4 class="font-bold text-slate-500 mb-4 uppercase">Monto, Pago y Observaciones</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <input id="bf-monto" type="number" required placeholder="Suma Total de Pesos ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-lg" value="${prefillData?.monto || ''}"/>
+              <input id="bf-monto" type="number" required placeholder="Suma Total ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-lg" value="${prefillData?.monto || ''}"/>
               <input id="bf-formapago" required placeholder="Forma de pago (Ej: EFECTIVO EN ESTE ACTO)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="EFECTIVO EN ESTE ACTO" />
             </div>
+            
             <textarea id="bf-obs" maxlength="1500" rows="4" placeholder="Observaciones adicionales..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold resize-none mb-6"></textarea>
             
             <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:scale-[1.01] transition-transform">
@@ -1411,6 +963,7 @@
               <input id="bf-monto" type="number" required placeholder="Venta Total ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-lg" value="${prefillData?.monto || ''}"/>
               <input id="bf-efectivo" type="number" placeholder="Efectivo abonado ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.efectivo || ''}"/>
             </div>
+            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-green-50 dark:bg-green-900/10 rounded-2xl border border-green-200 dark:border-green-800">
               <input id="bp-marca" required placeholder="Permuta: Marca" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.permuta?.marca || ''}"/>
               <input id="bp-modelo" required placeholder="Permuta: Modelo" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.permuta?.modelo || ''}"/>
@@ -1425,6 +978,7 @@
               <input id="bf-cuotas" type="number" placeholder="Cant. Cuotas" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.cuotas || ''}" />
               <input id="bf-valcuota" type="number" placeholder="Valor Cuota ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.valCuota || ''}" />
             </div>
+            
             <textarea id="bf-obs" maxlength="1500" rows="4" placeholder="Observaciones adicionales..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold resize-none mb-6"></textarea>
             
             <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:scale-[1.01] transition-transform">
@@ -1433,22 +987,17 @@
           </form>
         `;
       }
-      
       document.getElementById('boleto-form-content').innerHTML = content;
-      
-      // Si fue derivado automáticamente desde Cierre Venta, ya sabemos a qué auto pertenece.
       if (prefillData && prefillData.auto) { 
         state.tempFormData = { autoIdAsociado: prefillData.auto.id }; 
       } else { 
         state.tempFormData = {}; 
       }
-      
       openModal('modal-boleto');
     };
 
     window.preGuardarBoleto = (e, tipo) => {
       e.preventDefault();
-      
       const baseData = {
         tipo: tipo === 'simple' ? 'Boleto Compra Venta' : 'Boleto Venta con Permuta', 
         fecha: new Date().toISOString().split('T')[0],
@@ -1466,9 +1015,9 @@
         observaciones: document.getElementById('bf-obs').value
       };
       
-      if(tipo === 'simple') {
-        baseData.formaPago = document.getElementById('bf-formapago').value;
-      } else {
+      if(tipo === 'simple') { 
+        baseData.formaPago = document.getElementById('bf-formapago').value; 
+      } else { 
         baseData.telefono = document.getElementById('bf-telefono').value; 
         baseData.efectivo = document.getElementById('bf-efectivo').value; 
         baseData.p_marca = document.getElementById('bp-marca').value; 
@@ -1478,37 +1027,31 @@
         baseData.p_tasado = document.getElementById('bp-tasado').value; 
         baseData.saldo = document.getElementById('bf-saldo').value; 
         baseData.cuotas = document.getElementById('bf-cuotas').value; 
-        baseData.valCuota = document.getElementById('bf-valcuota').value;
+        baseData.valCuota = document.getElementById('bf-valcuota').value; 
       }
       
-      const autoId = state.tempFormData.autoIdAsociado; // Preservar si vino asociado directo desde cierre venta
+      const autoId = state.tempFormData.autoIdAsociado; 
       state.tempFormData = { ...baseData, autoIdAsociado: autoId };
-
-      if (autoId) {
-        // Salto modal asociación porque ya se sabe el auto
+      
+      if (autoId) { 
         guardarYImprimirFormulario(autoId); 
-      } else {
-        // Es un formulario manual, pregunto si quiero asociarlo a un auto.
-        document.getElementById('asoc-auto-select').innerHTML = `<option value="">-- Seleccionar Automóvil --</option>` + state.autos.filter(a => a.estado !== 'Vendido').map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join('');
+      } else { 
+        document.getElementById('asoc-auto-select').innerHTML = `<option value="">-- Seleccionar Automóvil --</option>` + state.autos.filter(a => a.estado !== 'Vendido').map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
         closeModal('modal-boleto'); 
         document.getElementById('asoc-select-container').classList.add('hidden'); 
-        openModal('modal-asociar-form');
+        openModal('modal-asociar-form'); 
       }
     };
 
     window.guardarYImprimirFormulario = async (autoIdAsociado) => {
       const data = { ...state.tempFormData };
-      
       if (autoIdAsociado) { 
         data.autoIdAsociado = autoIdAsociado; 
         await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' }); 
       }
-      
       await window.fbAdd("formularios", data);
-      
       closeModal('modal-asociar-form'); 
       closeModal('modal-boleto');
-      
       imprimirBoletoHtml(data);
     };
 
@@ -1545,7 +1088,7 @@
         printHtml = `
           <h2 class="text-center text-xl font-black mb-8 underline uppercase">BOLETO DE VENTA CON PERMUTA</h2>
           <p class="mb-4 text-justify">Conste por el presente que hemos vendido a Sr./Sra: <strong>${data.comprador}</strong><br>
-          D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong> Nro.: ______<br>
+          D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong><br>
           De la localidad de __________________ Celular: <strong>${data.telefono}</strong><br>
           Por cuenta y orden de Sr./Sra. <strong>${data.vendedor}</strong> un automovil usado, en las condiciones vistas y que se encuentran libre de gravamenes y/o deudas nacionales, municipales o provinciales, dejando contancia que en la fecha el comprador toma posesion del mismo de conformidad, siendo sus caracteristicas las que se detallan a continuacion:</p>
           
@@ -1576,7 +1119,6 @@
       }
       
       document.getElementById('print-content').innerHTML = printHtml;
-      
       document.getElementById('app-wrapper').classList.add('hidden'); 
       document.getElementById('print-section').classList.remove('hidden');
       
@@ -1620,7 +1162,6 @@
        `;
        
        document.getElementById('print-content').innerHTML = printHtml;
-       
        document.getElementById('app-wrapper').classList.add('hidden'); 
        document.getElementById('print-section').classList.remove('hidden');
        
@@ -1633,6 +1174,120 @@
 
 
     // ==========================================
+    //            COMISIONES Y PERSONAL
+    // ==========================================
+    
+    window.renderPersonalView = () => {
+      if(state.currentUser?.rol !== 'Admin') return;
+      const table = document.getElementById('personal-table');
+      
+      const usuariosAgencia = state.usuarios.filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado');
+      
+      let totLiq = 0;
+      
+      const dataRows = usuariosAgencia.map(u => {
+        const pdtes = state.comisiones.filter(c => c.userId === u.id && c.estado === 'Pendiente');
+        const totPdte = pdtes.reduce((a,c) => a + c.monto, 0);
+        totLiq += totPdte;
+        
+        const suc = state.sucursales.find(s => s.id == u.sucursalId)?.nombre || '-';
+        
+        return `
+          <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+            <td class="px-6 py-4 font-bold">${u.nombre}</td>
+            <td class="px-6 py-4 text-xs font-bold text-neutral-500 uppercase">${u.rol}</td>
+            <td class="px-6 py-4 text-sm">${suc}</td>
+            <td class="px-6 py-4 text-right font-black text-lg ${totPdte > 0 ? 'text-green-600 dark:text-green-500' : 'text-neutral-400'}">${formatMoney(totPdte)}</td>
+          </tr>
+        `;
+      }).join('');
+      
+      table.innerHTML = dataRows || `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay personal para comisionar.</td></tr>`;
+      
+      document.getElementById('monto-total-liquidar').innerText = formatMoney(totLiq);
+      
+      document.getElementById('comision-user').innerHTML = `<option value="">-- Seleccione Empleado --</option>` + usuariosAgencia.map(u => `<option value="${u.id}">${u.nombre} (${u.rol})</option>`).join('');
+    };
+
+    window.openModalAsignarBono = () => { 
+      document.getElementById('form-comision').reset(); 
+      document.getElementById('comision-venta-id').value = ""; 
+      openModal('modal-comision'); 
+    };
+    
+    window.openModalComisionPorVenta = (ventaId) => { 
+      document.getElementById('form-comision').reset(); 
+      document.getElementById('comision-venta-id').value = ventaId; 
+      openModal('modal-comision'); 
+    };
+
+    window.handleComisionSubmit = async (e) => {
+      e.preventDefault();
+      const uId = document.getElementById('comision-user').value;
+      const monto = Number(document.getElementById('comision-monto').value);
+      const vId = document.getElementById('comision-venta-id').value;
+      
+      if(!uId || monto <= 0) return alert("Complete los datos correctamente.");
+      
+      await window.fbAdd("comisiones", { 
+        userId: uId, 
+        ventaId: vId || null, 
+        monto: monto, 
+        estado: 'Pendiente', 
+        fecha: new Date().toISOString().split('T')[0] 
+      });
+      
+      closeModal('modal-comision'); 
+      alert("Comisión/Bono asignado correctamente.");
+    };
+
+    window.openModalCerrarPagos = () => { 
+      openModal('modal-cerrar-pagos'); 
+    };
+    
+    window.calcularTotalPagos = () => {
+      // Refresh real time the total
+      const pdtes = state.comisiones.filter(c => c.estado === 'Pendiente');
+      const tot = pdtes.reduce((a,c) => a + c.monto, 0);
+      document.getElementById('monto-total-liquidar').innerText = formatMoney(tot);
+    };
+
+    window.confirmarCierrePagos = async () => {
+      const pdtes = state.comisiones.filter(c => c.estado === 'Pendiente');
+      const tot = pdtes.reduce((a,c) => a + c.monto, 0);
+      
+      if(tot <= 0) { 
+        closeModal('modal-cerrar-pagos'); 
+        return alert("No hay comisiones pendientes de pago."); 
+      }
+      
+      const fDate = new Date().toISOString().split('T')[0];
+      const adminUsr = state.usuarios.find(u => u.rol === 'Admin') || state.currentUser;
+      
+      await window.fbAdd("transacciones", { 
+        fecha: fDate, 
+        descripcion: `Liquidación de Personal (Cierre de Pagos)`, 
+        tipo: 'gasto', 
+        categoria: 'Liquidación Personal', 
+        valor: tot, 
+        userId: adminUsr.id, 
+        sucursalId: adminUsr.sucursalId, 
+        tipoComprobante: 'X', 
+        numComprobante: '', 
+        iva: 0, 
+        estadoCobro: 'disponible' 
+      });
+      
+      // Batch update for all pending commissions
+      for(let p of pdtes) { 
+        await window.fbUpdate("comisiones", p.id, { estado: 'Pagada', fechaPago: fDate }); 
+      }
+      
+      closeModal('modal-cerrar-pagos'); 
+      alert("Pagos liquidados. Se generó el egreso en Caja automáticamente.");
+    };
+
+    // ==========================================
     //            RENDER DE VISTAS (RESTO)
     // ==========================================
     
@@ -1640,15 +1295,19 @@
        const table = document.getElementById('formularios-table');
        
        if(state.formularios.length === 0) { 
-         table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500">No hay formularios generados.</td></tr>`; 
+         table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay formularios generados.</td></tr>`; 
        } else {
          table.innerHTML = state.formularios.slice().reverse().map(f => `
-           <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
+           <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
              <td class="px-6 py-4 text-sm font-bold text-neutral-500">${formatDate(f.fecha)}</td>
-             <td class="px-6 py-4 font-bold"><span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs uppercase">${f.tipo}</span></td>
+             <td class="px-6 py-4 font-bold">
+               <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500 px-2 py-1 rounded text-xs uppercase">
+                 ${f.tipo}
+               </span>
+             </td>
              <td class="px-6 py-4 font-bold text-sm">${f.comprador}</td>
              <td class="px-6 py-4 text-center">
-               <button onclick='imprimirBoletoHtml(${JSON.stringify(f)})' class="px-3 py-1.5 bg-black text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform">
+               <button onclick='imprimirBoletoHtml(${JSON.stringify(f)})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform">
                  <i data-lucide="printer" class="w-4 h-4 inline"></i> Reimprimir
                </button>
              </td>
@@ -1666,10 +1325,12 @@
     window.renderAutosView = () => {
       const container = document.getElementById('autos-container');
       
-      document.getElementById('btn-view-grid').className = state.autosViewMode === 'grid' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 transition-colors';
-      document.getElementById('btn-view-list').className = state.autosViewMode === 'list' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 transition-colors';
+      document.getElementById('btn-view-grid').className = state.autosViewMode === 'grid' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
+      document.getElementById('btn-view-list').className = state.autosViewMode === 'list' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
       
-      if (state.autos.length === 0) { 
+      const autosValidos = state.autos.filter(a => a.estado !== 'Vendido');
+      
+      if (autosValidos.length === 0) { 
         container.innerHTML = '<div class="col-span-full py-12 text-center text-neutral-500 font-bold">No hay vehículos en la flota.</div>'; 
         return; 
       }
@@ -1677,19 +1338,17 @@
       if (state.autosViewMode === 'grid') {
         container.innerHTML = `
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
-            ${state.autos.map(auto => {
+            ${autosValidos.map(auto => {
               const totalGastos = auto.gastos?.reduce((s, g) => s + Number(g.monto), 0) || 0; 
-              const docsOk = checkDocStatus(auto.documentacion); 
               const sName = state.sucursales.find(x => x.id === auto.sucursalId)?.nombre || 'Sin Asignar';
               
-              let bClass = 'bg-neutral-200 text-neutral-800'; 
-              if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800'; 
-              if(auto.estado === 'Vendido') bClass = 'bg-neutral-100 text-neutral-500'; 
-              if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800 border border-amber-300';
+              let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
+              if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
+              if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 border border-amber-300 dark:border-amber-700';
               
               return `
                 <div onclick="openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
-                  <div class="bg-neutral-50/50 dark:bg-neutral-800/50 rounded-[2rem] p-6 h-full flex flex-col relative ${auto.estado === 'Vendido' ? 'opacity-60 grayscale' : ''}">
+                  <div class="bg-neutral-50/50 dark:bg-neutral-800/50 rounded-[2rem] p-6 h-full flex flex-col relative">
                     <div class="flex justify-between items-start mb-4">
                       <div class="flex flex-col space-y-1">
                         <div class="flex space-x-2">
@@ -1742,14 +1401,13 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
-                  ${state.autos.map(auto => {
-                    let bClass = 'bg-neutral-200 text-neutral-800'; 
-                    if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800'; 
-                    if(auto.estado === 'Vendido') bClass = 'bg-neutral-100 text-neutral-500'; 
-                    if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800';
+                  ${autosValidos.map(auto => {
+                    let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
+                    if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
+                    if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500';
                     
                     return `
-                      <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors ${auto.estado === 'Vendido' ? 'opacity-60' : ''}" onclick="openDetalleAuto('${auto.id}')">
+                      <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="openDetalleAuto('${auto.id}')">
                         <td class="px-6 py-4">
                           <p class="font-bold">${auto.marca} ${auto.modelo}</p>
                           <p class="text-xs text-neutral-500 font-bold mt-1">Año ${auto.año}</p>
@@ -1865,7 +1523,6 @@
       state.daActiveSection = 'crm'; 
       state.isVentaMode = false; 
       
-      // Reseteamos ventaData permuta al abrir una ficha limpia
       state.ventaData.tienePermuta = false;
       
       renderDetalleAuto(); 
@@ -2057,11 +1714,9 @@
               </div>
             </div>
             
-            <!-- CHECKBOXES DE PAGOS MULTIPLES -->
             <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-6">
               <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Formas de Pago Aplicadas</h4>
               
-              <!-- EFECTIVO -->
               <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
                 <input type="checkbox" id="chk-efectivo" onchange="document.getElementById('div-efectivo').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
                 <span>Efectivo / Transferencia (Inmediato a Caja)</span>
@@ -2071,7 +1726,6 @@
                 <input id="nota-efectivo" type="text" placeholder="Nota / Banco..." class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none focus:border-green-500 font-bold">
               </div>
               
-              <!-- CREDITO -->
               <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
                 <input type="checkbox" id="chk-credito" onchange="document.getElementById('div-credito').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
                 <span>Crédito Pre-Aprobado (Pendiente)</span>
@@ -2083,7 +1737,6 @@
                 <input id="nota-credito" type="text" placeholder="Entidad / Financiera..." class="col-span-4 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
               </div>
               
-              <!-- PAGARE -->
               <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
                 <input type="checkbox" id="chk-pagare" onchange="document.getElementById('div-pagare').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
                 <span>Pagaré Personal (Pendiente)</span>
@@ -2096,7 +1749,6 @@
               </div>
             </div>
             
-            <!-- PERMUTA -->
             <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-8">
               <div class="flex justify-between items-center mb-6">
                 <h4 class="font-bold flex items-center text-neutral-700 dark:text-neutral-300">
@@ -2104,7 +1756,6 @@
                 </h4>
                 
                 <label class="flex items-center cursor-pointer">
-                  <!-- SIN ONCHANGE PARA REDIBUJAR -->
                   <input type="checkbox" id="vent-hasperm" class="sr-only toggle-checkbox" onchange="document.getElementById('permuta-fields').classList.toggle('hidden', !this.checked); state.ventaData.tienePermuta=this.checked;" ${state.ventaData.tienePermuta ? 'checked' : ''} />
                   <div class="toggle-label bg-neutral-300 dark:bg-neutral-600 relative">
                     <div class="absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${state.ventaData.tienePermuta ? 'translate-x-6' : ''}"></div>
@@ -2164,7 +1815,7 @@
       document.getElementById('dac-nota').value = '';
     };
 
-    // SUBMIT CIERRE DE VENTA
+    // CIERRE VENTA DEFINITIVO
     window.handleDAVentaSubmit = async (e, autoId) => {
       e.preventDefault(); 
       const auto = state.autos.find(x => x.id === autoId);
@@ -2313,480 +1964,23 @@
       openModal('modal-confirm-boleto');
     };
 
-    // RENDERIZADO TABLAS EXTRA (Facturas, Ventas, Admin, etc)
-    window.renderFacturasView = () => {
-      if(state.currentUser?.rol !== 'Admin') return;
+    window.generarBoletoDesdeVendido = (autoId) => {
+      const a = state.autos.find(x => x.id === autoId); 
+      const v = state.ventas.find(venta => venta.autoDesc.includes(a.patente));
       
-      const facturas = state.transacciones.filter(t => ['A','B','C'].includes(t.tipoComprobante));
-      const totalEmitido = facturas.reduce((a,c) => a + c.valor, 0); 
-      const totalIva = facturas.reduce((a,c) => a + (c.iva || 0), 0);
+      const prefillData = { 
+        auto: a, 
+        comprador: v ? v.compradorNombre : '', 
+        dni: v ? v.compradorDNI : '', 
+        domicilio: v ? v.compradorDomicilio : '', 
+        monto: v ? v.montoTotal : a.precio, 
+        efectivo: v ? v.montoTotal : a.precio 
+      };
       
-      document.getElementById('facturas-summary').innerHTML = `
-        <div class="p-8 bg-black dark:bg-neutral-800 rounded-3xl text-white shadow-xl border border-neutral-800 dark:border-neutral-700">
-          <p class="text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">Monto Facturado (Global)</p>
-          <p class="text-5xl font-black">${formatMoney(totalEmitido)}</p>
-        </div>
-        <div class="p-8 bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
-          <p class="text-neutral-500 dark:text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">IVA Acumulado (Fac. A)</p>
-          <p class="text-5xl font-black text-neutral-900 dark:text-white">${formatMoney(totalIva)}</p>
-        </div>
-      `;
-      
-      const table = document.getElementById('facturas-table');
-      if(facturas.length === 0) { 
-        table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay facturas.</td></tr>`; 
-      } else {
-        table.innerHTML = facturas.slice().reverse().map(f => {
-          const u = state.usuarios.find(x => x.id === f.userId);
-          return `
-            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-              <td class="px-6 py-4">
-                <span class="inline-block bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-bold text-[10px] uppercase px-2 py-1 rounded mb-1">
-                  Tipo ${f.tipoComprobante}
-                </span>
-                <p class="font-mono text-sm font-bold">${f.numComprobante || 'S/N'}</p>
-              </td>
-              <td class="px-6 py-4 text-sm text-neutral-500">${formatDate(f.fecha)}</td>
-              <td class="px-6 py-4">
-                <p class="font-bold">${f.descripcion}</p>
-                <p class="text-xs text-neutral-400 mt-1">Por: ${u ? u.nombre : '-'}</p>
-              </td>
-              <td class="px-6 py-4 text-right font-black text-lg">${formatMoney(f.valor)}</td>
-              <td class="px-6 py-4 text-center">
-                ${f.tipoComprobante === 'A' ? `
-                  <button onclick="openDetalleFactura('${f.id}')" class="text-xs font-bold uppercase tracking-wider bg-black text-white px-4 py-2 rounded-xl dark:bg-neutral-700 hover:bg-neutral-800 transition-colors">
-                    Ver Detalle
-                  </button>
-                ` : '<span class="text-neutral-300 dark:text-neutral-700">-</span>'}
-              </td>
-            </tr>
-          `;
-        }).join('');
-      }
-    };
-    
-    window.openDetalleFactura = (id) => { 
-      const t = state.transacciones.find(x => x.id === id); 
-      const subtotal = t.valor - (t.iva || 0); 
-      
-      document.getElementById('factura-detail-content').innerHTML = `
-        <div class="text-center mb-8">
-          <div class="w-16 h-16 bg-black text-white flex items-center justify-center text-3xl font-black mx-auto mb-3 rounded-2xl shadow-md border border-neutral-800">A</div>
-          <p class="font-mono text-neutral-500 font-bold">${t.numComprobante}</p>
-        </div>
-        <div class="space-y-4 mb-8">
-          <div class="flex justify-between text-sm">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Fecha:</span> 
-            <span class="font-bold">${formatDate(t.fecha)}</span>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Operación:</span> 
-            <span class="font-bold text-right">${t.descripcion}</span>
-          </div>
-        </div>
-        <div class="border-t border-neutral-200 dark:border-neutral-700 pt-6 space-y-3">
-          <div class="flex justify-between text-sm">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">Subtotal:</span> 
-            <span class="font-bold text-lg">${formatMoney(subtotal)}</span>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-neutral-500 font-bold uppercase tracking-wider">IVA:</span> 
-            <span class="font-bold text-lg">${formatMoney(t.iva)}</span>
-          </div>
-          <div class="flex justify-between text-xl mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-            <span class="font-black uppercase tracking-wider">Total:</span> 
-            <span class="font-black text-2xl text-green-600 dark:text-green-500">${formatMoney(t.valor)}</span>
-          </div>
-        </div>
-      `; 
-      openModal('modal-detalle-factura'); 
-    };
-
-    window.handleGlobalLeadSubmit = async (e) => { 
-      e.preventDefault(); 
-      await window.fbAdd("consultas", { 
-        autoId: null, 
-        nombre: document.getElementById('gl-nombre').value, 
-        telefono: document.getElementById('gl-tel').value, 
-        marcaInteres: document.getElementById('gl-interes').value, 
-        estadoLead: document.getElementById('gl-estado').value, 
-        notas: document.getElementById('gl-nota').value, 
-        recordatorio: new Date().toISOString().split('T')[0], 
-        fecha: new Date().toISOString().split('T')[0] 
-      }); 
-      
-      closeModal('modal-nuevo-lead'); 
-      e.target.reset(); 
-    };
-    
-    window.renderClientesView = () => { 
-      const table = document.getElementById('crm-table'); 
-      
-      if (state.consultas.length === 0) { 
-        table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay clientes.</td></tr>`; 
-      } else { 
-        table.innerHTML = state.consultas.slice().reverse().map(c => { 
-          const a = c.autoId ? state.autos.find(x => x.id === c.autoId) : null; 
-          let lClass = 'bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'; 
-          if(c.estadoLead === 'Caliente') lClass = 'bg-black text-white dark:bg-white dark:text-black'; 
-          if(c.estadoLead === 'Tibio') lClass = 'bg-neutral-400 text-neutral-900 dark:bg-neutral-600 dark:text-white'; 
-          
-          return `
-            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-              <td class="px-6 py-4">
-                <div class="flex items-center">
-                  <div class="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center mr-4 font-black text-lg">
-                    ${c.nombre.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <p class="font-bold">${c.nombre}</p>
-                    <span class="inline-flex px-2 py-0.5 mt-1 rounded-md text-[10px] font-black uppercase tracking-widest ${lClass}">
-                      ${c.estadoLead}
-                    </span>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 text-sm font-bold">
-                ${c.telefono}
-              </td>
-              <td class="px-6 py-4">
-                ${a ? `<span class="font-bold text-sm text-green-600 dark:text-green-500 cursor-pointer hover:underline" onclick="openDetalleAuto('${a.id}')">${a.marca} ${a.modelo}</span>` : `<span class="font-bold text-sm">${c.marcaInteres}</span>`}
-                <p class="text-xs text-neutral-500 italic mt-1 max-w-[200px] truncate">"${c.notas}"</p>
-              </td>
-              <td class="px-6 py-4 text-sm font-bold">
-                ${formatDate(c.recordatorio)}
-              </td>
-              <td class="px-6 py-4">
-                <a href="${formatWhatsAppLink(c.telefono, `Hola ${c.nombre}, me comunico de RIVAS AUTO.`)}" target="_blank" class="px-4 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 inline-block">
-                  Contactar
-                </a>
-              </td>
-            </tr>
-          `; 
-        }).join(''); 
-      } 
-    };
-    
-    window.renderVentasView = () => { 
-      if(state.currentUser?.rol !== 'Admin') return; 
-      
-      const table = document.getElementById('ventas-table'); 
-      if (state.ventas.length === 0) { 
-        table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay ventas registradas.</td></tr>`; 
-      } else { 
-        table.innerHTML = state.ventas.slice().reverse().map(v => { 
-          let badge = ''; 
-          if (v.metodoPago.includes('Crédito') || v.metodoPago.includes('Pagaré')) { 
-            const p = v.cuotasTotales - v.cuotasPagadas; 
-            badge = `<span class="block mt-1 text-[10px] ${p > 0 ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/30' : 'text-green-600 bg-green-50 dark:bg-green-900/30'} px-2 py-0.5 rounded font-bold">${p} Pendientes</span>`; 
-          } 
-          
-          return `
-            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="openDetalleVenta('${v.id}')">
-              <td class="px-6 py-4 text-sm text-neutral-500">${formatDate(v.fecha)}</td>
-              <td class="px-6 py-4">
-                <p class="font-bold text-sm">${v.compradorNombre}</p>
-                <p class="text-xs text-neutral-500 flex items-center mt-1"><i data-lucide="phone" class="w-3 h-3 mr-1"></i>${v.compradorTelefono}</p>
-              </td>
-              <td class="px-6 py-4 font-bold text-sm">${v.autoDesc}</td>
-              <td class="px-6 py-4 text-right font-black">${formatMoney(v.montoTotal)}</td>
-              <td class="px-6 py-4 text-center">
-                <span class="text-xs uppercase font-bold text-neutral-700 dark:text-neutral-300">${v.metodoPago}</span>
-                ${badge}
-              </td>
-            </tr>
-          `; 
-        }).join(''); 
-      } 
-      lucide.createIcons(); 
+      closeModal('modal-detalle-auto'); 
+      switchTab('formularios'); 
+      openModalBoleto(v && v.tienePermuta ? 'permuta' : 'simple', prefillData);
     }
-    
-    window.openDetalleVenta = (id) => { 
-      const v = state.ventas.find(x => x.id === id); 
-      if(!v) return; 
-      
-      let pagosHTML = ''; 
-      if(v.metodoPago.includes('Crédito') || v.metodoPago.includes('Pagaré')) { 
-        pagosHTML = `
-          <div class="mt-6 p-6 bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-[2rem]">
-            <div class="flex justify-between items-center mb-4">
-              <h4 class="font-bold uppercase text-xs tracking-wider">Estado Crédito/Pagaré</h4>
-              <span class="font-black text-xl text-indigo-600 dark:text-indigo-400">${v.cuotasPagadas} / ${v.cuotasTotales} Pagadas</span>
-            </div>
-            ${v.cuotasPagadas < v.cuotasTotales ? `
-              <button onclick="registrarCuotaVenta('${v.id}')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow hover:scale-[1.01] transition-transform">
-                Registrar Pago de 1 Cuota
-              </button>
-            ` : `
-              <div class="text-center text-green-600 dark:text-green-400 font-bold p-3 bg-green-100 dark:bg-green-900/30 rounded-2xl">
-                Plan Finalizado
-              </div>
-            `}
-          </div>
-        `; 
-      } 
-      
-      document.getElementById('venta-detail-content').innerHTML = `
-        <div class="space-y-4 text-sm">
-          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500">Fecha</span>
-            <span class="font-bold">${formatDate(v.fecha)}</span>
-          </div>
-          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500">Comprador</span>
-            <span class="font-bold">${v.compradorNombre} <br><span class="text-xs text-neutral-400">DNI: ${v.compradorDNI}</span></span>
-          </div>
-          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500">Teléfono</span>
-            <a href="${formatWhatsAppLink(v.compradorTelefono,'Hola')}" target="_blank" class="font-bold text-green-500 hover:underline">${v.compradorTelefono}</a>
-          </div>
-          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500">Domicilio</span>
-            <span class="font-bold text-right">${v.compradorDomicilio}</span>
-          </div>
-          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500">Vehículo</span>
-            <span class="font-bold text-right">${v.autoDesc}</span>
-          </div>
-          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500">Monto Operación</span>
-            <span class="font-black text-lg">${formatMoney(v.montoTotal)}</span>
-          </div>
-          <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-            <span class="text-neutral-500">Métodos Combinados</span>
-            <span class="font-bold uppercase">${v.metodoPago}</span>
-          </div>
-          ${v.tienePermuta ? `
-            <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-              <span class="text-neutral-500">Permuta Entregada</span>
-              <span class="font-bold text-right">${v.detallePermuta}</span>
-            </div>
-          ` : ''}
-        </div>
-        ${pagosHTML}
-      `; 
-      openModal('modal-detalle-venta'); 
-    };
-    
-    window.registrarCuotaVenta = async (id) => { 
-      const v = state.ventas.find(x => x.id === id); 
-      if(v && v.cuotasPagadas < v.cuotasTotales) { 
-        await window.fbUpdate("ventas", id, { cuotasPagadas: v.cuotasPagadas + 1 }); 
-        closeModal('modal-detalle-venta'); 
-      } 
-    };
-
-    window.renderAdminView = () => { 
-      if(state.currentUser?.rol !== 'Admin') return; 
-      
-      const sucList = document.getElementById('admin-suc-list'); 
-      if (state.sucursales.length === 0) { 
-        sucList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay sucursales.</p>'; 
-      } else { 
-        sucList.innerHTML = state.sucursales.map(s => `
-          <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
-            <span class="font-bold text-sm">${s.nombre}</span>
-            <div class="flex space-x-1">
-              <button onclick="editSucursal('${s.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
-                <i data-lucide="edit-2" class="w-4 h-4"></i>
-              </button>
-              <button onclick="deleteSucursal('${s.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-        `).join(''); 
-      } 
-      
-      document.getElementById('new-user-suc').innerHTML = state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
-      
-      const usrList = document.getElementById('admin-users-list'); 
-      if (state.usuarios.length === 0) { 
-        usrList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay usuarios.</p>'; 
-      } else { 
-        usrList.innerHTML = state.usuarios.map(u => { 
-          const s = state.sucursales.find(x => x.id == u.sucursalId); 
-          return `
-            <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
-              <div>
-                <p class="font-bold text-sm">${u.nombre}</p>
-                <p class="text-[10px] font-bold text-neutral-500 mt-1 uppercase tracking-wider">
-                  ${u.rol} • ${s ? s.nombre : '-'} • ${u.email}
-                </p>
-              </div>
-              <div class="flex space-x-1">
-                <button onclick="editUser('${u.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
-                  <i data-lucide="edit-2" class="w-4 h-4"></i>
-                </button>
-                <button onclick="deleteUser('${u.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
-          `; 
-        }).join(''); 
-      } 
-      lucide.createIcons(); 
-    };
-
-    window.handleSaveSucursal = async (e) => { 
-      e.preventDefault(); 
-      const n = document.getElementById('new-suc-name').value; 
-      if(state.editingSucursalId) { 
-        await window.fbUpdate("sucursales", state.editingSucursalId, { nombre: n }); 
-      } else { 
-        await window.fbAdd("sucursales", { nombre: n }); 
-      } 
-      resetSucForm(); 
-    };
-    
-    window.editSucursal = (id) => { 
-      state.editingSucursalId = id; 
-      document.getElementById('new-suc-name').value = state.sucursales.find(s => s.id === id).nombre; 
-      document.getElementById('new-suc-cancel').classList.remove('hidden'); 
-    };
-    
-    window.deleteSucursal = async (id) => { 
-      if(confirm('¿Seguro de eliminar esta sucursal permanentemente?')) { 
-        await window.fbDelete("sucursales", id); 
-      } 
-    };
-    
-    window.resetSucForm = () => { 
-      state.editingSucursalId = null; 
-      document.getElementById('new-suc-name').value = ''; 
-      document.getElementById('new-suc-cancel').classList.add('hidden'); 
-    };
-    
-    window.handleSaveUser = async (e) => { 
-      e.preventDefault(); 
-      const n = document.getElementById('new-user-name').value; 
-      const em = document.getElementById('new-user-email').value; 
-      const r = document.getElementById('new-user-rol').value; 
-      const s = document.getElementById('new-user-suc').value; 
-      const p = document.getElementById('new-user-pwd').value; 
-      
-      if(state.editingUserId) { 
-        const d = { nombre: n, email: em, rol: r, sucursalId: s }; 
-        if(p) { d.password = p; d.isFirstLogin = true; } 
-        await window.fbUpdate("usuarios", state.editingUserId, d); 
-      } else { 
-        await window.fbAdd("usuarios", { nombre: n, email: em, rol: r, sucursalId: s, password: p, isFirstLogin: true }); 
-      } 
-      resetUserForm(); 
-    };
-    
-    window.editUser = (id) => { 
-      state.editingUserId = id; 
-      const u = state.usuarios.find(x => x.id === id); 
-      document.getElementById('new-user-name').value = u.nombre; 
-      document.getElementById('new-user-email').value = u.email; 
-      document.getElementById('new-user-rol').value = u.rol; 
-      document.getElementById('new-user-suc').value = u.sucursalId; 
-      document.getElementById('new-user-pwd').required = false; 
-      document.getElementById('new-user-cancel').classList.remove('hidden'); 
-    };
-    
-    window.deleteUser = async (id) => { 
-      if(id === state.currentUser.id) return alert('No puedes eliminar tu propio usuario en sesión.'); 
-      if(confirm('¿Eliminar usuario del sistema?')) { 
-        await window.fbDelete("usuarios", id); 
-      } 
-    };
-    
-    window.resetUserForm = () => { 
-      state.editingUserId = null; 
-      document.getElementById('new-user-name').value = ''; 
-      document.getElementById('new-user-email').value = ''; 
-      document.getElementById('new-user-pwd').value = ''; 
-      document.getElementById('new-user-pwd').required = true; 
-      document.getElementById('new-user-cancel').classList.add('hidden'); 
-    };
-
-    window.renderResumenesView = () => { 
-      if(state.currentUser?.rol !== 'Admin') return; 
-      
-      const ing = state.transacciones.filter(t => t.tipo === 'ingreso').reduce((a,c) => a + c.valor, 0); 
-      let egr = state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => a + c.valor, 0); 
-      
-      const cats = state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => { 
-        a[c.categoria] = (a[c.categoria] || 0) + c.valor; 
-        return a; 
-      }, {}); 
-      
-      state.autos.forEach(a => { 
-        a.gastos?.forEach(g => { 
-          cats[g.categoria] = (cats[g.categoria] || 0) + g.monto; 
-          egr += g.monto; 
-        }); 
-      }); 
-      
-      const max = Math.max(...Object.values(cats), 1); 
-      
-      let catHTML = ''; 
-      if(Object.keys(cats).length === 0) { 
-        catHTML = '<p class="text-neutral-500 py-4 font-bold">Sin datos de gastos en el periodo.</p>'; 
-      } else { 
-        catHTML = Object.entries(cats).sort((a,b) => b[1] - a[1]).map(([c,v]) => `
-          <div class="mb-4">
-            <div class="flex justify-between text-sm mb-2">
-              <span class="text-neutral-600 dark:text-neutral-300 font-bold uppercase tracking-wider text-[10px]">${c}</span>
-              <span class="font-black">${formatMoney(v)}</span>
-            </div>
-            <div class="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-3">
-              <div class="bg-green-600 h-3 rounded-full" style="width: ${(v/max)*100}%"></div>
-            </div>
-          </div>
-        `).join(''); 
-      } 
-      
-      document.getElementById('dashboard-content').innerHTML = `
-        <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2rem] shadow-sm">
-          <h3 class="font-black text-2xl mb-8">Flujo de Fondos Operativo</h3>
-          <div class="space-y-6">
-            <div class="flex justify-between items-center">
-              <span class="text-neutral-500 font-bold uppercase tracking-wider text-xs">Ingresos Totales</span>
-              <span class="font-black text-xl text-green-600 dark:text-green-500">${formatMoney(ing)}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-neutral-500 font-bold uppercase tracking-wider text-xs">Egresos (Caja + Taller)</span>
-              <span class="font-black text-xl text-rose-600 dark:text-rose-400">${formatMoney(egr)}</span>
-            </div>
-            <div class="pt-6 border-t border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
-              <span class="font-black text-xl uppercase">Balance Neto</span>
-              <span class="font-black text-3xl ${ing - egr >= 0 ? 'text-black dark:text-white' : 'text-rose-600'}">${formatMoney(ing - egr)}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2rem] shadow-sm">
-          <h3 class="font-black text-2xl mb-8">Distribución de Gastos</h3>
-          ${catHTML}
-        </div>
-      `; 
-    };
-
-    window.initSelects = () => { 
-      document.getElementById('caja-cat').innerHTML = state.categoriasGasto.map(c => `<option value="${c}">${c}</option>`).join(''); 
-      document.getElementById('auto-sucursal').innerHTML = state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
-      document.getElementById('caja-auto').innerHTML = `<option value="">-- Gasto General de Agencia --</option>` + state.autos.map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
-      document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0]; 
-    };
-    
-    window.renderAllViews = () => { 
-      if(!state.currentUser) return; 
-      if(window.renderCajaView) renderCajaView(); 
-      if(window.renderVentasView) renderVentasView();
-      if(window.renderFacturasView) renderFacturasView(); 
-      if(window.renderAutosView) renderAutosView(); 
-      if(window.renderClientesView) renderClientesView(); 
-      if(window.renderFormulariosView) renderFormulariosView();
-      if(window.renderResumenesView) renderResumenesView(); 
-      if(window.renderAdminView) renderAdminView(); 
-      checkNotifications();
-      lucide.createIcons(); 
-    };
-
   </script>
 </body>
 </html>
