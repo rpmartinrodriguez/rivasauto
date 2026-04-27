@@ -134,7 +134,7 @@ window.openModalIngreso = (id) => {
   window.openModal('modal-ingreso-auto');
 };
 
-window.confirmarIngresoAuto = async () => { 
+window.confirmarIngresoAuto = async (event) => { 
   const p = Number(document.getElementById('ingreso-precio').value); 
   const btn = event.target;
   
@@ -365,25 +365,33 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
   if(monto > 0) {
     const fDate = new Date().toISOString().split('T')[0];
     
-    await window.fbAdd("transacciones", { 
-      fecha: fDate, 
-      descripcion: `Cobro Cuota ${cuotaNum} (${tipo === 'credito' ? 'Crédito' : 'Pagaré'}): ${v.compradorNombre} - ${v.autoDesc}`, 
-      tipo: 'ingreso', 
-      categoria: 'Venta Vehículos', 
-      valor: monto, 
-      userId: userQueRegistra.id, 
-      sucursalId: userQueRegistra.sucursalId, 
-      tipoComprobante: 'X', 
-      numComprobante: '',
-      iva: 0, 
-      estadoCobro: 'disponible', 
-      fechaAcreditacion: null 
-    });
+    // El botón recibe disable temporalmente por ID dinámico para la carga visual
+    const btnId = tipo === 'credito' ? `btn-txt-credito-${ventaId}` : `btn-txt-pagare-${ventaId}`;
+    const btnEl = document.getElementById(btnId)?.parentElement;
+    if(btnEl) window.setBtnLoader(btnEl, true);
 
-    await window.fbUpdate("ventas", ventaId, updateData);
-    
-    window.closeModal('modal-pendientes');
-    alert(`Cuota ${cuotaNum} cobrada con éxito e ingresada a la caja.`);
+    try {
+      await window.fbAdd("transacciones", { 
+        fecha: fDate, 
+        descripcion: `Cobro Cuota ${cuotaNum} (${tipo === 'credito' ? 'Crédito' : 'Pagaré'}): ${v.compradorNombre} - ${v.autoDesc}`, 
+        tipo: 'ingreso', 
+        categoria: 'Venta Vehículos', 
+        valor: monto, 
+        userId: userQueRegistra.id, 
+        sucursalId: userQueRegistra.sucursalId, 
+        tipoComprobante: 'X', 
+        numComprobante: '',
+        iva: 0, 
+        estadoCobro: 'disponible', 
+        fechaAcreditacion: null 
+      });
+  
+      await window.fbUpdate("ventas", ventaId, updateData);
+      window.closeModal('modal-pendientes');
+      alert(`Cuota ${cuotaNum} cobrada con éxito e ingresada a la caja.`);
+    } finally {
+      if(btnEl) window.setBtnLoader(btnEl, false);
+    }
   }
 };
 
@@ -406,7 +414,7 @@ window.preGuardarBoleto = (e, tipo) => {
     chasis: document.getElementById('bf-chasis').value, 
     monto: document.getElementById('bf-monto').value, 
     observaciones: document.getElementById('bf-obs').value,
-    estado: 'Completado' // Se marca completado cuando se genera/edita manual
+    estado: 'Completado' 
   };
   
   if(tipo === 'simple') { 
@@ -425,7 +433,6 @@ window.preGuardarBoleto = (e, tipo) => {
   }
   
   const autoId = window.state.tempFormData.autoIdAsociado; 
-  // Revisamos si era un borrador guardado en BD para editarlo, o uno nuevo
   const formId = window.state.tempFormData.id;
 
   window.state.tempFormData = { ...baseData, autoIdAsociado: autoId, id: formId };
@@ -449,12 +456,10 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
   }
   
   if (data.id) {
-    // Si era un borrador pendiente, lo actualizamos
     const copyData = {...data};
-    delete copyData.id; // Limpiamos ID interno
+    delete copyData.id; 
     await window.fbUpdate("formularios", data.id, copyData);
   } else {
-    // Nuevo formulario
     await window.fbAdd("formularios", data);
   }
   
@@ -666,6 +671,8 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       metodoPago: metodos.join(' + '), 
       credito: objCredito,
       pagare: objPagare,
+      userId: userQueRegistra.id,
+      sucursalId: userQueRegistra.sucursalId,
       tienePermuta: window.state.ventaData.tienePermuta,
       detallePermuta: window.state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
     });
@@ -709,7 +716,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       chasis: '',
       monto: tVenta,
       observaciones: '',
-      estado: 'Pendiente', // Lo marcamos como pendiente para rellenar
+      estado: 'Pendiente', 
       autoIdAsociado: autoId
     };
 
@@ -755,7 +762,9 @@ window.handleGlobalLeadSubmit = async (e) => {
       estadoLead: document.getElementById('gl-estado').value, 
       notas: document.getElementById('gl-nota').value, 
       recordatorio: new Date().toISOString().split('T')[0], 
-      fecha: new Date().toISOString().split('T')[0] 
+      fecha: new Date().toISOString().split('T')[0],
+      userId: window.state.currentUser.id,
+      sucursalId: window.state.currentUser.sucursalId
     }); 
     window.closeModal('modal-nuevo-lead'); 
     e.target.reset(); 
@@ -779,12 +788,14 @@ window.handleDA_CRMSubmit = async (e, autoId) => {
       notas: document.getElementById('dac-nota').value, 
       estadoLead: 'Tibio', 
       recordatorio: new Date().toISOString().split('T')[0], 
-      fecha: new Date().toISOString().split('T')[0] 
+      fecha: new Date().toISOString().split('T')[0],
+      userId: window.state.currentUser.id,
+      sucursalId: window.state.currentUser.sucursalId
     }); 
     document.getElementById('dac-nombre').value = ''; 
     document.getElementById('dac-tel').value = ''; 
     document.getElementById('dac-nota').value = '';
-    // Actualiza la vista para ver el lead abajo
+    
     if(window.renderDetalleAuto) window.renderDetalleAuto();
   } finally {
     window.setBtnLoader(btn, false);
@@ -843,7 +854,7 @@ window.calcularTotalPagos = () => {
   if(ml) ml.innerText = window.formatMoney(tot);
 };
 
-window.confirmarCierrePagos = async () => {
+window.confirmarCierrePagos = async (event) => {
   const checkboxes = document.querySelectorAll('.cierre-user-checkbox:checked');
   const userIdsSelected = Array.from(checkboxes).map(cb => cb.value);
 
