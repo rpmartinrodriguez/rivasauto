@@ -40,12 +40,18 @@ window.checkNotifications = () => {
   const today = new Date();
   
   window.state.ventas.forEach(v => {
-    if (v.metodoPago.includes('Crédito') || v.metodoPago.includes('Pagaré')) {
-      const pendientes = v.cuotasTotales - v.cuotasPagadas;
+    // Verificación de seguridad por si es una venta vieja
+    const metodos = v.metodoPago || '';
+    
+    if (metodos.includes('Crédito') || metodos.includes('Pagaré')) {
+      const cuotasT = v.cuotasTotales || 0;
+      const cuotasP = v.cuotasPagadas || 0;
+      const pendientes = cuotasT - cuotasP;
+      
       if (pendientes <= 0) return; 
       
       const fechaFin = new Date(v.fecha + 'T00:00:00');
-      fechaFin.setMonth(fechaFin.getMonth() + v.cuotasTotales);
+      fechaFin.setMonth(fechaFin.getMonth() + cuotasT);
       
       const diffDays = Math.ceil((fechaFin - today) / (1000 * 60 * 60 * 24));
 
@@ -64,9 +70,9 @@ window.checkNotifications = () => {
     badge.classList.remove('hidden');
     list.innerHTML = notifs.map(n => `
       <div class="p-4 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
-        <p class="font-bold text-sm">${n.v.compradorNombre}</p>
-        <p class="text-xs text-neutral-500 mb-3">${n.v.autoDesc} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span></p>
-        <a href="${window.formatWhatsAppLink(n.v.compradorTelefono, `Hola ${n.v.compradorNombre}, vimos que estás por finalizar tu plan en RIVAS AUTO. ¿Te interesaría charlar para renovar tu unidad?`)}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
+        <p class="font-bold text-sm">${n.v.compradorNombre || 'Sin Nombre'}</p>
+        <p class="text-xs text-neutral-500 mb-3">${n.v.autoDesc || '-'} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span></p>
+        <a href="${window.formatWhatsAppLink(n.v.compradorTelefono || '', `Hola ${n.v.compradorNombre}, vimos que estás por finalizar tu plan en RIVAS AUTO. ¿Te interesaría charlar para renovar tu unidad?`)}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
           <i data-lucide="message-circle" class="w-3.5 h-3.5 mr-1.5"></i> Ofrecer Recompra
         </a>
       </div>
@@ -608,8 +614,12 @@ window.renderVentasView = () => {
   } else { 
     table.innerHTML = window.state.ventas.slice().reverse().map(v => { 
       let badge = ''; 
-      if (v.metodoPago.includes('Crédito') || v.metodoPago.includes('Pagaré')) { 
-        const p = v.cuotasTotales - v.cuotasPagadas; 
+      
+      // Salvavidas por si es una venta vieja sin metodoPago
+      const metodos = v.metodoPago || ''; 
+      
+      if (metodos.includes('Crédito') || metodos.includes('Pagaré')) { 
+        const p = (v.cuotasTotales || 0) - (v.cuotasPagadas || 0); 
         badge = `<span class="block mt-1 text-[10px] ${p > 0 ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/30' : 'text-green-600 bg-green-50 dark:bg-green-900/30'} px-2 py-0.5 rounded font-bold">${p} Pendientes</span>`; 
       } 
       
@@ -617,13 +627,13 @@ window.renderVentasView = () => {
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="window.openDetalleVenta('${v.id}')">
           <td class="px-6 py-4 text-sm text-neutral-500">${window.formatDate(v.fecha)}</td>
           <td class="px-6 py-4">
-            <p class="font-bold text-sm">${v.compradorNombre}</p>
-            <p class="text-xs text-neutral-500 flex items-center mt-1"><i data-lucide="phone" class="w-3 h-3 mr-1"></i>${v.compradorTelefono}</p>
+            <p class="font-bold text-sm">${v.compradorNombre || '-'}</p>
+            <p class="text-xs text-neutral-500 flex items-center mt-1"><i data-lucide="phone" class="w-3 h-3 mr-1"></i>${v.compradorTelefono || '-'}</p>
           </td>
-          <td class="px-6 py-4 font-bold text-sm">${v.autoDesc}</td>
-          <td class="px-6 py-4 text-right font-black">${window.formatMoney(v.montoTotal)}</td>
+          <td class="px-6 py-4 font-bold text-sm">${v.autoDesc || '-'}</td>
+          <td class="px-6 py-4 text-right font-black">${window.formatMoney(v.montoTotal || 0)}</td>
           <td class="px-6 py-4 text-center">
-            <span class="text-xs uppercase font-bold text-neutral-700 dark:text-neutral-300">${v.metodoPago}</span>
+            <span class="text-xs uppercase font-bold text-neutral-700 dark:text-neutral-300">${metodos}</span>
             ${badge}
           </td>
         </tr>
@@ -631,6 +641,105 @@ window.renderVentasView = () => {
     }).join(''); 
   } 
   lucide.createIcons(); 
+};
+
+window.openDetalleVenta = (id) => { 
+  const v = window.state.ventas.find(x => x.id === id); 
+  if(!v) return; 
+  
+  const metodos = v.metodoPago || ''; // Salvavidas
+  let pagosHTML = ''; 
+  
+  if(metodos.includes('Crédito') || metodos.includes('Pagaré')) { 
+    const pagadas = v.cuotasPagadas || 0;
+    const totales = v.cuotasTotales || 0;
+    
+    pagosHTML = `
+      <div class="mt-6 p-6 bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-[2rem]">
+        <div class="flex justify-between items-center mb-4">
+          <h4 class="font-bold uppercase text-xs tracking-wider">Estado Crédito/Pagaré</h4>
+          <span class="font-black text-xl text-indigo-600 dark:text-indigo-400">${pagadas} / ${totales} Pagadas</span>
+        </div>
+        ${pagadas < totales ? `
+          <button onclick="window.registrarCuotaVenta('${v.id}')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow hover:scale-[1.01] transition-transform">
+            Registrar Pago de 1 Cuota
+          </button>
+        ` : `
+          <div class="text-center text-green-600 dark:text-green-400 font-bold p-3 bg-green-100 dark:bg-green-900/30 rounded-2xl">
+            Plan Finalizado
+          </div>
+        `}
+      </div>
+    `; 
+  } 
+  
+  document.getElementById('venta-detail-content').innerHTML = `
+    <div class="space-y-4 text-sm">
+      <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+        <span class="text-neutral-500">Fecha</span>
+        <span class="font-bold">${window.formatDate(v.fecha)}</span>
+      </div>
+      <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+        <span class="text-neutral-500">Comprador</span>
+        <span class="font-bold text-right">${v.compradorNombre || '-'} <br><span class="text-xs text-neutral-400">DNI: ${v.compradorDNI || '-'}</span></span>
+      </div>
+      <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+        <span class="text-neutral-500">Teléfono</span>
+        <a href="${window.formatWhatsAppLink(v.compradorTelefono || '', 'Hola')}" target="_blank" class="font-bold text-green-500 hover:underline">${v.compradorTelefono || '-'}</a>
+      </div>
+      <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+        <span class="text-neutral-500">Domicilio</span>
+        <span class="font-bold text-right">${v.compradorDomicilio || '-'}</span>
+      </div>
+      <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+        <span class="text-neutral-500">Vehículo</span>
+        <span class="font-bold text-right">${v.autoDesc || '-'}</span>
+      </div>
+      <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+        <span class="text-neutral-500">Monto Operación</span>
+        <span class="font-black text-lg">${window.formatMoney(v.montoTotal || 0)}</span>
+      </div>
+      <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+        <span class="text-neutral-500">Métodos Aplicados</span>
+        <span class="font-bold uppercase">${metodos}</span>
+      </div>
+      ${v.tienePermuta ? `
+        <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+          <span class="text-neutral-500">Permuta Entregada</span>
+          <span class="font-bold text-right">${v.detallePermuta || '-'}</span>
+        </div>
+      ` : ''}
+    </div>
+    ${pagosHTML}
+  `; 
+  
+  // Botón Asignar Comisión (Exclusivo Admin)
+  if(window.state.currentUser && window.state.currentUser.rol === 'Admin') {
+    document.getElementById('venta-detail-content').innerHTML += `
+      <div class="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-800">
+        <button onclick="window.openModalComisionPorVenta('${v.id}')" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow hover:bg-green-700 transition-colors">
+          <i data-lucide="award" class="w-5 h-5 inline mr-2"></i>Asignar Comisión a Personal
+        </button>
+      </div>
+    `;
+  }
+  
+  window.openModal('modal-detalle-venta'); 
+  lucide.createIcons();
+};
+
+window.registrarCuotaVenta = async (id) => { 
+  const v = window.state.ventas.find(x => x.id === id); 
+  if(v && (v.cuotasPagadas || 0) < (v.cuotasTotales || 0)) { 
+    await window.fbUpdate("ventas", id, { cuotasPagadas: (v.cuotasPagadas || 0) + 1 }); 
+    window.closeModal('modal-detalle-venta'); 
+  } 
+};
+
+window.openModalComisionPorVenta = (ventaId) => { 
+  document.getElementById('form-comision').reset(); 
+  document.getElementById('comision-venta-id').value = ventaId; 
+  window.openModal('modal-comision'); 
 };
 
 // --- RENDERIZADO FACTURAS ---
@@ -684,6 +793,43 @@ window.renderFacturasView = () => {
       `; 
     }).join(''); 
   } 
+};
+
+window.openDetalleFactura = (id) => { 
+  const t = window.state.transacciones.find(x => x.id === id); 
+  const subtotal = t.valor - (t.iva || 0); 
+  
+  document.getElementById('factura-detail-content').innerHTML = `
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 bg-black text-white flex items-center justify-center text-3xl font-black mx-auto mb-3 rounded-2xl shadow-md border border-neutral-800">A</div>
+      <p class="font-mono text-neutral-500 font-bold">${t.numComprobante}</p>
+    </div>
+    <div class="space-y-4 mb-8">
+      <div class="flex justify-between text-sm">
+        <span class="text-neutral-500 font-bold uppercase tracking-wider">Fecha:</span> 
+        <span class="font-bold">${window.formatDate(t.fecha)}</span>
+      </div>
+      <div class="flex justify-between text-sm">
+        <span class="text-neutral-500 font-bold uppercase tracking-wider">Operación:</span> 
+        <span class="font-bold text-right">${t.descripcion}</span>
+      </div>
+    </div>
+    <div class="border-t border-neutral-200 dark:border-neutral-700 pt-6 space-y-3">
+      <div class="flex justify-between text-sm">
+        <span class="text-neutral-500 font-bold uppercase tracking-wider">Subtotal:</span> 
+        <span class="font-bold text-lg">${window.formatMoney(subtotal)}</span>
+      </div>
+      <div class="flex justify-between text-sm">
+        <span class="text-neutral-500 font-bold uppercase tracking-wider">IVA:</span> 
+        <span class="font-bold text-lg">${window.formatMoney(t.iva)}</span>
+      </div>
+      <div class="flex justify-between text-xl mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+        <span class="font-black uppercase tracking-wider">Total:</span> 
+        <span class="font-black text-2xl text-green-600 dark:text-green-500">${window.formatMoney(t.valor)}</span>
+      </div>
+    </div>
+  `; 
+  window.openModal('modal-detalle-factura'); 
 };
 
 // --- RENDERIZADO CRM ---
