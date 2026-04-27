@@ -16,33 +16,41 @@ window.renderAllViews = () => {
   if(window.renderResumenesView) window.renderResumenesView(); 
   if(window.renderAdminView) window.renderAdminView(); 
   
-  window.checkNotifications();
+  if(window.checkNotifications) window.checkNotifications();
   lucide.createIcons(); 
 };
 
 // --- INICIALIZADOR DE DESPLEGABLES ---
 window.initSelects = () => { 
-  document.getElementById('caja-cat').innerHTML = window.state.categoriasGasto.map(c => `<option value="${c}">${c}</option>`).join(''); 
-  document.getElementById('auto-sucursal').innerHTML = window.state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
-  document.getElementById('caja-auto').innerHTML = `<option value="">-- Gasto General de Agencia --</option>` + window.state.autos.map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
-  document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0]; 
+  const elCat = document.getElementById('caja-cat');
+  if (elCat) elCat.innerHTML = window.state.categoriasGasto.map(c => `<option value="${c}">${c}</option>`).join(''); 
+  
+  const elSuc = document.getElementById('auto-sucursal');
+  if (elSuc) elSuc.innerHTML = window.state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
+  
+  const elAuto = document.getElementById('caja-auto');
+  if (elAuto) elAuto.innerHTML = `<option value="">-- Gasto General de Agencia --</option>` + window.state.autos.map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
+  
+  const elFecha = document.getElementById('caja-fecha');
+  if (elFecha) elFecha.value = new Date().toISOString().split('T')[0]; 
 };
 
 // --- ALERTAS DE RECOMPRA ---
 window.checkNotifications = () => {
   if(!window.state.currentUser || window.state.currentUser.rol !== 'Admin') {
-    document.getElementById('notif-container').classList.add('hidden');
+    const nc = document.getElementById('notif-container');
+    if (nc) nc.classList.add('hidden');
     return;
   }
   
-  document.getElementById('notif-container').classList.remove('hidden');
+  const nc = document.getElementById('notif-container');
+  if (nc) nc.classList.remove('hidden');
+  
   const notifs = [];
   const today = new Date();
   
   window.state.ventas.forEach(v => {
-    // Verificación de seguridad por si es una venta vieja
     const metodos = v.metodoPago || '';
-    
     if (metodos.includes('Crédito') || metodos.includes('Pagaré')) {
       const cuotasT = v.cuotasTotales || 0;
       const cuotasP = v.cuotasPagadas || 0;
@@ -66,6 +74,8 @@ window.checkNotifications = () => {
   const badge = document.getElementById('notif-badge');
   const list = document.getElementById('notif-list');
   
+  if (!badge || !list) return;
+
   if (notifs.length > 0) {
     badge.classList.remove('hidden');
     list.innerHTML = notifs.map(n => `
@@ -91,9 +101,13 @@ window.toggleAutosViewMode = (mode) => {
 
 window.renderAutosView = () => {
   const container = document.getElementById('autos-container');
+  if(!container) return;
+
+  const btnGrid = document.getElementById('btn-view-grid');
+  const btnList = document.getElementById('btn-view-list');
   
-  document.getElementById('btn-view-grid').className = window.state.autosViewMode === 'grid' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
-  document.getElementById('btn-view-list').className = window.state.autosViewMode === 'list' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
+  if(btnGrid) btnGrid.className = window.state.autosViewMode === 'grid' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
+  if(btnList) btnList.className = window.state.autosViewMode === 'list' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
   
   const autosValidos = window.state.autos.filter(a => a.estado !== 'Vendido');
   
@@ -222,7 +236,7 @@ window.renderDetalleAuto = () => {
   
   if(!window.state.isVentaMode) {
     
-    // MODO VISTA NORMAL
+    // MODO VISTA NORMAL (FICHA)
     html += `
       <div class="bg-black text-white dark:bg-white dark:text-black rounded-[2rem] p-8 mb-6 relative overflow-hidden border border-neutral-800 dark:border-neutral-200">
         <div class="flex justify-between items-start relative z-10">
@@ -448,21 +462,23 @@ window.renderCajaView = () => {
 
   if(window.state.currentUser.rol !== 'Vendedor') {
     const fc = document.getElementById('caja-filters-container'); 
-    fc.classList.remove('hidden');
+    if(fc) fc.classList.remove('hidden');
     
     let users = window.state.currentUser.rol === 'Encargado' ? window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId) : window.state.usuarios;
     
-    fc.innerHTML = `
-      <div class="flex-1 min-w-[200px]">
-        <label class="text-xs font-bold text-neutral-500 block mb-1">Filtrar por Vendedor</label>
-        <select onchange="window.state.cajaFilterUser=this.value; window.renderCajaView()" class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500">
-          <option value="all">Todas las cajas permitidas</option>
-          ${users.map(u => `
-            <option value="${u.id}" ${window.state.cajaFilterUser === u.id ? 'selected' : ''}>${u.nombre}</option>
-          `).join('')}
-        </select>
-      </div>
-    `;
+    if(fc) {
+      fc.innerHTML = `
+        <div class="flex-1 min-w-[200px]">
+          <label class="text-xs font-bold text-neutral-500 block mb-1">Filtrar por Vendedor</label>
+          <select onchange="window.state.cajaFilterUser=this.value; window.renderCajaView()" class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500">
+            <option value="all">Todas las cajas permitidas</option>
+            ${users.map(u => `
+              <option value="${u.id}" ${window.state.cajaFilterUser === u.id ? 'selected' : ''}>${u.nombre}</option>
+            `).join('')}
+          </select>
+        </div>
+      `;
+    }
     
     if(window.state.cajaFilterUser !== 'all') { 
       myTrans = myTrans.filter(t => t.userId === window.state.cajaFilterUser); 
@@ -470,8 +486,11 @@ window.renderCajaView = () => {
   }
 
   if (window.state.currentUser.rol === 'Admin') { 
-    document.getElementById('btn-ver-pendientes').classList.remove('hidden'); 
-    document.getElementById('btn-ver-pendientes').classList.add('inline-flex'); 
+    const btnPendientes = document.getElementById('btn-ver-pendientes');
+    if(btnPendientes) {
+      btnPendientes.classList.remove('hidden'); 
+      btnPendientes.classList.add('inline-flex'); 
+    }
   }
 
   const sorted = [...myTrans].sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
@@ -487,60 +506,66 @@ window.renderCajaView = () => {
   const ing = transWithSaldo.filter(t => t.tipo === 'ingreso' && t.estadoCobro !== 'pendiente').reduce((a,c) => a + c.valor, 0); 
   const egr = transWithSaldo.filter(t => t.tipo === 'gasto').reduce((a,c) => a + c.valor, 0);
 
-  document.getElementById('caja-stats').innerHTML = `
-    <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
-      <h3 class="text-sm font-medium text-neutral-500 mb-1">Saldo Real Disponible</h3>
-      <p class="text-3xl font-black ${saldo >= 0 ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">${window.formatMoney(saldo)}</p>
-    </div>
-    <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
-      <h3 class="text-sm font-medium text-neutral-500 mb-1">Ingresos Efectivizados</h3>
-      <p class="text-3xl font-black text-green-600 dark:text-green-500">${window.formatMoney(ing)}</p>
-    </div>
-    <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
-      <h3 class="text-sm font-medium text-neutral-500 mb-1">Egresos Registrados</h3>
-      <p class="text-3xl font-black text-rose-600 dark:text-rose-400">${window.formatMoney(egr)}</p>
-    </div>
-  `;
+  const statContainer = document.getElementById('caja-stats');
+  if(statContainer) {
+    statContainer.innerHTML = `
+      <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
+        <h3 class="text-sm font-medium text-neutral-500 mb-1">Saldo Real Disponible</h3>
+        <p class="text-3xl font-black ${saldo >= 0 ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">${window.formatMoney(saldo)}</p>
+      </div>
+      <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
+        <h3 class="text-sm font-medium text-neutral-500 mb-1">Ingresos Efectivizados</h3>
+        <p class="text-3xl font-black text-green-600 dark:text-green-500">${window.formatMoney(ing)}</p>
+      </div>
+      <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
+        <h3 class="text-sm font-medium text-neutral-500 mb-1">Egresos Registrados</h3>
+        <p class="text-3xl font-black text-rose-600 dark:text-rose-400">${window.formatMoney(egr)}</p>
+      </div>
+    `;
+  }
 
-  if (transWithSaldo.length === 0) { 
-    document.getElementById('caja-table').innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">Sin movimientos en la caja seleccionada.</td></tr>`; 
-  } else {
-    document.getElementById('caja-table').innerHTML = transWithSaldo.slice().reverse().map(t => {
-      const u = window.state.usuarios.find(x => x.id === t.userId); 
-      const s = window.state.sucursales.find(x => x.id === t.sucursalId);
-      
-      return `
-        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors ${t.estadoCobro === 'pendiente' ? 'opacity-50' : ''}">
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-4">
-              <div class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${t.tipo === 'ingreso' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'}">
-                <i data-lucide="${t.tipo === 'ingreso' ? 'trending-up' : 'trending-down'}" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <p class="text-sm font-bold flex items-center">
-                  ${t.descripcion}
-                  ${t.estadoCobro === 'pendiente' ? '<span class="ml-2 text-[10px] bg-amber-200 text-amber-800 dark:bg-amber-900 dark:text-amber-300 px-1 rounded">Pendiente</span>' : ''}
-                </p>
-                <div class="flex items-center space-x-2 mt-1">
-                  <span class="text-xs text-neutral-500 uppercase">${t.categoria}</span>
-                  ${t.tipoComprobante !== 'X' ? `<span class="bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300 text-[10px] font-bold px-1.5 py-0.5 rounded">Fac ${t.tipoComprobante}</span>` : ''}
+  const tableContainer = document.getElementById('caja-table');
+  if (tableContainer) {
+    if (transWithSaldo.length === 0) { 
+      tableContainer.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">Sin movimientos en la caja seleccionada.</td></tr>`; 
+    } else {
+      tableContainer.innerHTML = transWithSaldo.slice().reverse().map(t => {
+        const u = window.state.usuarios.find(x => x.id === t.userId); 
+        const s = window.state.sucursales.find(x => x.id === t.sucursalId);
+        
+        return `
+          <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors ${t.estadoCobro === 'pendiente' ? 'opacity-50' : ''}">
+            <td class="px-6 py-4">
+              <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${t.tipo === 'ingreso' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'}">
+                  <i data-lucide="${t.tipo === 'ingreso' ? 'trending-up' : 'trending-down'}" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-bold flex items-center">
+                    ${t.descripcion}
+                    ${t.estadoCobro === 'pendiente' ? '<span class="ml-2 text-[10px] bg-amber-200 text-amber-800 dark:bg-amber-900 dark:text-amber-300 px-1 rounded">Pendiente</span>' : ''}
+                  </p>
+                  <div class="flex items-center space-x-2 mt-1">
+                    <span class="text-xs text-neutral-500 uppercase">${t.categoria}</span>
+                    ${t.tipoComprobante !== 'X' ? `<span class="bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300 text-[10px] font-bold px-1.5 py-0.5 rounded">Fac ${t.tipoComprobante}</span>` : ''}
+                  </div>
                 </div>
               </div>
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <p class="text-sm font-bold">${u ? u.nombre : '-'}</p>
-            <p class="text-xs text-neutral-500">${s ? s.nombre : ''}</p>
-          </td>
-          <td class="px-6 py-4 text-sm font-bold text-right ${t.tipo === 'ingreso' ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">
-            ${t.tipo === 'ingreso' ? '+' : '-'}${window.formatMoney(t.valor)}
-          </td>
-          <td class="px-6 py-4 text-sm font-bold text-right">
-            ${t.estadoCobro === 'pendiente' ? '-' : window.formatMoney(t.saldoDisponible)}
-          </td>
-        </tr>
-      `;
-    }).join('');
+            </td>
+            <td class="px-6 py-4">
+              <p class="text-sm font-bold">${u ? u.nombre : '-'}</p>
+              <p class="text-xs text-neutral-500">${s ? s.nombre : ''}</p>
+            </td>
+            <td class="px-6 py-4 text-sm font-bold text-right ${t.tipo === 'ingreso' ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">
+              ${t.tipo === 'ingreso' ? '+' : '-'}${window.formatMoney(t.valor)}
+            </td>
+            <td class="px-6 py-4 text-sm font-bold text-right">
+              ${t.estadoCobro === 'pendiente' ? '-' : window.formatMoney(t.saldoDisponible)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
   }
   lucide.createIcons();
 };
@@ -548,6 +573,7 @@ window.renderCajaView = () => {
 // --- RENDERIZADO FORMULARIOS ---
 window.renderFormulariosView = () => {
    const table = document.getElementById('formularios-table');
+   if(!table) return;
    
    if(window.state.formularios.length === 0) { 
      table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay formularios generados.</td></tr>`; 
@@ -572,36 +598,183 @@ window.renderFormulariosView = () => {
    lucide.createIcons();
 };
 
-// --- RENDERIZADO PERSONAL Y COMISIONES ---
+// --- RENDERIZADO PERSONAL, COMISIONES Y CIERRES ---
 window.renderPersonalView = () => {
   if(window.state.currentUser?.rol !== 'Admin') return;
+  
   const table = document.getElementById('personal-table');
+  const select = document.getElementById('comision-user');
+  const tableCierres = document.getElementById('cierres-table');
   
   const usuariosAgencia = window.state.usuarios.filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado');
   
   let totLiq = 0;
   
-  const dataRows = usuariosAgencia.map(u => {
-    const pdtes = window.state.comisiones.filter(c => c.userId === u.id && c.estado === 'Pendiente');
-    const totPdte = pdtes.reduce((a,c) => a + c.monto, 0);
-    totLiq += totPdte;
+  if (table) {
+    const dataRows = usuariosAgencia.map(u => {
+      const pdtes = window.state.comisiones.filter(c => c.userId === u.id && c.estado === 'Pendiente');
+      const totPdte = pdtes.reduce((a,c) => a + c.monto, 0);
+      totLiq += totPdte;
+      
+      const suc = window.state.sucursales.find(s => s.id == u.sucursalId)?.nombre || '-';
+      
+      return `
+        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetallePersonal('${u.id}')">
+          <td class="px-6 py-4 font-bold">${u.nombre}</td>
+          <td class="px-6 py-4 text-xs font-bold text-neutral-500 uppercase">${u.rol}</td>
+          <td class="px-6 py-4 text-sm">${suc}</td>
+          <td class="px-6 py-4 text-right font-black text-lg ${totPdte > 0 ? 'text-green-600 dark:text-green-500' : 'text-neutral-400'}">${window.formatMoney(totPdte)}</td>
+        </tr>
+      `;
+    }).join('');
     
-    const suc = window.state.sucursales.find(s => s.id == u.sucursalId)?.nombre || '-';
+    table.innerHTML = dataRows || `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay personal para comisionar.</td></tr>`;
+  }
+  
+  if (document.getElementById('monto-total-liquidar')) {
+    document.getElementById('monto-total-liquidar').innerText = window.formatMoney(totLiq);
+  }
+  
+  if (select) {
+    select.innerHTML = `<option value="">-- Seleccione Empleado --</option>` + usuariosAgencia.map(u => `<option value="${u.id}">${u.nombre} (${u.rol})</option>`).join('');
+  }
+  
+  if (tableCierres) {
+    const cierres = window.state.cierres_personal || [];
     
-    return `
-      <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-        <td class="px-6 py-4 font-bold">${u.nombre}</td>
-        <td class="px-6 py-4 text-xs font-bold text-neutral-500 uppercase">${u.rol}</td>
-        <td class="px-6 py-4 text-sm">${suc}</td>
-        <td class="px-6 py-4 text-right font-black text-lg ${totPdte > 0 ? 'text-green-600 dark:text-green-500' : 'text-neutral-400'}">${window.formatMoney(totPdte)}</td>
-      </tr>
+    if(cierres.length === 0) {
+      tableCierres.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay cierres registrados.</td></tr>`;
+    } else {
+      tableCierres.innerHTML = cierres.slice().reverse().map(c => `
+        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+          <td class="px-6 py-4 font-bold text-sm">${window.formatDate(c.fecha)}</td>
+          <td class="px-6 py-4 text-sm font-bold text-neutral-500">${c.cantidadMovimientos || 0} movimientos</td>
+          <td class="px-6 py-4 text-right font-black text-rose-600 dark:text-rose-400">${window.formatMoney(c.total)}</td>
+          <td class="px-6 py-4 text-center">
+             <button onclick="window.openDetalleCierre('${c.id}')" class="px-4 py-2 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-xl hover:scale-105 transition-transform">
+               Ver Detalle
+             </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+};
+
+window.openDetallePersonal = (userId) => {
+  const u = window.state.usuarios.find(x => x.id === userId);
+  if(!u) return;
+  
+  const comisionesUsuario = window.state.comisiones.filter(c => c.userId === userId).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+  
+  let html = `
+    <div class="mb-6 flex items-center space-x-4">
+      <div class="w-14 h-14 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center font-black text-2xl">
+        ${u.nombre.charAt(0).toUpperCase()}
+      </div>
+      <div>
+        <h4 class="text-2xl font-black">${u.nombre}</h4>
+        <p class="text-sm text-neutral-500 font-bold uppercase tracking-wider">${u.rol}</p>
+      </div>
+    </div>
+  `;
+  
+  if(comisionesUsuario.length === 0) {
+    html += `<p class="text-neutral-500 text-center py-6 font-bold">No hay registro de comisiones para este empleado.</p>`;
+  } else {
+    html += `
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800">
+            <th class="py-3">Fecha</th>
+            <th class="py-3">Estado</th>
+            <th class="py-3 text-right">Monto</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
+          ${comisionesUsuario.map(c => `
+            <tr>
+              <td class="py-4 text-sm font-bold text-neutral-600 dark:text-neutral-400">${window.formatDate(c.fecha)}</td>
+              <td class="py-4">
+                <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${c.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'}">
+                  ${c.estado}
+                </span>
+              </td>
+              <td class="py-4 text-right font-black ${c.estado === 'Pendiente' ? 'text-neutral-900 dark:text-white' : 'text-neutral-400 dark:text-neutral-500 line-through'}">
+                ${window.formatMoney(c.monto)}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
     `;
-  }).join('');
+  }
   
-  table.innerHTML = dataRows || `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay personal para comisionar.</td></tr>`;
+  document.getElementById('dp-content').innerHTML = html;
+  window.openModal('modal-detalle-personal');
+};
+
+window.openDetalleCierre = (cierreId) => {
+  const cierre = window.state.cierres_personal.find(c => c.id === cierreId);
+  if(!cierre) return;
   
-  // Actualizar el select del modal de asignación manual de bonos
-  document.getElementById('comision-user').innerHTML = `<option value="">-- Seleccione Empleado --</option>` + usuariosAgencia.map(u => `<option value="${u.id}">${u.nombre} (${u.rol})</option>`).join('');
+  // Buscar todas las comisiones asociadas a este cierre
+  const comisionesPagadas = window.state.comisiones.filter(c => c.cierreId === cierreId);
+  
+  let html = `
+    <div class="mb-8 flex justify-between items-end border-b border-neutral-200 dark:border-neutral-800 pb-6">
+      <div>
+        <p class="text-sm font-bold text-neutral-500 uppercase tracking-wider mb-1">Fecha de Liquidación</p>
+        <h4 class="text-2xl font-black">${window.formatDate(cierre.fecha)}</h4>
+      </div>
+      <div class="text-right">
+        <p class="text-sm font-bold text-neutral-500 uppercase tracking-wider mb-1">Total Abonado</p>
+        <p class="text-3xl font-black text-rose-600 dark:text-rose-400">${window.formatMoney(cierre.total)}</p>
+      </div>
+    </div>
+    
+    <h5 class="font-bold text-lg mb-4">Desglose de Pagos</h5>
+  `;
+  
+  if(comisionesPagadas.length === 0) {
+    html += `<p class="text-neutral-500">Detalle no disponible o vacío.</p>`;
+  } else {
+    // Agrupar por usuario para un resumen más claro
+    const agrupado = {};
+    comisionesPagadas.forEach(c => {
+      if(!agrupado[c.userId]) agrupado[c.userId] = { total: 0, items: [] };
+      agrupado[c.userId].total += c.monto;
+      agrupado[c.userId].items.push(c);
+    });
+    
+    html += `<div class="space-y-6">`;
+    for(let userId in agrupado) {
+      const u = window.state.usuarios.find(x => x.id === userId);
+      const nombre = u ? u.nombre : 'Usuario Eliminado';
+      const userGroup = agrupado[userId];
+      
+      html += `
+        <div class="bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700">
+          <div class="flex justify-between items-center mb-3 border-b border-neutral-200 dark:border-neutral-700 pb-2">
+            <span class="font-black text-lg">${nombre}</span>
+            <span class="font-black text-green-600 dark:text-green-500">${window.formatMoney(userGroup.total)}</span>
+          </div>
+          <ul class="space-y-1 pl-2">
+            ${userGroup.items.map(item => `
+              <li class="flex justify-between text-sm">
+                <span class="text-neutral-600 dark:text-neutral-400">• Comisión (Orig: ${window.formatDate(item.fecha)})</span>
+                <span class="font-bold">${window.formatMoney(item.monto)}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      `;
+    }
+    html += `</div>`;
+  }
+  
+  document.getElementById('dc-content').innerHTML = html;
+  window.openModal('modal-detalle-cierre');
 };
 
 // --- RENDERIZADO VENTAS ---
@@ -609,13 +782,14 @@ window.renderVentasView = () => {
   if(window.state.currentUser?.rol !== 'Admin') return; 
   
   const table = document.getElementById('ventas-table'); 
+  if(!table) return;
+  
   if (window.state.ventas.length === 0) { 
     table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay ventas registradas.</td></tr>`; 
   } else { 
     table.innerHTML = window.state.ventas.slice().reverse().map(v => { 
       let badge = ''; 
       
-      // Salvavidas por si es una venta vieja sin metodoPago
       const metodos = v.metodoPago || ''; 
       
       if (metodos.includes('Crédito') || metodos.includes('Pagaré')) { 
@@ -647,7 +821,7 @@ window.openDetalleVenta = (id) => {
   const v = window.state.ventas.find(x => x.id === id); 
   if(!v) return; 
   
-  const metodos = v.metodoPago || ''; // Salvavidas
+  const metodos = v.metodoPago || ''; 
   let pagosHTML = ''; 
   
   if(metodos.includes('Crédito') || metodos.includes('Pagaré')) { 
@@ -713,7 +887,6 @@ window.openDetalleVenta = (id) => {
     ${pagosHTML}
   `; 
   
-  // Botón Asignar Comisión (Exclusivo Admin)
   if(window.state.currentUser && window.state.currentUser.rol === 'Admin') {
     document.getElementById('venta-detail-content').innerHTML += `
       <div class="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-800">
@@ -728,20 +901,6 @@ window.openDetalleVenta = (id) => {
   lucide.createIcons();
 };
 
-window.registrarCuotaVenta = async (id) => { 
-  const v = window.state.ventas.find(x => x.id === id); 
-  if(v && (v.cuotasPagadas || 0) < (v.cuotasTotales || 0)) { 
-    await window.fbUpdate("ventas", id, { cuotasPagadas: (v.cuotasPagadas || 0) + 1 }); 
-    window.closeModal('modal-detalle-venta'); 
-  } 
-};
-
-window.openModalComisionPorVenta = (ventaId) => { 
-  document.getElementById('form-comision').reset(); 
-  document.getElementById('comision-venta-id').value = ventaId; 
-  window.openModal('modal-comision'); 
-};
-
 // --- RENDERIZADO FACTURAS ---
 window.renderFacturasView = () => { 
   if(window.state.currentUser?.rol !== 'Admin') return; 
@@ -750,18 +909,22 @@ window.renderFacturasView = () => {
   const totalEmitido = facturas.reduce((a,c) => a + c.valor, 0); 
   const totalIva = facturas.reduce((a,c) => a + (c.iva || 0), 0); 
   
-  document.getElementById('facturas-summary').innerHTML = `
-    <div class="p-8 bg-black dark:bg-neutral-800 rounded-3xl text-white shadow-xl border border-neutral-800 dark:border-neutral-700">
-      <p class="text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">Monto Facturado (Global)</p>
-      <p class="text-5xl font-black">${window.formatMoney(totalEmitido)}</p>
-    </div>
-    <div class="p-8 bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
-      <p class="text-neutral-500 dark:text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">IVA Acumulado (Fac. A)</p>
-      <p class="text-5xl font-black text-neutral-900 dark:text-white">${window.formatMoney(totalIva)}</p>
-    </div>
-  `; 
+  const fs = document.getElementById('facturas-summary');
+  if(fs) {
+    fs.innerHTML = `
+      <div class="p-8 bg-black dark:bg-neutral-800 rounded-3xl text-white shadow-xl border border-neutral-800 dark:border-neutral-700">
+        <p class="text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">Monto Facturado (Global)</p>
+        <p class="text-5xl font-black">${window.formatMoney(totalEmitido)}</p>
+      </div>
+      <div class="p-8 bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
+        <p class="text-neutral-500 dark:text-neutral-400 text-sm font-bold uppercase tracking-wider mb-2">IVA Acumulado (Fac. A)</p>
+        <p class="text-5xl font-black text-neutral-900 dark:text-white">${window.formatMoney(totalIva)}</p>
+      </div>
+    `; 
+  }
   
   const table = document.getElementById('facturas-table'); 
+  if(!table) return;
   
   if(facturas.length === 0) { 
     table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay facturas.</td></tr>`; 
@@ -797,6 +960,7 @@ window.renderFacturasView = () => {
 
 window.openDetalleFactura = (id) => { 
   const t = window.state.transacciones.find(x => x.id === id); 
+  if(!t) return;
   const subtotal = t.valor - (t.iva || 0); 
   
   document.getElementById('factura-detail-content').innerHTML = `
@@ -835,6 +999,7 @@ window.openDetalleFactura = (id) => {
 // --- RENDERIZADO CRM ---
 window.renderClientesView = () => { 
   const table = document.getElementById('crm-table'); 
+  if(!table) return;
   
   if (window.state.consultas.length === 0) { 
     table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay clientes en la base de datos.</td></tr>`; 
@@ -884,6 +1049,8 @@ window.renderClientesView = () => {
 // --- RENDERIZADO DASHBOARD EJECUTIVO ---
 window.renderResumenesView = () => { 
   if(window.state.currentUser?.rol !== 'Admin') return; 
+  const dc = document.getElementById('dashboard-content');
+  if(!dc) return;
   
   const ing = window.state.transacciones.filter(t => t.tipo === 'ingreso').reduce((a,c) => a + c.valor, 0); 
   let egr = window.state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => a + c.valor, 0); 
@@ -919,7 +1086,7 @@ window.renderResumenesView = () => {
     `).join(''); 
   } 
   
-  document.getElementById('dashboard-content').innerHTML = `
+  dc.innerHTML = `
     <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2rem] shadow-sm">
       <h3 class="font-black text-2xl mb-8">Flujo de Fondos Operativo</h3>
       <div class="space-y-6">
@@ -950,51 +1117,58 @@ window.renderAdminView = () => {
   if(window.state.currentUser?.rol !== 'Admin') return; 
   
   const sucList = document.getElementById('admin-suc-list'); 
-  if (window.state.sucursales.length === 0) { 
-    sucList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay sucursales.</p>'; 
-  } else { 
-    sucList.innerHTML = window.state.sucursales.map(s => `
-      <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
-        <span class="font-bold text-sm">${s.nombre}</span>
-        <div class="flex space-x-1">
-          <button onclick="window.editSucursal('${s.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
-            <i data-lucide="edit-2" class="w-4 h-4"></i>
-          </button>
-          <button onclick="window.deleteSucursal('${s.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-    `).join(''); 
-  } 
-  
-  document.getElementById('new-user-suc').innerHTML = window.state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
-  
-  const usrList = document.getElementById('admin-users-list'); 
-  if (window.state.usuarios.length === 0) { 
-    usrList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay usuarios.</p>'; 
-  } else { 
-    usrList.innerHTML = window.state.usuarios.map(u => { 
-      const s = window.state.sucursales.find(x => x.id == u.sucursalId); 
-      return `
+  if(sucList) {
+    if (window.state.sucursales.length === 0) { 
+      sucList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay sucursales.</p>'; 
+    } else { 
+      sucList.innerHTML = window.state.sucursales.map(s => `
         <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
-          <div>
-            <p class="font-bold text-sm">${u.nombre}</p>
-            <p class="text-[10px] font-bold text-neutral-500 mt-1 uppercase tracking-wider">
-              ${u.rol} • ${s ? s.nombre : '-'} • ${u.email}
-            </p>
-          </div>
+          <span class="font-bold text-sm">${s.nombre}</span>
           <div class="flex space-x-1">
-            <button onclick="window.editUser('${u.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
+            <button onclick="window.editSucursal('${s.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
               <i data-lucide="edit-2" class="w-4 h-4"></i>
             </button>
-            <button onclick="window.deleteUser('${u.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
+            <button onclick="window.deleteSucursal('${s.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
-      `; 
-    }).join(''); 
-  } 
+      `).join(''); 
+    } 
+  }
+  
+  const elSuc = document.getElementById('new-user-suc');
+  if(elSuc) {
+    elSuc.innerHTML = window.state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
+  }
+  
+  const usrList = document.getElementById('admin-users-list'); 
+  if(usrList) {
+    if (window.state.usuarios.length === 0) { 
+      usrList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay usuarios.</p>'; 
+    } else { 
+      usrList.innerHTML = window.state.usuarios.map(u => { 
+        const s = window.state.sucursales.find(x => x.id == u.sucursalId); 
+        return `
+          <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+            <div>
+              <p class="font-bold text-sm">${u.nombre}</p>
+              <p class="text-[10px] font-bold text-neutral-500 mt-1 uppercase tracking-wider">
+                ${u.rol} • ${s ? s.nombre : '-'} • ${u.email}
+              </p>
+            </div>
+            <div class="flex space-x-1">
+              <button onclick="window.editUser('${u.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
+                <i data-lucide="edit-2" class="w-4 h-4"></i>
+              </button>
+              <button onclick="window.deleteUser('${u.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `; 
+      }).join(''); 
+    } 
+  }
   lucide.createIcons(); 
 };
