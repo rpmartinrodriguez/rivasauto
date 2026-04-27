@@ -613,7 +613,9 @@ window.openModalPendientes = () => {
   );
 
   let totalPendiente = 0;
+  
   oldPendientes.forEach(t => totalPendiente += t.valor);
+  
   ventasPendientes.forEach(v => {
     if(v.credito) totalPendiente += (v.credito.cuotas - v.credito.pagadas) * v.credito.valorCuota;
     if(v.pagare) totalPendiente += (v.pagare.cuotas - v.pagare.pagadas) * v.pagare.valorCuota;
@@ -713,6 +715,7 @@ window.openModalPendientes = () => {
   lucide.createIcons();
 };
 
+
 // --- RENDERIZADO FORMULARIOS ---
 window.renderFormulariosView = () => {
    const table = document.getElementById('formularios-table');
@@ -783,7 +786,10 @@ window.renderPersonalView = () => {
 
       return `
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetallePersonal('${u.id}')">
-          <td class="px-6 py-4 font-bold">${u.nombre}</td>
+          <td class="px-6 py-4 font-bold flex items-center">
+             <div class="w-2 h-2 rounded-full mr-2 ${totPdte > 0 ? 'bg-amber-500' : 'bg-transparent'}"></div>
+             ${u.nombre}
+          </td>
           <td class="px-6 py-4 text-xs font-bold text-neutral-500 uppercase">${u.rol}</td>
           <td class="px-6 py-4 text-sm">${suc}</td>
           <td class="px-6 py-4 text-right font-black text-lg ${totPdte > 0 ? 'text-green-600 dark:text-green-500' : 'text-neutral-400'}">${window.formatMoney(totPdte)}</td>
@@ -865,10 +871,10 @@ window.openDetallePersonal = (userId) => {
         </thead>
         <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
           ${comisionesUsuario.map(c => {
-            let autoDesc = 'Manual / Bono';
+            let autoDesc = c.descripcion || 'Manual / Bono';
             if (c.ventaId) {
                const v = window.state.ventas.find(x => x.id === c.ventaId);
-               if(v) autoDesc = v.autoDesc;
+               if(v) autoDesc = `Venta: ${v.autoDesc}`;
             }
             return `
             <tr>
@@ -938,7 +944,7 @@ window.openDetalleCierre = (cierreId) => {
           </div>
           <ul class="space-y-2 pl-2">
             ${userGroup.items.map(item => {
-              let autoDesc = 'Manual / Bono Especial';
+              let autoDesc = item.descripcion || 'Carga Manual';
               if (item.ventaId) {
                  const v = window.state.ventas.find(x => x.id === item.ventaId);
                  if(v) autoDesc = `Venta: ${v.autoDesc}`;
@@ -1054,7 +1060,6 @@ window.openDetalleVenta = (id) => {
   `; 
   
   if(window.state.currentUser && window.state.currentUser.rol === 'Admin') {
-    // MODULO DE RENTABILIDAD EXCLUSIVO ADMIN
     let patenteStr = '';
     const match = v.autoDesc.match(/\(([^)]+)\)/);
     if(match) patenteStr = match[1];
@@ -1210,7 +1215,6 @@ window.renderClientesView = () => {
     table.innerHTML = window.state.consultas.slice().reverse().map(c => { 
       const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
       
-      // LOGICA DINAMICA DE TEMPERATURA CRM
       const leadDate = new Date(c.fecha + 'T00:00:00');
       const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
       
