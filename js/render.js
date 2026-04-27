@@ -2,7 +2,6 @@
 // js/render.js
 // ==========================================
 
-// --- RENDERIZADO GLOBAL ---
 window.renderAllViews = () => { 
   if(!window.state.currentUser) return; 
   
@@ -20,7 +19,6 @@ window.renderAllViews = () => {
   lucide.createIcons(); 
 };
 
-// --- INICIALIZADOR DE DESPLEGABLES ---
 window.initSelects = () => { 
   const elCat = document.getElementById('caja-cat');
   if (elCat) elCat.innerHTML = window.state.categoriasGasto.map(c => `<option value="${c}">${c}</option>`).join(''); 
@@ -35,7 +33,6 @@ window.initSelects = () => {
   if (elFecha) elFecha.value = new Date().toISOString().split('T')[0]; 
 };
 
-// --- ALERTAS DE RECOMPRA ---
 window.checkNotifications = () => {
   if(!window.state.currentUser || window.state.currentUser.rol !== 'Admin') {
     const nc = document.getElementById('notif-container');
@@ -93,7 +90,6 @@ window.checkNotifications = () => {
   }
 };
 
-// --- FLOTA Y AUTOS ---
 window.toggleAutosViewMode = (mode) => { 
   window.state.autosViewMode = mode; 
   window.renderAutosView(); 
@@ -253,6 +249,7 @@ window.renderDetalleAuto = () => {
           <div class="text-right">
             <p class="text-xs uppercase font-bold opacity-60">Precio Venta</p>
             <p class="text-3xl font-black mt-1">${window.formatMoney(a.precio)}</p>
+            ${tg > 0 ? `<p class="text-[10px] font-bold mt-2 text-rose-400 dark:text-rose-600 uppercase tracking-widest">+ Gastos Aplicados: ${window.formatMoney(tg)}</p>` : ''}
           </div>
         </div>
     `;
@@ -291,6 +288,7 @@ window.renderDetalleAuto = () => {
     
     html += `</div>`;
     
+    // PESTAÑAS (TABS)
     html += `
       <div class="flex space-x-4 border-b border-neutral-200 dark:border-neutral-800 mb-6 overflow-x-auto no-scrollbar">
         <button onclick="window.switchDASection('crm')" class="pb-3 font-bold border-b-2 flex items-center ${window.state.daActiveSection === 'crm' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
@@ -299,9 +297,13 @@ window.renderDetalleAuto = () => {
         <button onclick="window.switchDASection('doc')" class="pb-3 font-bold border-b-2 flex items-center ${window.state.daActiveSection === 'doc' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
           <i data-lucide="file-check" class="w-4 h-4 mr-2"></i> Papeles
         </button>
+        <button onclick="window.switchDASection('taller')" class="pb-3 font-bold border-b-2 flex items-center ${window.state.daActiveSection === 'taller' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
+          <i data-lucide="wrench" class="w-4 h-4 mr-2"></i> Taller
+        </button>
       </div>
     `;
     
+    // CONTENIDO DE LAS PESTAÑAS
     if(window.state.daActiveSection === 'doc') {
       html += `
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -331,6 +333,24 @@ window.renderDetalleAuto = () => {
            </form>
          </div>
        `;
+    } else if (window.state.daActiveSection === 'taller') {
+       if(!a.gastos || a.gastos.length === 0) {
+         html += `<p class="text-neutral-500 text-sm font-bold text-center py-6">No hay gastos de taller registrados para este vehículo.</p>`;
+       } else {
+         html += `
+         <div class="space-y-3">
+           ${a.gastos.slice().reverse().map(g => `
+             <div class="flex justify-between items-center p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700">
+               <div>
+                 <p class="font-bold text-sm">${g.descripcion}</p>
+                 <p class="text-xs text-neutral-500 mt-1 uppercase tracking-wider">${g.categoria} • ${window.formatDate(g.fecha)}</p>
+               </div>
+               <span class="font-black text-rose-600 dark:text-rose-400">${window.formatMoney(g.monto)}</span>
+             </div>
+           `).join('')}
+         </div>
+         `;
+       }
     }
   } else {
     
@@ -341,7 +361,6 @@ window.renderDetalleAuto = () => {
       </button>
     `;
     
-    // Ganancia visible sólo para Admin
     if (window.state.currentUser.rol === 'Admin') {
       html += `
         <div class="bg-black dark:bg-white text-white dark:text-black rounded-[2rem] p-6 mb-6 flex justify-between shadow-xl border border-neutral-800 dark:border-neutral-200">
@@ -384,10 +403,10 @@ window.renderDetalleAuto = () => {
           
           <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
             <input type="checkbox" id="chk-credito" onchange="document.getElementById('div-credito').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
-            <span>Crédito Pre-Aprobado (Pendiente)</span>
+            <span>Crédito Pre-Aprobado (Cobro en Caja)</span>
           </label>
           <div id="div-credito" class="hidden pl-8 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl fade-in">
-            <input id="val-credito" type="number" placeholder="Monto ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+            <input id="val-credito" type="number" placeholder="Monto Total a Financiar ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
             <input id="cuotas-credito" type="number" placeholder="Cant. Cuotas" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
             <input id="venc-credito" type="date" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 text-xs font-bold outline-none focus:border-green-500" title="1º Vencimiento">
             <input id="nota-credito" type="text" placeholder="Entidad / Financiera..." class="col-span-4 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
@@ -395,10 +414,10 @@ window.renderDetalleAuto = () => {
           
           <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
             <input type="checkbox" id="chk-pagare" onchange="document.getElementById('div-pagare').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
-            <span>Pagaré Personal (Pendiente)</span>
+            <span>Pagaré Personal (Cobro en Caja)</span>
           </label>
           <div id="div-pagare" class="hidden pl-8 mb-4 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl fade-in">
-            <input id="val-pagare" type="number" placeholder="Monto ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+            <input id="val-pagare" type="number" placeholder="Monto Total a Financiar ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
             <input id="cuotas-pagare" type="number" placeholder="Cant. Cuotas" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
             <input id="venc-pagare" type="date" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 text-xs font-bold outline-none focus:border-green-500" title="1º Vencimiento">
             <input id="nota-pagare" type="text" placeholder="Detalle / Aval..." class="col-span-4 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
@@ -570,6 +589,108 @@ window.renderCajaView = () => {
   lucide.createIcons();
 };
 
+window.openModalPendientes = () => { 
+  const oldPendientes = window.state.transacciones.filter(t => t.estadoCobro === 'pendiente');
+  
+  const ventasPendientes = window.state.ventas.filter(v => 
+    (v.credito && v.credito.pagadas < v.credito.cuotas) ||
+    (v.pagare && v.pagare.pagadas < v.pagare.cuotas)
+  );
+
+  let totalPendiente = 0;
+  
+  oldPendientes.forEach(t => totalPendiente += t.valor);
+  
+  ventasPendientes.forEach(v => {
+    if(v.credito) totalPendiente += (v.credito.cuotas - v.credito.pagadas) * v.credito.valorCuota;
+    if(v.pagare) totalPendiente += (v.pagare.cuotas - v.pagare.pagadas) * v.pagare.valorCuota;
+  });
+
+  const content = document.getElementById('pendientes-list-content');
+  if(!content) return;
+
+  if (oldPendientes.length === 0 && ventasPendientes.length === 0) { 
+    content.innerHTML = `<p class="text-center text-neutral-500 py-6 font-bold">Sin cobros pendientes por el momento.</p>`; 
+    window.openModal('modal-pendientes');
+    return;
+  }
+
+  let html = `
+    <div class="mb-6 bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-400 p-4 rounded-2xl flex justify-between items-center">
+      <span class="font-bold uppercase tracking-wider text-xs">Total Pendiente a Cobrar</span>
+      <span class="font-black text-2xl">${window.formatMoney(totalPendiente)}</span>
+    </div>
+    <div class="space-y-4">
+  `;
+
+  ventasPendientes.forEach(v => {
+    let internalHtml = '';
+    
+    if(v.credito && v.credito.pagadas < v.credito.cuotas) {
+      internalHtml += `
+        <div class="flex justify-between items-center mt-2 p-3 bg-white/60 dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+          <span class="text-xs font-bold">Crédito: Cuota ${v.credito.pagadas + 1} de ${v.credito.cuotas}</span>
+          <div class="flex items-center space-x-4">
+            <span class="text-sm font-black text-green-600 dark:text-green-500">${window.formatMoney(v.credito.valorCuota)}</span>
+            <button onclick="window.cobrarCuotaVenta('${v.id}', 'credito')" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition-transform shadow-md">Cobrar en Caja</button>
+          </div>
+        </div>
+      `;
+    }
+    
+    if(v.pagare && v.pagare.pagadas < v.pagare.cuotas) {
+      internalHtml += `
+        <div class="flex justify-between items-center mt-2 p-3 bg-white/60 dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+          <span class="text-xs font-bold">Pagaré: Cuota ${v.pagare.pagadas + 1} de ${v.pagare.cuotas}</span>
+          <div class="flex items-center space-x-4">
+            <span class="text-sm font-black text-green-600 dark:text-green-500">${window.formatMoney(v.pagare.valorCuota)}</span>
+            <button onclick="window.cobrarCuotaVenta('${v.id}', 'pagare')" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition-transform shadow-md">Cobrar en Caja</button>
+          </div>
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="border border-neutral-200 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm">
+        <div class="bg-neutral-50 dark:bg-neutral-800 p-4 flex justify-between items-center cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors" onclick="document.getElementById('pend-venta-${v.id}').classList.toggle('hidden')">
+          <div>
+             <p class="font-black text-sm text-neutral-900 dark:text-white">${v.compradorNombre}</p>
+             <p class="text-xs text-neutral-500 font-bold mt-1">${v.autoDesc}</p>
+          </div>
+          <i data-lucide="chevron-down" class="w-5 h-5 text-neutral-400"></i>
+        </div>
+        <div id="pend-venta-${v.id}" class="hidden p-4 bg-neutral-100/50 dark:bg-neutral-900/50 border-t border-neutral-200 dark:border-neutral-700">
+           ${internalHtml}
+        </div>
+      </div>
+    `;
+  });
+
+  oldPendientes.forEach(t => {
+    html += `
+      <div class="flex justify-between items-center p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-2xl shadow-sm">
+        <div>
+          <p class="font-bold text-sm text-neutral-900 dark:text-white">${t.descripcion}</p>
+          <p class="text-xs text-amber-700 dark:text-amber-400 font-bold mt-1">Acreditación Original: ${window.formatDate(t.fechaAcreditacion)}</p>
+        </div>
+        <div class="text-right">
+          <p class="font-black text-green-600 dark:text-green-500 mb-2">${window.formatMoney(t.valor)}</p>
+          <button onclick="window.marcarCobrado('${t.id}')" class="px-4 py-2 bg-black text-white dark:bg-white dark:text-black text-xs font-bold rounded-lg hover:scale-105 transition-transform shadow-md">
+            Cobrar en Caja
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  content.innerHTML = html;
+  
+  window.openModal('modal-pendientes');
+  lucide.createIcons();
+};
+
+
 // --- RENDERIZADO FORMULARIOS ---
 window.renderFormulariosView = () => {
    const table = document.getElementById('formularios-table');
@@ -718,7 +839,6 @@ window.openDetalleCierre = (cierreId) => {
   const cierre = window.state.cierres_personal.find(c => c.id === cierreId);
   if(!cierre) return;
   
-  // Buscar todas las comisiones asociadas a este cierre
   const comisionesPagadas = window.state.comisiones.filter(c => c.cierreId === cierreId);
   
   let html = `
@@ -739,7 +859,6 @@ window.openDetalleCierre = (cierreId) => {
   if(comisionesPagadas.length === 0) {
     html += `<p class="text-neutral-500">Detalle no disponible o vacío.</p>`;
   } else {
-    // Agrupar por usuario para un resumen más claro
     const agrupado = {};
     comisionesPagadas.forEach(c => {
       if(!agrupado[c.userId]) agrupado[c.userId] = { total: 0, items: [] };
@@ -789,12 +908,20 @@ window.renderVentasView = () => {
   } else { 
     table.innerHTML = window.state.ventas.slice().reverse().map(v => { 
       let badge = ''; 
-      
       const metodos = v.metodoPago || ''; 
       
       if (metodos.includes('Crédito') || metodos.includes('Pagaré')) { 
-        const p = (v.cuotasTotales || 0) - (v.cuotasPagadas || 0); 
-        badge = `<span class="block mt-1 text-[10px] ${p > 0 ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/30' : 'text-green-600 bg-green-50 dark:bg-green-900/30'} px-2 py-0.5 rounded font-bold">${p} Pendientes</span>`; 
+        // Fallback robusto por si es venta vieja sin objeto de crédito guardado
+        let pendientes = 0;
+        if(v.credito) pendientes += (v.credito.cuotas - v.credito.pagadas);
+        if(v.pagare) pendientes += (v.pagare.cuotas - v.pagare.pagadas);
+        if(!v.credito && !v.pagare) pendientes = (v.cuotasTotales || 0) - (v.cuotasPagadas || 0);
+
+        if (pendientes > 0) {
+          badge = `<span class="block mt-1 text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded font-bold">${pendientes} Pendientes</span>`; 
+        } else if (pendientes === 0) {
+          badge = `<span class="block mt-1 text-[10px] text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded font-bold">Finalizado</span>`; 
+        }
       } 
       
       return `
@@ -822,30 +949,6 @@ window.openDetalleVenta = (id) => {
   if(!v) return; 
   
   const metodos = v.metodoPago || ''; 
-  let pagosHTML = ''; 
-  
-  if(metodos.includes('Crédito') || metodos.includes('Pagaré')) { 
-    const pagadas = v.cuotasPagadas || 0;
-    const totales = v.cuotasTotales || 0;
-    
-    pagosHTML = `
-      <div class="mt-6 p-6 bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-[2rem]">
-        <div class="flex justify-between items-center mb-4">
-          <h4 class="font-bold uppercase text-xs tracking-wider">Estado Crédito/Pagaré</h4>
-          <span class="font-black text-xl text-indigo-600 dark:text-indigo-400">${pagadas} / ${totales} Pagadas</span>
-        </div>
-        ${pagadas < totales ? `
-          <button onclick="window.registrarCuotaVenta('${v.id}')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow hover:scale-[1.01] transition-transform">
-            Registrar Pago de 1 Cuota
-          </button>
-        ` : `
-          <div class="text-center text-green-600 dark:text-green-400 font-bold p-3 bg-green-100 dark:bg-green-900/30 rounded-2xl">
-            Plan Finalizado
-          </div>
-        `}
-      </div>
-    `; 
-  } 
   
   document.getElementById('venta-detail-content').innerHTML = `
     <div class="space-y-4 text-sm">
@@ -884,7 +987,6 @@ window.openDetalleVenta = (id) => {
         </div>
       ` : ''}
     </div>
-    ${pagosHTML}
   `; 
   
   if(window.state.currentUser && window.state.currentUser.rol === 'Admin') {
