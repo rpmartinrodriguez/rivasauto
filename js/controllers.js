@@ -2,7 +2,7 @@
 // js/controllers.js
 // ==========================================
 
-// --- PERSISTENCIA DE VISTA DE AUTOS ---
+// --- PERSISTENCIA Y UTILIDADES ---
 document.addEventListener("DOMContentLoaded", () => {
   const savedView = localStorage.getItem('autosViewMode');
   if (savedView && window.state) {
@@ -10,13 +10,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// Helper para animar botones y evitar doble click
+window.setBtnLoader = (btn, isLoading) => {
+  if(!btn) return;
+  if(isLoading) {
+    btn.dataset.originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i>';
+    btn.disabled = true;
+    btn.classList.add('opacity-75', 'cursor-not-allowed');
+  } else {
+    btn.innerHTML = btn.dataset.originalHtml;
+    btn.disabled = false;
+    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+  }
+  if(window.lucide) window.lucide.createIcons();
+};
+
+// --- CONTROLADORES DE FLOTA Y AUTOS ---
 window.toggleAutosViewMode = (mode) => { 
   window.state.autosViewMode = mode; 
   localStorage.setItem('autosViewMode', mode); 
   if (window.renderAutosView) window.renderAutosView(); 
 };
 
-// --- CONTROLADORES DE FLOTA Y AUTOS ---
 window.openModalCreateAuto = () => { 
   window.state.editingAutoId = null; 
   document.getElementById('form-auto').reset(); 
@@ -51,34 +67,40 @@ window.deleteAuto = async (id) => {
 
 window.handleAutoSubmit = async (e) => {
   e.preventDefault();
+  const btn = document.getElementById('modal-auto-submit');
+  window.setBtnLoader(btn, true);
   
-  const obj = { 
-    marca: document.getElementById('auto-marca').value, 
-    modelo: document.getElementById('auto-modelo').value, 
-    color: document.getElementById('auto-color').value, 
-    km: Number(document.getElementById('auto-km').value), 
-    año: Number(document.getElementById('auto-anio').value), 
-    patente: document.getElementById('auto-patente').value.toUpperCase(), 
-    precio: Number(document.getElementById('auto-precio').value), 
-    costo: Number(document.getElementById('auto-costo').value), 
-    condicion: document.getElementById('auto-condicion').value, 
-    sucursalId: document.getElementById('auto-sucursal').value 
-  };
-  
-  if(window.state.editingAutoId) { 
-    await window.fbUpdate("autos", window.state.editingAutoId, obj); 
-  } else { 
-    await window.fbAdd("autos", { 
-      ...obj, 
-      estado: 'Disponible', 
-      gastos: [], 
-      documentacion: { c08: false, verificacion: false, libreDeuda: false, vtv: '' } 
-    }); 
+  try {
+    const obj = { 
+      marca: document.getElementById('auto-marca').value, 
+      modelo: document.getElementById('auto-modelo').value, 
+      color: document.getElementById('auto-color').value, 
+      km: Number(document.getElementById('auto-km').value), 
+      año: Number(document.getElementById('auto-anio').value), 
+      patente: document.getElementById('auto-patente').value.toUpperCase(), 
+      precio: Number(document.getElementById('auto-precio').value), 
+      costo: Number(document.getElementById('auto-costo').value), 
+      condicion: document.getElementById('auto-condicion').value, 
+      sucursalId: document.getElementById('auto-sucursal').value 
+    };
+    
+    if(window.state.editingAutoId) { 
+      await window.fbUpdate("autos", window.state.editingAutoId, obj); 
+    } else { 
+      await window.fbAdd("autos", { 
+        ...obj, 
+        estado: 'Disponible', 
+        gastos: [], 
+        documentacion: { c08: false, verificacion: false, libreDeuda: false, vtv: '' } 
+      }); 
+    }
+    
+    window.closeModal('modal-auto'); 
+    e.target.reset(); 
+    window.initSelects();
+  } finally {
+    window.setBtnLoader(btn, false);
   }
-  
-  window.closeModal('modal-auto'); 
-  e.target.reset(); 
-  window.initSelects();
 };
 
 window.openDetalleAuto = (id) => { 
@@ -114,10 +136,17 @@ window.openModalIngreso = (id) => {
 
 window.confirmarIngresoAuto = async () => { 
   const p = Number(document.getElementById('ingreso-precio').value); 
+  const btn = event.target;
+  
   if(p > 0) { 
-    await window.fbUpdate("autos", window.state.pendingIngresoAutoId, { estado: 'Disponible', precio: p }); 
-    document.getElementById('ingreso-aviso-gastos').classList.remove('hidden'); 
-    document.getElementById('btn-ingreso-gastos').classList.remove('hidden'); 
+    window.setBtnLoader(btn, true);
+    try {
+      await window.fbUpdate("autos", window.state.pendingIngresoAutoId, { estado: 'Disponible', precio: p }); 
+      document.getElementById('ingreso-aviso-gastos').classList.remove('hidden'); 
+      document.getElementById('btn-ingreso-gastos').classList.remove('hidden'); 
+    } finally {
+      window.setBtnLoader(btn, false);
+    }
   } else { 
     alert("Debe establecer un precio mayor a 0."); 
   } 
@@ -136,13 +165,20 @@ window.abrirCajaParaGastos = () => {
 // --- CONTROLADORES DE ADMINISTRACIÓN (SUCURSALES Y USUARIOS) ---
 window.handleSaveSucursal = async (e) => { 
   e.preventDefault(); 
-  const n = document.getElementById('new-suc-name').value; 
-  if(window.state.editingSucursalId) { 
-    await window.fbUpdate("sucursales", window.state.editingSucursalId, { nombre: n }); 
-  } else { 
-    await window.fbAdd("sucursales", { nombre: n }); 
-  } 
-  window.resetSucForm(); 
+  const btn = document.getElementById('new-suc-submit');
+  window.setBtnLoader(btn, true);
+  
+  try {
+    const n = document.getElementById('new-suc-name').value; 
+    if(window.state.editingSucursalId) { 
+      await window.fbUpdate("sucursales", window.state.editingSucursalId, { nombre: n }); 
+    } else { 
+      await window.fbAdd("sucursales", { nombre: n }); 
+    } 
+    window.resetSucForm(); 
+  } finally {
+    window.setBtnLoader(btn, false);
+  }
 };
 
 window.editSucursal = (id) => { 
@@ -165,30 +201,37 @@ window.resetSucForm = () => {
 
 window.handleSaveUser = async (e) => { 
   e.preventDefault(); 
-  const n = document.getElementById('new-user-name').value; 
-  const em = document.getElementById('new-user-email').value; 
-  const r = document.getElementById('new-user-rol').value; 
-  const s = document.getElementById('new-user-suc').value; 
-  const p = document.getElementById('new-user-pwd').value; 
+  const btn = document.getElementById('new-user-submit');
+  window.setBtnLoader(btn, true);
   
-  if(window.state.editingUserId) { 
-    const d = { nombre: n, email: em, rol: r, sucursalId: s }; 
-    if(p) { 
-      d.password = p; 
-      d.isFirstLogin = true; 
+  try {
+    const n = document.getElementById('new-user-name').value; 
+    const em = document.getElementById('new-user-email').value; 
+    const r = document.getElementById('new-user-rol').value; 
+    const s = document.getElementById('new-user-suc').value; 
+    const p = document.getElementById('new-user-pwd').value; 
+    
+    if(window.state.editingUserId) { 
+      const d = { nombre: n, email: em, rol: r, sucursalId: s }; 
+      if(p) { 
+        d.password = p; 
+        d.isFirstLogin = true; 
+      } 
+      await window.fbUpdate("usuarios", window.state.editingUserId, d); 
+    } else { 
+      await window.fbAdd("usuarios", { 
+        nombre: n, 
+        email: em, 
+        rol: r, 
+        sucursalId: s, 
+        password: p, 
+        isFirstLogin: true 
+      }); 
     } 
-    await window.fbUpdate("usuarios", window.state.editingUserId, d); 
-  } else { 
-    await window.fbAdd("usuarios", { 
-      nombre: n, 
-      email: em, 
-      rol: r, 
-      sucursalId: s, 
-      password: p, 
-      isFirstLogin: true 
-    }); 
-  } 
-  window.resetUserForm(); 
+    window.resetUserForm(); 
+  } finally {
+    window.setBtnLoader(btn, false);
+  }
 };
 
 window.editUser = (id) => { 
@@ -249,50 +292,55 @@ window.marcarCobrado = async (id) => {
 
 window.handleCajaSubmit = async (e) => {
   e.preventDefault(); 
+  const btn = e.submitter;
+  window.setBtnLoader(btn, true);
   
-  const f = document.getElementById('caja-fecha').value; 
-  const t = document.getElementById('caja-tipo').value; 
-  const d = document.getElementById('caja-desc').value; 
-  const c = document.getElementById('caja-cat').value; 
-  const v = Number(document.getElementById('caja-monto').value); 
-  const a = document.getElementById('caja-auto').value || null; 
-  const compTipo = document.getElementById('caja-comprobante').value; 
-  const compNum = document.getElementById('caja-comp-num').value; 
-  const iva = Number(document.getElementById('caja-iva').value || 0);
-  
-  await window.fbAdd("transacciones", { 
-    userId: window.state.currentUser.id, 
-    sucursalId: window.state.currentUser.sucursalId, 
-    fecha: f, 
-    tipo: t, 
-    descripcion: d, 
-    categoria: c, 
-    valor: v, 
-    autoId: a, 
-    tipoComprobante: compTipo, 
-    numComprobante: compNum, 
-    iva: iva, 
-    estadoCobro: 'disponible' 
-  });
-  
-  if(a && t === 'gasto') { 
-    const auto = window.state.autos.find(x => x.id === a); 
-    const nwGastos = [...(auto.gastos || []), { 
-      id: window.generateId(), 
+  try {
+    const f = document.getElementById('caja-fecha').value; 
+    const t = document.getElementById('caja-tipo').value; 
+    const d = document.getElementById('caja-desc').value; 
+    const c = document.getElementById('caja-cat').value; 
+    const v = Number(document.getElementById('caja-monto').value); 
+    const a = document.getElementById('caja-auto').value || null; 
+    const compTipo = document.getElementById('caja-comprobante').value; 
+    const compNum = document.getElementById('caja-comp-num').value; 
+    const iva = Number(document.getElementById('caja-iva').value || 0);
+    
+    await window.fbAdd("transacciones", { 
+      userId: window.state.currentUser.id, 
+      sucursalId: window.state.currentUser.sucursalId, 
       fecha: f, 
+      tipo: t, 
       descripcion: d, 
       categoria: c, 
-      monto: v 
-    }]; 
-    await window.fbUpdate("autos", a, { gastos: nwGastos }); 
+      valor: v, 
+      autoId: a, 
+      tipoComprobante: compTipo, 
+      numComprobante: compNum, 
+      iva: iva, 
+      estadoCobro: 'disponible' 
+    });
+    
+    if(a && t === 'gasto') { 
+      const auto = window.state.autos.find(x => x.id === a); 
+      const nwGastos = [...(auto.gastos || []), { 
+        id: window.generateId(), 
+        fecha: f, 
+        descripcion: d, 
+        categoria: c, 
+        monto: v 
+      }]; 
+      await window.fbUpdate("autos", a, { gastos: nwGastos }); 
+    }
+    
+    window.closeModal('modal-caja'); 
+    e.target.reset(); 
+    window.initSelects();
+  } finally {
+    window.setBtnLoader(btn, false);
   }
-  
-  window.closeModal('modal-caja'); 
-  e.target.reset(); 
-  window.initSelects();
 };
 
-// --- COBRANZA DE CUOTAS DESDE PENDIENTES ---
 window.cobrarCuotaVenta = async (ventaId, tipo) => {
   const v = window.state.ventas.find(x => x.id === ventaId);
   if(!v) return;
@@ -305,7 +353,6 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
   if(tipo === 'credito' && v.credito) {
     monto = v.credito.valorCuota;
     cuotaNum = v.credito.pagadas + 1;
-    // Evita errores con Firebase pasando el objeto modificado completo
     const updatedCredito = { ...v.credito, pagadas: cuotaNum };
     updateData = { credito: updatedCredito };
   } else if (tipo === 'pagare' && v.pagare) {
@@ -318,7 +365,6 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
   if(monto > 0) {
     const fDate = new Date().toISOString().split('T')[0];
     
-    // 1. Insertar el cobro en la caja
     await window.fbAdd("transacciones", { 
       fecha: fDate, 
       descripcion: `Cobro Cuota ${cuotaNum} (${tipo === 'credito' ? 'Crédito' : 'Pagaré'}): ${v.compradorNombre} - ${v.autoDesc}`, 
@@ -334,181 +380,12 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
       fechaAcreditacion: null 
     });
 
-    // 2. Sumar la cuota pagada a la Venta
     await window.fbUpdate("ventas", ventaId, updateData);
     
     window.closeModal('modal-pendientes');
     alert(`Cuota ${cuotaNum} cobrada con éxito e ingresada a la caja.`);
   }
 };
-
-
-// --- CONTROLADORES DE CIERRE DE VENTA ---
-window.handleDAVentaSubmit = async (e, autoId) => {
-  e.preventDefault(); 
-  
-  const auto = window.state.autos.find(x => x.id === autoId);
-  const userQueRegistra = window.state.currentUser; 
-  
-  const vEf = document.getElementById('chk-efectivo')?.checked ? Number(document.getElementById('val-efectivo').value) : 0;
-  
-  const vCr = document.getElementById('chk-credito')?.checked ? Number(document.getElementById('val-credito').value) : 0;
-  const cCr = Number(document.getElementById('cuotas-credito')?.value || 0);
-  
-  const vPa = document.getElementById('chk-pagare')?.checked ? Number(document.getElementById('val-pagare').value) : 0;
-  const cPa = Number(document.getElementById('cuotas-pagare')?.value || 0);
-  
-  const vPe = window.state.ventaData.tienePermuta ? Number(document.getElementById('p-valor').value) : 0;
-  
-  const tVenta = vEf + vCr + vPa + vPe;
-
-  if(tVenta <= 0) {
-    return alert("Debe especificar al menos una forma de pago válida o recibir permuta para cerrar la venta.");
-  }
-
-  const fDate = new Date().toISOString().split('T')[0];
-
-  // 1. Efectivo Inmediato a Caja
-  if(vEf > 0) {
-    await window.fbAdd("transacciones", { 
-      fecha: fDate, 
-      descripcion: `Cobro Venta: ${auto.marca} ${auto.modelo} (${document.getElementById('nota-efectivo').value||'Efectivo'})`, 
-      tipo: 'ingreso', 
-      categoria: 'Venta Vehículos', 
-      valor: vEf, 
-      userId: userQueRegistra.id, 
-      sucursalId: userQueRegistra.sucursalId, 
-      tipoComprobante: 'X', 
-      numComprobante: '',
-      iva: 0, 
-      estadoCobro: 'disponible', 
-      fechaAcreditacion: null 
-    });
-  }
-
-  // 2. Preparar Objetos de Cuotas
-  let objCredito = null;
-  if (vCr > 0 && cCr > 0) {
-    objCredito = {
-      montoTotal: vCr,
-      cuotas: cCr,
-      pagadas: 0,
-      valorCuota: vCr / cCr
-    };
-  }
-  
-  let objPagare = null;
-  if (vPa > 0 && cPa > 0) {
-    objPagare = {
-      montoTotal: vPa,
-      cuotas: cPa,
-      pagadas: 0,
-      valorCuota: vPa / cPa
-    };
-  }
-
-  // 3. Registro Histórico de la Venta
-  let metodos = [];
-  if(vEf > 0) metodos.push('Efectivo');
-  if(vCr > 0) metodos.push('Crédito');
-  if(vPa > 0) metodos.push('Pagaré');
-  if(vPe > 0) metodos.push('Permuta');
-  
-  await window.fbAdd("ventas", {
-    fecha: fDate, 
-    autoDesc: `${auto.marca} ${auto.modelo} (${auto.patente})`,
-    compradorNombre: document.getElementById('vent-comp-nombre').value, 
-    compradorTelefono: document.getElementById('vent-comp-tel').value,
-    compradorDNI: document.getElementById('vent-comp-dni').value,
-    compradorDomicilio: document.getElementById('vent-comp-domicilio').value,
-    montoTotal: tVenta, 
-    metodoPago: metodos.join(' + '), 
-    credito: objCredito,
-    pagare: objPagare,
-    tienePermuta: window.state.ventaData.tienePermuta,
-    detallePermuta: window.state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
-  });
-
-  // 4. Alta de Auto Recibido en Permuta
-  if(window.state.ventaData.tienePermuta) {
-    await window.fbAdd("autos", { 
-      marca: document.getElementById('p-marca').value, 
-      modelo: document.getElementById('p-modelo').value, 
-      color: document.getElementById('p-color').value, 
-      km: Number(document.getElementById('p-km').value||0),
-      año: Number(document.getElementById('p-anio').value), 
-      patente: document.getElementById('p-pat').value.toUpperCase(), 
-      precio: 0, 
-      costo: vPe, 
-      condicion: document.getElementById('p-condicion').value, 
-      estado: 'A Ingresar', 
-      sucursalId: auto.sucursalId, 
-      gastos: [], 
-      documentacion: {c08: false, verificacion: false, libreDeuda: false, vtv: ''} 
-    });
-  }
-  
-  // 5. Marcar Auto actual como Vendido
-  await window.fbUpdate("autos", autoId, { estado: 'Vendido' }); 
-  
-  // 6. Preparar Data para Boleto Rápido
-  window.state.tempFormData = {
-    auto: auto,
-    comprador: document.getElementById('vent-comp-nombre').value, 
-    telefono: document.getElementById('vent-comp-tel').value, 
-    dni: document.getElementById('vent-comp-dni').value, 
-    domicilio: document.getElementById('vent-comp-domicilio').value,
-    monto: tVenta, 
-    efectivo: vEf, 
-    saldo: vCr + vPa, 
-    cuotas: Math.max(cCr, cPa), 
-    valCuota: '',
-    permuta: window.state.ventaData.tienePermuta ? { 
-      marca: document.getElementById('p-marca').value, 
-      modelo: document.getElementById('p-modelo').value, 
-      anio: document.getElementById('p-anio').value, 
-      patente: document.getElementById('p-pat').value.toUpperCase(), 
-      tasado: document.getElementById('p-valor').value 
-    } : null
-  };
-
-  window.closeModal('modal-detalle-auto'); 
-  
-  document.getElementById('btn-go-to-boleto').onclick = () => {
-     window.closeModal('modal-confirm-boleto');
-     window.switchTab('formularios'); 
-     window.openModalBoleto(window.state.ventaData.tienePermuta ? 'permuta' : 'simple', window.state.tempFormData);
-  };
-  
-  window.openModal('modal-confirm-boleto');
-};
-
-window.registrarCuotaVenta = async (id) => { 
-  const v = window.state.ventas.find(x => x.id === id); 
-  if(!v) return; 
-
-  // Si tiene un objeto de credito pendiente, derivamos al controlador maestro
-  if (v.credito && v.credito.pagadas < v.credito.cuotas) {
-      await window.cobrarCuotaVenta(id, 'credito');
-      window.closeModal('modal-detalle-venta');
-      return;
-  }
-
-  // Si tiene un pagare pendiente, derivamos al controlador maestro
-  if (v.pagare && v.pagare.pagadas < v.pagare.cuotas) {
-      await window.cobrarCuotaVenta(id, 'pagare');
-      window.closeModal('modal-detalle-venta');
-      return;
-  }
-
-  // Backup (por si es una venta vieja formateada distinto)
-  if (v.cuotasPagadas !== undefined && v.cuotasPagadas < v.cuotasTotales) {
-      await window.fbUpdate("ventas", id, { cuotasPagadas: v.cuotasPagadas + 1 }); 
-      window.closeModal('modal-detalle-venta');
-      return;
-  }
-};
-
 
 // --- CONTROLADORES DE FORMULARIOS (BOLETOS Y FLOTA) ---
 window.preGuardarBoleto = (e, tipo) => {
@@ -528,7 +405,8 @@ window.preGuardarBoleto = (e, tipo) => {
     motor: document.getElementById('bf-motor').value, 
     chasis: document.getElementById('bf-chasis').value, 
     monto: document.getElementById('bf-monto').value, 
-    observaciones: document.getElementById('bf-obs').value
+    observaciones: document.getElementById('bf-obs').value,
+    estado: 'Completado' // Se marca completado cuando se genera/edita manual
   };
   
   if(tipo === 'simple') { 
@@ -547,9 +425,12 @@ window.preGuardarBoleto = (e, tipo) => {
   }
   
   const autoId = window.state.tempFormData.autoIdAsociado; 
-  window.state.tempFormData = { ...baseData, autoIdAsociado: autoId };
+  // Revisamos si era un borrador guardado en BD para editarlo, o uno nuevo
+  const formId = window.state.tempFormData.id;
+
+  window.state.tempFormData = { ...baseData, autoIdAsociado: autoId, id: formId };
   
-  if (autoId) { 
+  if (autoId || formId) { 
     window.guardarYImprimirFormulario(autoId); 
   } else { 
     document.getElementById('asoc-auto-select').innerHTML = `<option value="">-- Seleccionar Automóvil --</option>` + window.state.autos.filter(a => a.estado !== 'Vendido').map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
@@ -567,7 +448,15 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
     await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' }); 
   }
   
-  await window.fbAdd("formularios", data);
+  if (data.id) {
+    // Si era un borrador pendiente, lo actualizamos
+    const copyData = {...data};
+    delete copyData.id; // Limpiamos ID interno
+    await window.fbUpdate("formularios", data.id, copyData);
+  } else {
+    // Nuevo formulario
+    await window.fbAdd("formularios", data);
+  }
   
   window.closeModal('modal-asociar-form'); 
   window.closeModal('modal-boleto');
@@ -590,8 +479,8 @@ window.imprimirBoletoHtml = (data) => {
         <li>Modelo y Tipo: ${data.modelo}</li>
         <li>Año: ${data.año}</li>
         <li>Dominio: ${data.dominio}</li>
-        <li>Motor N°: ${data.motor}</li>
-        <li>Chasis N°: ${data.chasis}</li>
+        <li>Motor N°: ${data.motor || '___________'}</li>
+        <li>Chasis N°: ${data.chasis || '___________'}</li>
       </ul>
       <p class="mb-4">En la suma total de pesos: <strong>$ ${data.monto}</strong></p>
       <p class="mb-6">Pagaderos de la siguiente forma: <strong>${data.formaPago}</strong>, SIRVIENDO EL PRESENTE BOLETO DE RECIBO SUFICIENTE.</p>
@@ -613,7 +502,7 @@ window.imprimirBoletoHtml = (data) => {
       Por cuenta y orden de Sr./Sra. <strong>${data.vendedor}</strong> un automovil usado, en las condiciones vistas y que se encuentran libre de gravamenes y/o deudas nacionales, municipales o provinciales, dejando contancia que en la fecha el comprador toma posesion del mismo de conformidad, siendo sus caracteristicas las que se detallan a continuacion:</p>
       
       <p class="mb-4 font-bold">Marca: ${data.marca} Modelo: ${data.modelo}<br>
-      Año: ${data.año} Motor: ${data.motor} Nro. serie o chasis: ${data.chasis}<br>
+      Año: ${data.año} Motor: ${data.motor || '___________'} Nro. serie o chasis: ${data.chasis || '___________'}<br>
       Patentado en la localidad de __________________ bajo Nro. ${data.dominio}</p>
       
       <p class="mb-4 text-justify">La venta se realiza por la suma total de ($) <strong>${data.monto}</strong> , (____________________________________)<br>
@@ -639,7 +528,6 @@ window.imprimirBoletoHtml = (data) => {
   }
   
   document.getElementById('print-content').innerHTML = printHtml;
-  
   document.getElementById('app-wrapper').classList.add('hidden'); 
   document.getElementById('print-section').classList.remove('hidden');
   
@@ -683,7 +571,6 @@ window.imprimirFlota = () => {
    `;
    
    document.getElementById('print-content').innerHTML = printHtml;
-   
    document.getElementById('app-wrapper').classList.add('hidden'); 
    document.getElementById('print-section').classList.remove('hidden');
    
@@ -694,147 +581,322 @@ window.imprimirFlota = () => {
    }, 500);
 };
 
-window.generarBoletoDesdeVendido = (autoId) => {
-  const a = window.state.autos.find(x => x.id === autoId); 
-  const v = window.state.ventas.find(venta => venta.autoDesc.includes(a.patente));
+// --- CONTROLADORES DE CIERRE DE VENTA MAESTRO ---
+window.handleDAVentaSubmit = async (e, autoId) => {
+  e.preventDefault(); 
+  const btn = e.submitter || document.getElementById('txt-submit-venta')?.parentElement;
+  window.setBtnLoader(btn, true);
   
-  const prefillData = { 
-    auto: a, 
-    comprador: v ? v.compradorNombre : '', 
-    dni: v ? v.compradorDNI : '', 
-    domicilio: v ? v.compradorDomicilio : '', 
-    monto: v ? v.montoTotal : a.precio, 
-    efectivo: v ? v.montoTotal : a.precio 
-  };
-  
-  window.closeModal('modal-detalle-auto'); 
-  window.switchTab('formularios'); 
-  window.openModalBoleto(v && v.tienePermuta ? 'permuta' : 'simple', prefillData);
+  try {
+    const auto = window.state.autos.find(x => x.id === autoId);
+    const userQueRegistra = window.state.currentUser; 
+    
+    const vEf = document.getElementById('chk-efectivo')?.checked ? Number(document.getElementById('val-efectivo').value) : 0;
+    
+    const vCr = document.getElementById('chk-credito')?.checked ? Number(document.getElementById('val-credito').value) : 0;
+    const cCr = Number(document.getElementById('cuotas-credito')?.value || 0);
+    
+    const vPa = document.getElementById('chk-pagare')?.checked ? Number(document.getElementById('val-pagare').value) : 0;
+    const cPa = Number(document.getElementById('cuotas-pagare')?.value || 0);
+    
+    const vPe = window.state.ventaData.tienePermuta ? Number(document.getElementById('p-valor').value) : 0;
+    
+    const tVenta = vEf + vCr + vPa + vPe;
+
+    if(tVenta <= 0) {
+      return alert("Debe especificar al menos una forma de pago válida o recibir permuta para cerrar la venta.");
+    }
+
+    const fDate = new Date().toISOString().split('T')[0];
+
+    // 1. Efectivo Inmediato a Caja
+    if(vEf > 0) {
+      await window.fbAdd("transacciones", { 
+        fecha: fDate, 
+        descripcion: `Cobro Venta: ${auto.marca} ${auto.modelo} (${document.getElementById('nota-efectivo').value||'Efectivo'})`, 
+        tipo: 'ingreso', 
+        categoria: 'Venta Vehículos', 
+        valor: vEf, 
+        userId: userQueRegistra.id, 
+        sucursalId: userQueRegistra.sucursalId, 
+        tipoComprobante: 'X', 
+        numComprobante: '',
+        iva: 0, 
+        estadoCobro: 'disponible', 
+        fechaAcreditacion: null 
+      });
+    }
+
+    // 2. Preparar Objetos de Cuotas
+    let objCredito = null;
+    if (vCr > 0 && cCr > 0) {
+      objCredito = {
+        montoTotal: vCr,
+        cuotas: cCr,
+        pagadas: 0,
+        valorCuota: vCr / cCr
+      };
+    }
+    
+    let objPagare = null;
+    if (vPa > 0 && cPa > 0) {
+      objPagare = {
+        montoTotal: vPa,
+        cuotas: cPa,
+        pagadas: 0,
+        valorCuota: vPa / cPa
+      };
+    }
+
+    // 3. Registro Histórico de la Venta
+    let metodos = [];
+    if(vEf > 0) metodos.push('Efectivo');
+    if(vCr > 0) metodos.push('Crédito');
+    if(vPa > 0) metodos.push('Pagaré');
+    if(vPe > 0) metodos.push('Permuta');
+    
+    await window.fbAdd("ventas", {
+      fecha: fDate, 
+      autoDesc: `${auto.marca} ${auto.modelo} (${auto.patente})`,
+      compradorNombre: document.getElementById('vent-comp-nombre').value, 
+      compradorTelefono: document.getElementById('vent-comp-tel').value,
+      compradorDNI: document.getElementById('vent-comp-dni').value,
+      compradorDomicilio: document.getElementById('vent-comp-domicilio').value,
+      montoTotal: tVenta, 
+      metodoPago: metodos.join(' + '), 
+      credito: objCredito,
+      pagare: objPagare,
+      tienePermuta: window.state.ventaData.tienePermuta,
+      detallePermuta: window.state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
+    });
+
+    // 4. Alta de Auto Recibido en Permuta
+    if(window.state.ventaData.tienePermuta) {
+      await window.fbAdd("autos", { 
+        marca: document.getElementById('p-marca').value, 
+        modelo: document.getElementById('p-modelo').value, 
+        color: document.getElementById('p-color').value, 
+        km: Number(document.getElementById('p-km').value||0),
+        año: Number(document.getElementById('p-anio').value), 
+        patente: document.getElementById('p-pat').value.toUpperCase(), 
+        precio: 0, 
+        costo: vPe, 
+        condicion: document.getElementById('p-condicion').value, 
+        estado: 'A Ingresar', 
+        sucursalId: auto.sucursalId, 
+        gastos: [], 
+        documentacion: {c08: false, verificacion: false, libreDeuda: false, vtv: ''} 
+      });
+    }
+    
+    // 5. Marcar Auto actual como Vendido
+    await window.fbUpdate("autos", autoId, { estado: 'Vendido' }); 
+    
+    // 6. FLUJO AUTOMATIZADO: Crear Borrador del Boleto en DB
+    const cuotasMax = Math.max(cCr, cPa);
+    const boletoData = {
+      tipo: window.state.ventaData.tienePermuta ? 'Boleto Venta con Permuta' : 'Boleto Compra Venta',
+      fecha: fDate,
+      vendedor: 'RIVAS AUTO',
+      comprador: document.getElementById('vent-comp-nombre').value,
+      dni: document.getElementById('vent-comp-dni').value,
+      domicilio: document.getElementById('vent-comp-domicilio').value,
+      marca: auto.marca,
+      modelo: auto.modelo,
+      año: auto.año,
+      dominio: auto.patente,
+      motor: '',
+      chasis: '',
+      monto: tVenta,
+      observaciones: '',
+      estado: 'Pendiente', // Lo marcamos como pendiente para rellenar
+      autoIdAsociado: autoId
+    };
+
+    if (window.state.ventaData.tienePermuta) {
+      boletoData.telefono = document.getElementById('vent-comp-tel').value;
+      boletoData.efectivo = vEf;
+      boletoData.p_marca = document.getElementById('p-marca').value;
+      boletoData.p_modelo = document.getElementById('p-modelo').value;
+      boletoData.p_anio = document.getElementById('p-anio').value;
+      boletoData.p_dominio = document.getElementById('p-pat').value.toUpperCase();
+      boletoData.p_tasado = vPe;
+      boletoData.saldo = vCr + vPa;
+      boletoData.cuotas = cuotasMax;
+      boletoData.valCuota = '';
+    } else {
+      boletoData.formaPago = metodos.join(' + ');
+    }
+
+    await window.fbAdd("formularios", boletoData);
+
+    // 7. Enrutamiento directo a la sección Formularios
+    window.closeModal('modal-detalle-auto'); 
+    window.switchTab('formularios');
+    
+  } finally {
+    window.setBtnLoader(btn, false);
+  }
 };
 
-// --- CRM GLOBALES ---
+
+// --- CRM GLOBALES Y DE AUTO ---
 window.handleGlobalLeadSubmit = async (e) => { 
   e.preventDefault(); 
-  await window.fbAdd("consultas", { 
-    autoId: null, 
-    nombre: document.getElementById('gl-nombre').value, 
-    telefono: document.getElementById('gl-tel').value, 
-    marcaInteres: document.getElementById('gl-interes').value, 
-    estadoLead: document.getElementById('gl-estado').value, 
-    notas: document.getElementById('gl-nota').value, 
-    recordatorio: new Date().toISOString().split('T')[0], 
-    fecha: new Date().toISOString().split('T')[0] 
-  }); 
-  window.closeModal('modal-nuevo-lead'); 
-  e.target.reset(); 
+  const btn = e.submitter;
+  window.setBtnLoader(btn, true);
+  
+  try {
+    await window.fbAdd("consultas", { 
+      autoId: null, 
+      nombre: document.getElementById('gl-nombre').value, 
+      telefono: document.getElementById('gl-tel').value, 
+      marcaInteres: document.getElementById('gl-interes').value, 
+      estadoLead: document.getElementById('gl-estado').value, 
+      notas: document.getElementById('gl-nota').value, 
+      recordatorio: new Date().toISOString().split('T')[0], 
+      fecha: new Date().toISOString().split('T')[0] 
+    }); 
+    window.closeModal('modal-nuevo-lead'); 
+    e.target.reset(); 
+  } finally {
+    window.setBtnLoader(btn, false);
+  }
 };
 
 window.handleDA_CRMSubmit = async (e, autoId) => { 
   e.preventDefault(); 
-  const a = window.state.autos.find(x => x.id === autoId);
-  await window.fbAdd("consultas", { 
-    autoId: autoId, 
-    marcaInteres: a.marca, 
-    nombre: document.getElementById('dac-nombre').value, 
-    telefono: document.getElementById('dac-tel').value, 
-    notas: document.getElementById('dac-nota').value, 
-    estadoLead: 'Tibio', 
-    recordatorio: new Date().toISOString().split('T')[0], 
-    fecha: new Date().toISOString().split('T')[0] 
-  }); 
-  document.getElementById('dac-nombre').value = ''; 
-  document.getElementById('dac-tel').value = ''; 
-  document.getElementById('dac-nota').value = '';
+  const btn = e.submitter || document.getElementById('txt-submit-lead-auto')?.parentElement;
+  window.setBtnLoader(btn, true);
+  
+  try {
+    const a = window.state.autos.find(x => x.id === autoId);
+    await window.fbAdd("consultas", { 
+      autoId: autoId, 
+      marcaInteres: a.marca, 
+      nombre: document.getElementById('dac-nombre').value, 
+      telefono: document.getElementById('dac-tel').value, 
+      notas: document.getElementById('dac-nota').value, 
+      estadoLead: 'Tibio', 
+      recordatorio: new Date().toISOString().split('T')[0], 
+      fecha: new Date().toISOString().split('T')[0] 
+    }); 
+    document.getElementById('dac-nombre').value = ''; 
+    document.getElementById('dac-tel').value = ''; 
+    document.getElementById('dac-nota').value = '';
+    // Actualiza la vista para ver el lead abajo
+    if(window.renderDetalleAuto) window.renderDetalleAuto();
+  } finally {
+    window.setBtnLoader(btn, false);
+  }
 };
 
-// --- COMISIONES Y PERSONAL ---
+// --- COMISIONES Y PERSONAL (CARGA MANUAL Y CIERRE) ---
 window.openModalAsignarBono = () => { 
   document.getElementById('form-comision').reset(); 
   document.getElementById('comision-venta-id').value = ""; 
   window.openModal('modal-comision'); 
 };
 
-window.openModalComisionPorVenta = (ventaId) => { 
-  document.getElementById('form-comision').reset(); 
-  document.getElementById('comision-venta-id').value = ventaId; 
-  window.openModal('modal-comision'); 
-};
-
 window.handleComisionSubmit = async (e) => {
   e.preventDefault();
-  const uId = document.getElementById('comision-user').value;
-  const monto = Number(document.getElementById('comision-monto').value);
-  const vId = document.getElementById('comision-venta-id').value;
+  const btn = e.submitter;
+  window.setBtnLoader(btn, true);
   
-  if(!uId || monto <= 0) return alert("Complete los datos correctamente.");
-  
-  await window.fbAdd("comisiones", { 
-    userId: uId, 
-    ventaId: vId || null, 
-    monto: monto, 
-    estado: 'Pendiente', 
-    fecha: new Date().toISOString().split('T')[0] 
-  });
-  
-  window.closeModal('modal-comision'); 
-  alert("Comisión/Bono asignado correctamente.");
+  try {
+    const uId = document.getElementById('comision-user').value;
+    const monto = Number(document.getElementById('comision-monto').value);
+    const desc = document.getElementById('comision-desc') ? document.getElementById('comision-desc').value : 'Carga Manual';
+    const vId = document.getElementById('comision-venta-id').value;
+    
+    if(!uId || monto <= 0) return alert("Complete los datos correctamente.");
+    
+    await window.fbAdd("comisiones", { 
+      userId: uId, 
+      ventaId: vId || null, 
+      monto: monto, 
+      descripcion: desc,
+      estado: 'Pendiente', 
+      fecha: new Date().toISOString().split('T')[0] 
+    });
+    
+    window.closeModal('modal-comision'); 
+    alert("Carga registrada y asignada correctamente.");
+  } finally {
+    window.setBtnLoader(btn, false);
+  }
 };
 
 window.openModalCerrarPagos = () => { 
+  window.calcularTotalPagos();
   window.openModal('modal-cerrar-pagos'); 
 };
 
 window.calcularTotalPagos = () => {
-  const pdtes = window.state.comisiones.filter(c => c.estado === 'Pendiente');
+  const checkboxes = document.querySelectorAll('.cierre-user-checkbox:checked');
+  const userIdsSelected = Array.from(checkboxes).map(cb => cb.value);
+  
+  const pdtes = window.state.comisiones.filter(c => c.estado === 'Pendiente' && userIdsSelected.includes(c.userId));
   const tot = pdtes.reduce((a,c) => a + c.monto, 0);
+  
   const ml = document.getElementById('monto-total-liquidar');
   if(ml) ml.innerText = window.formatMoney(tot);
 };
 
 window.confirmarCierrePagos = async () => {
-  const pdtes = window.state.comisiones.filter(c => c.estado === 'Pendiente');
+  const checkboxes = document.querySelectorAll('.cierre-user-checkbox:checked');
+  const userIdsSelected = Array.from(checkboxes).map(cb => cb.value);
+
+  const pdtes = window.state.comisiones.filter(c => c.estado === 'Pendiente' && userIdsSelected.includes(c.userId));
   const tot = pdtes.reduce((a,c) => a + c.monto, 0);
   
   if(tot <= 0) { 
     window.closeModal('modal-cerrar-pagos'); 
-    return alert("No hay comisiones pendientes de pago."); 
+    return alert("No hay comisiones seleccionadas pendientes de pago."); 
   }
   
-  const fDate = new Date().toISOString().split('T')[0];
-  const adminUsr = window.state.usuarios.find(u => u.rol === 'Admin') || window.state.currentUser;
-  
-  const nuevoCierreData = {
-    fecha: fDate,
-    cantidadMovimientos: pdtes.length,
-    total: tot,
-    userId: adminUsr.id
-  };
-  
-  const docRef = await window.fbAdd("cierres_personal", nuevoCierreData);
-  const cierreId = docRef ? docRef.id : window.generateId();
-  
-  await window.fbAdd("transacciones", { 
-    fecha: fDate, 
-    descripcion: `Liquidación de Personal (Cierre de Pagos)`, 
-    tipo: 'gasto', 
-    categoria: 'Liquidación Personal', 
-    valor: tot, 
-    userId: adminUsr.id, 
-    sucursalId: adminUsr.sucursalId, 
-    tipoComprobante: 'X', 
-    numComprobante: '', 
-    iva: 0, 
-    estadoCobro: 'disponible' 
-  });
-  
-  for(let p of pdtes) { 
-    await window.fbUpdate("comisiones", p.id, { 
-      estado: 'Pagada', 
-      fechaPago: fDate,
-      cierreId: cierreId
-    }); 
+  const btn = event.target;
+  window.setBtnLoader(btn, true);
+
+  try {
+    const fDate = new Date().toISOString().split('T')[0];
+    const adminUsr = window.state.usuarios.find(u => u.rol === 'Admin') || window.state.currentUser;
+    
+    const nuevoCierreData = {
+      fecha: fDate,
+      cantidadMovimientos: pdtes.length,
+      total: tot,
+      userId: adminUsr.id
+    };
+    
+    const docRef = await window.fbAdd("cierres_personal", nuevoCierreData);
+    const cierreId = docRef ? docRef.id : window.generateId();
+    
+    await window.fbAdd("transacciones", { 
+      fecha: fDate, 
+      descripcion: `Liquidación de Personal (Cierre de Pagos)`, 
+      tipo: 'gasto', 
+      categoria: 'Liquidación Personal', 
+      valor: tot, 
+      userId: adminUsr.id, 
+      sucursalId: adminUsr.sucursalId, 
+      tipoComprobante: 'X', 
+      numComprobante: '', 
+      iva: 0, 
+      estadoCobro: 'disponible' 
+    });
+    
+    for(let p of pdtes) { 
+      await window.fbUpdate("comisiones", p.id, { 
+        estado: 'Pagada', 
+        fechaPago: fDate,
+        cierreId: cierreId
+      }); 
+    }
+    
+    window.closeModal('modal-cerrar-pagos'); 
+    alert("Pagos liquidados con éxito.");
+  } finally {
+    window.setBtnLoader(btn, false);
   }
-  
-  window.closeModal('modal-cerrar-pagos'); 
-  alert("Pagos liquidados. Se generó el egreso en Caja y el Ticket de Cierre Histórico automáticamente.");
 };
