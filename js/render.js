@@ -79,7 +79,7 @@ window.checkNotifications = () => {
       <div class="p-4 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
         <p class="font-bold text-sm">${n.v.compradorNombre || 'Sin Nombre'}</p>
         <p class="text-xs text-neutral-500 mb-3">${n.v.autoDesc || '-'} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span></p>
-        <a href="${window.formatWhatsAppLink(n.v.compradorTelefono || '', `Hola ${n.v.compradorNombre}, vimos que estás por finalizar tu plan en RIVAS AUTO. ¿Te interesaría charlar para renovar tu unidad?`)}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
+        <a href="${window.formatWhatsAppLink(n.v.compradorTelefono || '', '')}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
           <i data-lucide="message-circle" class="w-3.5 h-3.5 mr-1.5"></i> Ofrecer Recompra
         </a>
       </div>
@@ -92,6 +92,7 @@ window.checkNotifications = () => {
 
 window.toggleAutosViewMode = (mode) => { 
   window.state.autosViewMode = mode; 
+  localStorage.setItem('autosViewMode', mode);
   window.renderAutosView(); 
 };
 
@@ -152,7 +153,7 @@ window.renderAutosView = () => {
                   </div>
                   <div class="flex justify-between items-center px-2">
                     <span class="text-xs text-neutral-500 font-bold">
-                      <i data-lucide="wrench" class="w-3 h-3 inline"></i> Inversión
+                      <i data-lucide="wrench" class="w-3 h-3 inline"></i> Inversión Acumulada
                     </span>
                     <span class="text-sm font-bold">${window.formatMoney(totalGastos)}</span>
                   </div>
@@ -232,7 +233,6 @@ window.renderDetalleAuto = () => {
   
   if(!window.state.isVentaMode) {
     
-    // MODO VISTA NORMAL (FICHA)
     html += `
       <div class="bg-black text-white dark:bg-white dark:text-black rounded-[2rem] p-8 mb-6 relative overflow-hidden border border-neutral-800 dark:border-neutral-200">
         <div class="flex justify-between items-start relative z-10">
@@ -249,7 +249,7 @@ window.renderDetalleAuto = () => {
           <div class="text-right">
             <p class="text-xs uppercase font-bold opacity-60">Precio Venta</p>
             <p class="text-3xl font-black mt-1">${window.formatMoney(a.precio)}</p>
-            ${tg > 0 ? `<p class="text-[10px] font-bold mt-2 text-rose-400 dark:text-rose-600 uppercase tracking-widest">+ Gastos Aplicados: ${window.formatMoney(tg)}</p>` : ''}
+            ${tg > 0 ? `<p class="text-xs font-bold mt-2 text-rose-400 dark:text-rose-600 uppercase tracking-widest">+ GASTOS: ${window.formatMoney(tg)}</p>` : ''}
           </div>
         </div>
     `;
@@ -276,14 +276,6 @@ window.renderDetalleAuto = () => {
           </div>
         `; 
       } 
-    } else {
-      html += `
-        <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
-          <button onclick="window.generarBoletoDesdeVendido('${a.id}')" class="w-full py-4 bg-white text-black font-black rounded-2xl shadow hover:bg-neutral-200 transition-all">
-            <i data-lucide="file-text" class="w-5 h-5 inline mr-2"></i> Generar Boleto de esta Unidad
-          </button>
-        </div>
-      `;
     }
     
     html += `</div>`;
@@ -303,7 +295,6 @@ window.renderDetalleAuto = () => {
       </div>
     `;
     
-    // CONTENIDO DE LAS PESTAÑAS
     if(window.state.daActiveSection === 'doc') {
       html += `
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -318,19 +309,43 @@ window.renderDetalleAuto = () => {
         </div>
       `;
     } else if(window.state.daActiveSection === 'crm') {
+       const leadsAuto = window.state.consultas.filter(c => c.autoId === a.id).sort((x,y) => new Date(y.fecha) - new Date(x.fecha));
+       
+       let listHtml = '';
+       if (leadsAuto.length > 0) {
+         listHtml = leadsAuto.map(c => `
+           <div class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800">
+             <div>
+               <p class="text-sm font-bold">${c.nombre}</p>
+               <p class="text-xs text-neutral-500">${c.telefono} • ${window.formatDate(c.fecha)}</p>
+             </div>
+             <p class="text-xs text-neutral-500 italic max-w-[120px] truncate text-right">"${c.notas}"</p>
+           </div>
+         `).join('');
+       } else {
+         listHtml = '<p class="text-xs text-neutral-500 py-2">No hay leads registrados específicos para este vehículo.</p>';
+       }
+      
        html += `
          <div>
-           <form onsubmit="window.handleDA_CRMSubmit(event, '${a.id}')" class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700 mb-6">
+           <form id="btn-submit-lead-auto" onsubmit="window.handleDA_CRMSubmit(event, '${a.id}')" class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700 mb-6">
              <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Cargar Interesado</h4>
              <div class="grid grid-cols-2 gap-4">
                <input id="dac-nombre" required placeholder="Nombre" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
                <input id="dac-tel" required placeholder="Teléfono" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
              </div>
              <textarea id="dac-nota" placeholder="Notas..." class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none resize-none focus:border-green-500 font-bold"></textarea>
-             <button type="submit" class="w-full py-3 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold shadow-lg hover:scale-[1.02] transition-transform">
-               Guardar Lead
+             <button type="submit" class="w-full py-3 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold shadow-lg hover:scale-[1.02] transition-transform flex justify-center items-center">
+               <span id="txt-submit-lead-auto">Guardar Lead</span>
              </button>
            </form>
+           
+           <div class="mt-4">
+             <h5 class="font-bold text-xs uppercase mb-2 text-neutral-500 tracking-wider">Historial de Leads del Vehículo</h5>
+             <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+               ${listHtml}
+             </div>
+           </div>
          </div>
        `;
     } else if (window.state.daActiveSection === 'taller') {
@@ -377,7 +392,7 @@ window.renderDetalleAuto = () => {
     }
 
     html += `
-      <form onsubmit="window.handleDAVentaSubmit(event, '${a.id}')">
+      <form id="btn-submit-venta" onsubmit="window.handleDAVentaSubmit(event, '${a.id}')">
         
         <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-6">
           <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Datos Comprador</h4>
@@ -458,8 +473,8 @@ window.renderDetalleAuto = () => {
           </div>
         </div>
         
-        <button type="submit" class="w-full py-5 bg-green-600 text-white font-black text-lg rounded-2xl shadow-xl hover:bg-green-700 hover:scale-[1.01] transition-transform">
-          Confirmar Cierre de Venta
+        <button type="submit" class="w-full py-5 bg-green-600 text-white font-black text-lg rounded-2xl shadow-xl hover:bg-green-700 hover:scale-[1.01] transition-transform flex justify-center items-center">
+          <span id="txt-submit-venta">Confirmar Cierre de Venta</span>
         </button>
       </form>
     `;
@@ -598,9 +613,7 @@ window.openModalPendientes = () => {
   );
 
   let totalPendiente = 0;
-  
   oldPendientes.forEach(t => totalPendiente += t.valor);
-  
   ventasPendientes.forEach(v => {
     if(v.credito) totalPendiente += (v.credito.cuotas - v.credito.pagadas) * v.credito.valorCuota;
     if(v.pagare) totalPendiente += (v.pagare.cuotas - v.pagare.pagadas) * v.pagare.valorCuota;
@@ -615,13 +628,19 @@ window.openModalPendientes = () => {
     return;
   }
 
-  let html = `
-    <div class="mb-6 bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-400 p-4 rounded-2xl flex justify-between items-center">
-      <span class="font-bold uppercase tracking-wider text-xs">Total Pendiente a Cobrar</span>
-      <span class="font-black text-2xl">${window.formatMoney(totalPendiente)}</span>
-    </div>
-    <div class="space-y-4">
-  `;
+  let html = '';
+  
+  // TOTAL EXCLUSIVO ADMIN
+  if (window.state.currentUser && window.state.currentUser.rol === 'Admin') {
+    html += `
+      <div class="mb-6 bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-400 p-4 rounded-2xl flex justify-between items-center">
+        <span class="font-bold uppercase tracking-wider text-xs">Total Pendiente a Cobrar</span>
+        <span class="font-black text-2xl">${window.formatMoney(totalPendiente)}</span>
+      </div>
+    `;
+  }
+  
+  html += `<div class="space-y-4">`;
 
   ventasPendientes.forEach(v => {
     let internalHtml = '';
@@ -632,7 +651,9 @@ window.openModalPendientes = () => {
           <span class="text-xs font-bold">Crédito: Cuota ${v.credito.pagadas + 1} de ${v.credito.cuotas}</span>
           <div class="flex items-center space-x-4">
             <span class="text-sm font-black text-green-600 dark:text-green-500">${window.formatMoney(v.credito.valorCuota)}</span>
-            <button onclick="window.cobrarCuotaVenta('${v.id}', 'credito')" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition-transform shadow-md">Cobrar en Caja</button>
+            <button onclick="window.cobrarCuotaVenta('${v.id}', 'credito')" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition-transform shadow-md flex items-center">
+              <span id="btn-txt-credito-${v.id}">Cobrar</span>
+            </button>
           </div>
         </div>
       `;
@@ -644,7 +665,9 @@ window.openModalPendientes = () => {
           <span class="text-xs font-bold">Pagaré: Cuota ${v.pagare.pagadas + 1} de ${v.pagare.cuotas}</span>
           <div class="flex items-center space-x-4">
             <span class="text-sm font-black text-green-600 dark:text-green-500">${window.formatMoney(v.pagare.valorCuota)}</span>
-            <button onclick="window.cobrarCuotaVenta('${v.id}', 'pagare')" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition-transform shadow-md">Cobrar en Caja</button>
+            <button onclick="window.cobrarCuotaVenta('${v.id}', 'pagare')" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition-transform shadow-md flex items-center">
+              <span id="btn-txt-pagare-${v.id}">Cobrar</span>
+            </button>
           </div>
         </div>
       `;
@@ -675,8 +698,8 @@ window.openModalPendientes = () => {
         </div>
         <div class="text-right">
           <p class="font-black text-green-600 dark:text-green-500 mb-2">${window.formatMoney(t.valor)}</p>
-          <button onclick="window.marcarCobrado('${t.id}')" class="px-4 py-2 bg-black text-white dark:bg-white dark:text-black text-xs font-bold rounded-lg hover:scale-105 transition-transform shadow-md">
-            Cobrar en Caja
+          <button onclick="window.marcarCobrado('${t.id}')" class="px-4 py-2 bg-black text-white dark:bg-white dark:text-black text-xs font-bold rounded-lg hover:scale-105 transition-transform shadow-md flex items-center">
+            <span id="btn-txt-pend-${t.id}">Cobrar en Caja</span>
           </button>
         </div>
       </div>
@@ -690,7 +713,6 @@ window.openModalPendientes = () => {
   lucide.createIcons();
 };
 
-
 // --- RENDERIZADO FORMULARIOS ---
 window.renderFormulariosView = () => {
    const table = document.getElementById('formularios-table');
@@ -700,7 +722,7 @@ window.renderFormulariosView = () => {
      table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay formularios generados.</td></tr>`; 
    } else {
      table.innerHTML = window.state.formularios.slice().reverse().map(f => `
-       <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+       <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors ${f.estado === 'Pendiente' ? 'cursor-pointer border-l-4 border-l-amber-500' : ''}" ${f.estado === 'Pendiente' ? `onclick="window.openModalBoleto('${f.tipo === 'Boleto Compra Venta' ? 'simple' : 'permuta'}', ${JSON.stringify(f).replace(/"/g, '&quot;')})"` : ''}>
          <td class="px-6 py-4 text-sm font-bold text-neutral-500">${window.formatDate(f.fecha)}</td>
          <td class="px-6 py-4 font-bold">
            <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500 px-2 py-1 rounded text-xs uppercase tracking-wider">
@@ -709,9 +731,15 @@ window.renderFormulariosView = () => {
          </td>
          <td class="px-6 py-4 font-bold text-sm">${f.comprador}</td>
          <td class="px-6 py-4 text-center">
-           <button onclick='window.imprimirBoletoHtml(${JSON.stringify(f)})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform">
-             <i data-lucide="printer" class="w-4 h-4 inline"></i> Reimprimir
-           </button>
+           ${f.estado === 'Pendiente' ? `
+             <span class="text-xs uppercase font-bold text-amber-500 flex items-center justify-center">
+               <i data-lucide="edit" class="w-4 h-4 mr-1"></i> Completar
+             </span>
+           ` : `
+             <button onclick='event.stopPropagation(); window.imprimirBoletoHtml(${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform">
+               <i data-lucide="printer" class="w-4 h-4 inline"></i> Reimprimir
+             </button>
+           `}
          </td>
        </tr>
      `).join('');
@@ -726,10 +754,12 @@ window.renderPersonalView = () => {
   const table = document.getElementById('personal-table');
   const select = document.getElementById('comision-user');
   const tableCierres = document.getElementById('cierres-table');
+  const modalCierreList = document.getElementById('cierre-checkboxes-list');
   
   const usuariosAgencia = window.state.usuarios.filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado');
   
   let totLiq = 0;
+  let checkboxHtml = '';
   
   if (table) {
     const dataRows = usuariosAgencia.map(u => {
@@ -739,6 +769,18 @@ window.renderPersonalView = () => {
       
       const suc = window.state.sucursales.find(s => s.id == u.sucursalId)?.nombre || '-';
       
+      if(totPdte > 0) {
+        checkboxHtml += `
+          <label class="flex items-center justify-between p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl cursor-pointer hover:border-green-500">
+            <div class="flex items-center">
+              <input type="checkbox" checked value="${u.id}" class="cierre-user-checkbox w-5 h-5 text-green-600 rounded mr-3" onchange="window.calcularTotalPagos()">
+              <span class="font-bold text-sm">${u.nombre}</span>
+            </div>
+            <span class="font-black text-rose-500" data-amount="${totPdte}">${window.formatMoney(totPdte)}</span>
+          </label>
+        `;
+      }
+
       return `
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetallePersonal('${u.id}')">
           <td class="px-6 py-4 font-bold">${u.nombre}</td>
@@ -752,6 +794,14 @@ window.renderPersonalView = () => {
     table.innerHTML = dataRows || `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay personal para comisionar.</td></tr>`;
   }
   
+  if(modalCierreList) {
+    if(checkboxHtml === '') {
+      modalCierreList.innerHTML = `<p class="text-sm text-neutral-500 text-center italic">No hay comisiones pendientes.</p>`;
+    } else {
+      modalCierreList.innerHTML = checkboxHtml;
+    }
+  }
+
   if (document.getElementById('monto-total-liquidar')) {
     document.getElementById('monto-total-liquidar').innerText = window.formatMoney(totLiq);
   }
@@ -769,11 +819,11 @@ window.renderPersonalView = () => {
       tableCierres.innerHTML = cierres.slice().reverse().map(c => `
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
           <td class="px-6 py-4 font-bold text-sm">${window.formatDate(c.fecha)}</td>
-          <td class="px-6 py-4 text-sm font-bold text-neutral-500">${c.cantidadMovimientos || 0} movimientos</td>
+          <td class="px-6 py-4 text-sm font-bold text-neutral-500">${c.cantidadMovimientos || 0} comisiones</td>
           <td class="px-6 py-4 text-right font-black text-rose-600 dark:text-rose-400">${window.formatMoney(c.total)}</td>
           <td class="px-6 py-4 text-center">
              <button onclick="window.openDetalleCierre('${c.id}')" class="px-4 py-2 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-xl hover:scale-105 transition-transform">
-               Ver Detalle
+               Ver Ticket
              </button>
           </td>
         </tr>
@@ -808,14 +858,22 @@ window.openDetallePersonal = (userId) => {
         <thead>
           <tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800">
             <th class="py-3">Fecha</th>
+            <th class="py-3">Contexto Venta</th>
             <th class="py-3">Estado</th>
             <th class="py-3 text-right">Monto</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
-          ${comisionesUsuario.map(c => `
+          ${comisionesUsuario.map(c => {
+            let autoDesc = 'Manual / Bono';
+            if (c.ventaId) {
+               const v = window.state.ventas.find(x => x.id === c.ventaId);
+               if(v) autoDesc = v.autoDesc;
+            }
+            return `
             <tr>
               <td class="py-4 text-sm font-bold text-neutral-600 dark:text-neutral-400">${window.formatDate(c.fecha)}</td>
+              <td class="py-4 text-sm font-bold truncate max-w-[150px]" title="${autoDesc}">${autoDesc}</td>
               <td class="py-4">
                 <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${c.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'}">
                   ${c.estado}
@@ -825,7 +883,7 @@ window.openDetallePersonal = (userId) => {
                 ${window.formatMoney(c.monto)}
               </td>
             </tr>
-          `).join('')}
+          `}).join('')}
         </tbody>
       </table>
     `;
@@ -853,7 +911,7 @@ window.openDetalleCierre = (cierreId) => {
       </div>
     </div>
     
-    <h5 class="font-bold text-lg mb-4">Desglose de Pagos</h5>
+    <h5 class="font-bold text-lg mb-4">Desglose del Ticket</h5>
   `;
   
   if(comisionesPagadas.length === 0) {
@@ -878,13 +936,20 @@ window.openDetalleCierre = (cierreId) => {
             <span class="font-black text-lg">${nombre}</span>
             <span class="font-black text-green-600 dark:text-green-500">${window.formatMoney(userGroup.total)}</span>
           </div>
-          <ul class="space-y-1 pl-2">
-            ${userGroup.items.map(item => `
+          <ul class="space-y-2 pl-2">
+            ${userGroup.items.map(item => {
+              let autoDesc = 'Manual / Bono Especial';
+              if (item.ventaId) {
+                 const v = window.state.ventas.find(x => x.id === item.ventaId);
+                 if(v) autoDesc = `Venta: ${v.autoDesc}`;
+              }
+              return `
               <li class="flex justify-between text-sm">
-                <span class="text-neutral-600 dark:text-neutral-400">• Comisión (Orig: ${window.formatDate(item.fecha)})</span>
-                <span class="font-bold">${window.formatMoney(item.monto)}</span>
+                <span class="text-neutral-600 dark:text-neutral-400 font-bold">• ${autoDesc} <span class="text-[10px] text-neutral-400 font-normal ml-2">(Orig: ${window.formatDate(item.fecha)})</span></span>
+                <span class="font-black text-neutral-800 dark:text-neutral-200">${window.formatMoney(item.monto)}</span>
               </li>
-            `).join('')}
+              `;
+            }).join('')}
           </ul>
         </div>
       `;
@@ -911,7 +976,6 @@ window.renderVentasView = () => {
       const metodos = v.metodoPago || ''; 
       
       if (metodos.includes('Crédito') || metodos.includes('Pagaré')) { 
-        // Fallback robusto por si es venta vieja sin objeto de crédito guardado
         let pendientes = 0;
         if(v.credito) pendientes += (v.credito.cuotas - v.credito.pagadas);
         if(v.pagare) pendientes += (v.pagare.cuotas - v.pagare.pagadas);
@@ -950,7 +1014,7 @@ window.openDetalleVenta = (id) => {
   
   const metodos = v.metodoPago || ''; 
   
-  document.getElementById('venta-detail-content').innerHTML = `
+  let html = `
     <div class="space-y-4 text-sm">
       <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
         <span class="text-neutral-500">Fecha</span>
@@ -962,7 +1026,7 @@ window.openDetalleVenta = (id) => {
       </div>
       <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
         <span class="text-neutral-500">Teléfono</span>
-        <a href="${window.formatWhatsAppLink(v.compradorTelefono || '', 'Hola')}" target="_blank" class="font-bold text-green-500 hover:underline">${v.compradorTelefono || '-'}</a>
+        <a href="${window.formatWhatsAppLink(v.compradorTelefono || '', '')}" target="_blank" class="font-bold text-green-500 hover:underline">${v.compradorTelefono || '-'}</a>
       </div>
       <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
         <span class="text-neutral-500">Domicilio</span>
@@ -990,7 +1054,41 @@ window.openDetalleVenta = (id) => {
   `; 
   
   if(window.state.currentUser && window.state.currentUser.rol === 'Admin') {
-    document.getElementById('venta-detail-content').innerHTML += `
+    // MODULO DE RENTABILIDAD EXCLUSIVO ADMIN
+    let patenteStr = '';
+    const match = v.autoDesc.match(/\(([^)]+)\)/);
+    if(match) patenteStr = match[1];
+
+    const a = window.state.autos.find(x => x.patente === patenteStr);
+    
+    const costo = a ? a.costo || 0 : 0;
+    const gastos = a && a.gastos ? a.gastos.reduce((acc, g) => acc + g.monto, 0) : 0;
+    const comisiones = window.state.comisiones.filter(c => c.ventaId === v.id).reduce((acc, c) => acc + c.monto, 0);
+    const totalEgresos = costo + gastos + comisiones;
+    const ganancia = v.montoTotal - totalEgresos;
+    const colorGanancia = ganancia >= 0 ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-500';
+           
+    html += `
+      <div class="mt-6 border border-neutral-200 dark:border-neutral-700 rounded-[2rem] overflow-hidden shadow-sm">
+        <div class="bg-neutral-100 dark:bg-neutral-800 p-4 flex justify-between items-center cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors" onclick="document.getElementById('rentab-v-${v.id}').classList.toggle('hidden')">
+          <span class="font-black text-sm uppercase tracking-wider flex items-center">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 mr-2"></i> Análisis de Rentabilidad
+          </span>
+          <i data-lucide="chevron-down" class="w-5 h-5 text-neutral-500"></i>
+        </div>
+        <div id="rentab-v-${v.id}" class="hidden p-6 bg-neutral-50 dark:bg-neutral-800/50">
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between items-center"><span class="text-neutral-500 font-bold">Ingreso por Venta Bruto</span><span class="font-black text-lg">${window.formatMoney(v.montoTotal)}</span></div>
+            <div class="flex justify-between items-center"><span class="text-neutral-500 font-bold">Costo Origen Vehículo</span><span class="font-black text-rose-500">-${window.formatMoney(costo)}</span></div>
+            <div class="flex justify-between items-center"><span class="text-neutral-500 font-bold">Inversión (Gastos Taller)</span><span class="font-black text-rose-500">-${window.formatMoney(gastos)}</span></div>
+            <div class="flex justify-between items-center"><span class="text-neutral-500 font-bold">Comisiones Pagadas</span><span class="font-black text-rose-500">-${window.formatMoney(comisiones)}</span></div>
+            <div class="flex justify-between items-center border-t border-neutral-200 dark:border-neutral-700 pt-3 mt-2"><span class="font-black uppercase text-base">Utilidad Neta</span><span class="font-black text-2xl ${colorGanancia}">${window.formatMoney(ganancia)}</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    html += `
       <div class="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-800">
         <button onclick="window.openModalComisionPorVenta('${v.id}')" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow hover:bg-green-700 transition-colors">
           <i data-lucide="award" class="w-5 h-5 inline mr-2"></i>Asignar Comisión a Personal
@@ -999,6 +1097,7 @@ window.openDetalleVenta = (id) => {
     `;
   }
   
+  document.getElementById('venta-detail-content').innerHTML = html;
   window.openModal('modal-detalle-venta'); 
   lucide.createIcons();
 };
@@ -1103,14 +1202,28 @@ window.renderClientesView = () => {
   const table = document.getElementById('crm-table'); 
   if(!table) return;
   
+  const today = new Date();
+
   if (window.state.consultas.length === 0) { 
     table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay clientes en la base de datos.</td></tr>`; 
   } else { 
     table.innerHTML = window.state.consultas.slice().reverse().map(c => { 
       const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
+      
+      // LOGICA DINAMICA DE TEMPERATURA CRM
+      const leadDate = new Date(c.fecha + 'T00:00:00');
+      const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
+      
+      let dynamicState = 'Frío';
       let lClass = 'bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'; 
-      if(c.estadoLead === 'Caliente') lClass = 'bg-black text-white dark:bg-white dark:text-black'; 
-      if(c.estadoLead === 'Tibio') lClass = 'bg-neutral-400 text-neutral-900 dark:bg-neutral-600 dark:text-white'; 
+
+      if (diffDays <= 7) { 
+        dynamicState = 'Caliente'; 
+        lClass = 'bg-black text-white dark:bg-white dark:text-black'; 
+      } else if (diffDays <= 20) { 
+        dynamicState = 'Tibio'; 
+        lClass = 'bg-neutral-400 text-neutral-900 dark:bg-neutral-600 dark:text-white'; 
+      } 
       
       return `
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
@@ -1122,7 +1235,7 @@ window.renderClientesView = () => {
               <div>
                 <p class="font-bold">${c.nombre}</p>
                 <span class="inline-flex px-2 py-0.5 mt-1 rounded-md text-[10px] font-black uppercase tracking-widest ${lClass}">
-                  ${c.estadoLead}
+                  ${dynamicState}
                 </span>
               </div>
             </div>
@@ -1134,11 +1247,11 @@ window.renderClientesView = () => {
             ${a ? `<span class="font-bold text-sm text-green-600 dark:text-green-500 cursor-pointer hover:underline" onclick="window.openDetalleAuto('${a.id}')">${a.marca} ${a.modelo}</span>` : `<span class="font-bold text-sm">${c.marcaInteres}</span>`}
             <p class="text-xs text-neutral-500 italic mt-1 max-w-[200px] truncate">"${c.notas}"</p>
           </td>
-          <td class="px-6 py-4 text-sm font-bold">
-            ${window.formatDate(c.recordatorio)}
+          <td class="px-6 py-4 text-sm font-bold text-neutral-500">
+            Orig: ${window.formatDate(c.fecha)}
           </td>
           <td class="px-6 py-4">
-            <a href="${window.formatWhatsAppLink(c.telefono, `Hola ${c.nombre}, me comunico de RIVAS AUTO.`)}" target="_blank" class="px-4 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 inline-block">
+            <a href="${window.formatWhatsAppLink(c.telefono, '')}" target="_blank" class="px-4 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 inline-block">
               Contactar
             </a>
           </td>
