@@ -90,6 +90,12 @@ window.checkNotifications = () => {
   }
 };
 
+window.toggleAutosViewMode = (mode) => { 
+  window.state.autosViewMode = mode; 
+  localStorage.setItem('autosViewMode', mode);
+  window.renderAutosView(); 
+};
+
 window.renderAutosView = () => {
   const container = document.getElementById('autos-container');
   if(!container) return;
@@ -274,7 +280,6 @@ window.renderDetalleAuto = () => {
     
     html += `</div>`;
     
-    // PESTAÑAS (TABS)
     html += `
       <div class="flex space-x-4 border-b border-neutral-200 dark:border-neutral-800 mb-6 overflow-x-auto no-scrollbar">
         <button onclick="window.switchDASection('crm')" class="pb-3 font-bold border-b-2 flex items-center ${window.state.daActiveSection === 'crm' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
@@ -306,7 +311,6 @@ window.renderDetalleAuto = () => {
        
        let leadsAuto = window.state.consultas.filter(c => c.autoId === a.id);
        
-       // Filtramos leads según rol para que el vendedor solo vea los que él cargó
        if(window.state.currentUser.rol === 'Vendedor') {
          leadsAuto = leadsAuto.filter(c => c.userId === window.state.currentUser.id);
        } else if (window.state.currentUser.rol === 'Encargado') {
@@ -373,7 +377,6 @@ window.renderDetalleAuto = () => {
     }
   } else {
     
-    // MODO CERRAR VENTA (Checkout Modal)
     html += `
       <button type="button" onclick="window.state.isVentaMode=false; window.renderDetalleAuto()" class="mb-6 text-sm font-bold flex items-center hover:underline text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors">
         <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Volver a Ficha
@@ -495,19 +498,24 @@ window.renderCajaView = () => {
   if(window.state.currentUser.rol === 'Vendedor') { 
     myTrans = myTrans.filter(t => t.userId === window.state.currentUser.id); 
   } else if (window.state.currentUser.rol === 'Encargado') { 
-    myTrans = myTrans.filter(t => t.sucursalId === window.state.currentUser.sucursalId); 
+    // ENCARGADO: Ve su caja y la de sus vendedores de la sucursal, PERO NO DEL ADMIN
+    const usuariosValidos = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+    myTrans = myTrans.filter(t => usuariosValidos.includes(t.userId)); 
   }
 
   if(window.state.currentUser.rol !== 'Vendedor') {
     const fc = document.getElementById('caja-filters-container'); 
     if(fc) fc.classList.remove('hidden');
     
-    let users = window.state.currentUser.rol === 'Encargado' ? window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId) : window.state.usuarios;
+    let users = window.state.usuarios;
+    if (window.state.currentUser.rol === 'Encargado') {
+       users = users.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin');
+    }
     
     if(fc) {
       fc.innerHTML = `
         <div class="flex-1 min-w-[200px]">
-          <label class="text-xs font-bold text-neutral-500 block mb-1">Filtrar por Vendedor</label>
+          <label class="text-xs font-bold text-neutral-500 block mb-1">Filtrar por Usuario</label>
           <select onchange="window.state.cajaFilterUser=this.value; window.renderCajaView()" class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500">
             <option value="all">Todas las cajas permitidas</option>
             ${users.map(u => `
@@ -523,7 +531,6 @@ window.renderCajaView = () => {
     }
   }
 
-  // Ahora TODOS pueden ver el botón de pendientes (solo cambian los permisos dentro del modal)
   const btnPendientes = document.getElementById('btn-ver-pendientes');
   if(btnPendientes) {
     btnPendientes.classList.remove('hidden'); 
@@ -615,8 +622,10 @@ window.openModalPendientes = () => {
     myTrans = myTrans.filter(t => t.userId === window.state.currentUser.id); 
     myVentas = myVentas.filter(v => v.userId === window.state.currentUser.id); 
   } else if (window.state.currentUser.rol === 'Encargado') { 
-    myTrans = myTrans.filter(t => t.sucursalId === window.state.currentUser.sucursalId); 
-    myVentas = myVentas.filter(v => v.sucursalId === window.state.currentUser.sucursalId); 
+    // Filtro Encargado: Solo ve lo suyo y lo de sus vendedores (No Admin)
+    const validUsers = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+    myTrans = myTrans.filter(t => validUsers.includes(t.userId)); 
+    myVentas = myVentas.filter(v => validUsers.includes(v.userId)); 
   }
 
   const oldPendientes = myTrans.filter(t => t.estadoCobro === 'pendiente');
@@ -725,7 +734,6 @@ window.openModalPendientes = () => {
   window.openModal('modal-pendientes');
   lucide.createIcons();
 };
-
 
 // --- RENDERIZADO FORMULARIOS ---
 window.renderFormulariosView = () => {
@@ -985,7 +993,8 @@ window.renderVentasView = () => {
   if(window.state.currentUser.rol === 'Vendedor') {
      misVentas = misVentas.filter(v => v.userId === window.state.currentUser.id);
   } else if (window.state.currentUser.rol === 'Encargado') {
-     misVentas = misVentas.filter(v => v.sucursalId === window.state.currentUser.sucursalId);
+     const validUsers = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+     misVentas = misVentas.filter(v => validUsers.includes(v.userId));
   }
   
   const table = document.getElementById('ventas-table'); 
@@ -1229,7 +1238,8 @@ window.renderClientesView = () => {
   if(window.state.currentUser.rol === 'Vendedor') {
      misConsultas = misConsultas.filter(c => c.userId === window.state.currentUser.id);
   } else if (window.state.currentUser.rol === 'Encargado') {
-     misConsultas = misConsultas.filter(c => c.sucursalId === window.state.currentUser.sucursalId);
+     const validUsers = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+     misConsultas = misConsultas.filter(c => validUsers.includes(c.userId));
   }
 
   const today = new Date();
