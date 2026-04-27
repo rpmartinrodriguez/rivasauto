@@ -66,7 +66,7 @@
          <button type="submit" class="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 shadow-lg transition-colors">Entrar</button>
          <p id="login-error" class="text-rose-500 text-sm font-bold mt-4 hidden text-center">Datos incorrectos.</p>
          
-         <button id="login-install-btn" type="button" onclick="installPWA()" class="hidden w-full py-3 mt-4 bg-neutral-100 dark:bg-neutral-800 font-bold rounded-xl hover:bg-neutral-200 transition-colors">
+         <button id="login-install-btn" type="button" onclick="installPWA()" class="hidden w-full py-3 mt-4 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-200 transition-colors">
            <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i> Instalar App
          </button>
        </form>
@@ -240,7 +240,7 @@
             <div><h2 class="text-4xl font-black">Personal</h2></div>
             <div class="flex space-x-3">
               <button onclick="openModal('modal-comision')" class="px-6 py-3 font-bold bg-neutral-200 dark:bg-neutral-800 rounded-2xl hover:scale-105 transition-transform">Bono Manual</button>
-              <button onclick="openModal('modal-cerrar-pagos'); calcularTotalPagos();" class="px-6 py-3 font-bold text-white bg-rose-600 rounded-2xl hover:bg-rose-700 hover:scale-105 transition-transform">Cerrar Pagos</button>
+              <button onclick="openModal('modal-cerrar-pagos'); window.calcularTotalPagos && window.calcularTotalPagos();" class="px-6 py-3 font-bold text-white bg-rose-600 rounded-2xl hover:bg-rose-700 hover:scale-105 transition-transform">Cerrar Pagos</button>
             </div>
           </div>
           <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
@@ -292,7 +292,7 @@
           <h2 class="text-4xl font-black mb-6">Ajustes del Sistema</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm">
-               <h3 class="text-xl font-bold mb-4">Usuarios</h3>
+               <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="users" class="w-5 h-5 mr-2"></i> Usuarios</h3>
                <form onsubmit="handleSaveUser(event)" class="mb-6 bg-neutral-100/50 dark:bg-neutral-800/50 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 space-y-3">
                  <div class="grid grid-cols-2 gap-3">
                    <input id="new-user-name" required placeholder="Nombre" class="w-full rounded-xl px-3 py-2 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700" />
@@ -306,8 +306,8 @@
                  </div>
                  <div class="relative w-full">
                    <input type="password" id="new-user-pwd" required placeholder="Contraseña" class="w-full rounded-xl px-3 py-2 pr-10 text-sm outline-none border focus:border-green-500 bg-white dark:bg-neutral-900 dark:border-neutral-700" />
-                   <button type="button" onclick="togglePwd('new-user-pwd')" class="absolute right-3 top-1/2 -translate-y-1/2">
-                     <i data-lucide="eye" class="w-4 h-4 text-neutral-400"></i>
+                   <button type="button" onclick="togglePwdVisibility('new-user-pwd')" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">
+                     <i data-lucide="eye" class="w-4 h-4"></i>
                    </button>
                  </div>
                  <div class="flex space-x-2">
@@ -317,8 +317,9 @@
                </form>
                <div id="admin-users-list" class="space-y-2 max-h-64 overflow-y-auto no-scrollbar"></div>
             </div>
+            
             <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm h-fit">
-               <h3 class="text-xl font-bold mb-4">Sucursales</h3>
+               <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="map-pin" class="w-5 h-5 mr-2"></i> Sucursales</h3>
                <form onsubmit="handleSaveSucursal(event)" class="mb-6 flex flex-col space-y-2">
                  <div class="flex space-x-2">
                    <input id="new-suc-name" required placeholder="Nombre" class="flex-1 rounded-xl px-3 py-2 text-sm outline-none border bg-white dark:bg-neutral-900 dark:border-neutral-700 focus:border-green-500" />
@@ -349,7 +350,10 @@
             </div>
             <div class="mb-5">
               <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Categoría</label>
-              <div class="flex space-x-2"><select id="caja-cat" required class="flex-1 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"></select><button type="button" onclick="agregarCategoria()" class="px-4 bg-neutral-200 dark:bg-neutral-800 font-bold rounded-2xl hover:bg-neutral-300 transition-colors">+</button></div>
+              <div class="flex space-x-2">
+                <select id="caja-cat" required class="flex-1 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"></select>
+                <button type="button" onclick="agregarCategoria()" class="px-4 bg-neutral-200 dark:bg-neutral-800 font-bold rounded-2xl hover:bg-neutral-300 transition-colors">+</button>
+              </div>
             </div>
             <div class="mb-5"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Descripción</label><input type="text" id="caja-desc" required class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500" /></div>
             <div class="mb-5"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Auto (Opcional)</label><select id="caja-auto" class="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 rounded-2xl px-4 py-3 outline-none focus:border-green-500"></select></div>
@@ -393,9 +397,9 @@
     <div id="modal-detalle-venta" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-venta')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900">
+        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900">
           <h3 class="text-2xl font-black">Ficha de Operación</h3>
-          <button onclick="closeModal('modal-detalle-venta')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button onclick="closeModal('modal-detalle-venta')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar" id="venta-detail-content"></div>
       </div>
@@ -403,49 +407,51 @@
 
     <div id="modal-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-auto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
+      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden">
+        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-2xl font-black" id="modal-auto-title">Alta Vehículo</h3>
-          <button onclick="closeModal('modal-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button onclick="closeModal('modal-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6 overflow-y-auto max-h-[75vh] no-scrollbar">
           <form id="form-auto">
             <div class="grid grid-cols-2 gap-4 mb-4">
-              <input id="auto-marca" required placeholder="Marca" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-              <input id="auto-modelo" required placeholder="Modelo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-marca" required placeholder="Marca" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-modelo" required placeholder="Modelo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
-              <input id="auto-color" required placeholder="Color" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-              <input id="auto-km" type="number" required placeholder="Kilometraje" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-color" required placeholder="Color" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-km" type="number" required placeholder="Kilometraje" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
-              <input id="auto-anio" type="number" required placeholder="Año" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-              <input id="auto-patente" required placeholder="Patente" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 uppercase outline-none focus:border-green-500 font-bold" />
+              <input id="auto-anio" type="number" required placeholder="Año" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="auto-patente" required placeholder="Patente" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 uppercase outline-none focus:border-green-500 font-bold" />
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Precio V. Est. ($)</label>
-                <input id="auto-precio" type="number" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Precio Venta Est. ($)</label>
+                <input id="auto-precio" type="number" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Costo Original ($)</label>
-                <input id="auto-costo" type="number" required placeholder="Costo ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+                <input id="auto-costo" type="number" required placeholder="Costo ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Condición</label>
-                <select id="auto-condicion" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
+                <select id="auto-condicion" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
                   <option value="Propio">Propio</option>
                   <option value="Consignación">Consignación</option>
                 </select>
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Ubicación</label>
-                <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
+                <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
               </div>
             </div>
-            <button type="submit" id="modal-auto-submit" class="w-full mt-2 py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Vehículo</button>
+            <button type="submit" id="modal-auto-submit" class="w-full mt-2 py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition">
+              Guardar Vehículo
+            </button>
           </form>
         </div>
       </div>
@@ -453,21 +459,21 @@
 
     <div id="modal-ingreso-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-ingreso-auto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm p-8 text-center overflow-hidden">
+      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm p-8 text-center overflow-hidden">
          <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8"></i></div>
          <h3 class="text-2xl font-black mb-2">Hacer Disponible</h3>
          <p class="text-sm text-neutral-500 mb-6">Establece el precio de venta final:</p>
-         <input type="number" id="ingreso-precio" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-4 text-lg font-bold mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 text-center" />
-         <button onclick="confirmarIngresoAuto()" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg hover:scale-105 transition-transform mb-4">Guardar y Habilitar</button>
+         <input type="number" id="ingreso-precio" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-4 text-lg font-bold mb-6 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 text-center" />
+         <button onclick="confirmarIngresoAuto()" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg mb-4 hover:scale-105 transition-transform">Guardar y Habilitar</button>
          <p class="text-xs text-rose-500 font-bold hidden" id="ingreso-aviso-gastos">¡No olvides registrar gastos!</p>
-         <button onclick="abrirCajaParaGastos()" id="btn-ingreso-gastos" class="hidden w-full py-3 bg-neutral-100 dark:bg-neutral-800 font-bold mt-2 rounded-2xl hover:bg-neutral-200 transition-colors">Cargar Gastos Ahora</button>
+         <button onclick="abrirCajaParaGastos()" id="btn-ingreso-gastos" class="hidden w-full py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold mt-2 rounded-2xl">Cargar Gastos Ahora</button>
       </div>
     </div>
 
     <div id="modal-detalle-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-detalle-auto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
+      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
+        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
           <h3 id="da-title" class="text-2xl font-black">Ficha 360º</h3>
           <div class="flex items-center space-x-2" id="da-header-actions"></div>
         </div>
@@ -477,26 +483,26 @@
 
     <div id="modal-nuevo-lead" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-nuevo-lead')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
+      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-2xl font-black">Nuevo Interesado</h3>
           <button onclick="closeModal('modal-nuevo-lead')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="p-6">
           <form onsubmit="handleGlobalLeadSubmit(event)">
-            <input id="gl-nombre" required placeholder="Nombre" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
-            <input id="gl-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+            <input id="gl-nombre" required placeholder="Nombre" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+            <input id="gl-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             <div class="mb-4">
               <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Vehículo Buscado</label>
-              <input id="gl-interes" required placeholder="Ej: Pick-ups..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+              <input id="gl-interes" required placeholder="Ej: Pick-ups..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             </div>
             <div class="mb-4">
               <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Temperatura</label>
-              <select id="gl-estado" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
+              <select id="gl-estado" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
                 <option value="Caliente">🔥 Caliente</option><option value="Tibio" selected>⭐ Tibio</option><option value="Frío">❄️ Frío</option>
               </select>
             </div>
-            <textarea id="gl-nota" placeholder="Notas..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold"></textarea>
+            <textarea id="gl-nota" placeholder="Notas..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold"></textarea>
             <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Lead</button>
           </form>
         </div>
@@ -505,8 +511,8 @@
 
     <div id="modal-boleto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-boleto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
+      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden">
+        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center sticky top-0 z-20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md">
           <h3 id="boleto-title" class="text-2xl font-black">Completar Boleto</h3>
           <button onclick="closeModal('modal-boleto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
@@ -516,15 +522,15 @@
 
     <div id="modal-asociar-form" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-asociar-form')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
+      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
          <h3 class="text-xl font-black mb-4">¿Asociar a auto?</h3>
          <p class="text-sm text-neutral-500 mb-6">Si asocias este boleto a un auto en stock, su estado cambiará a "Vendido".</p>
          <div class="flex justify-center space-x-4 mb-6">
-           <button onclick="document.getElementById('asoc-select-container').classList.remove('hidden')" class="px-6 py-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500 rounded-xl font-bold hover:bg-green-200 transition-colors">Sí, asociar</button>
-           <button onclick="guardarYImprimirFormulario(null)" class="px-6 py-2 bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 rounded-xl font-bold hover:bg-neutral-200 transition-colors">No, solo imprimir</button>
+           <button onclick="document.getElementById('asoc-select-container').classList.remove('hidden')" class="px-6 py-2 bg-green-100 text-green-700 rounded-xl font-bold hover:bg-green-200 transition-colors">Sí, asociar</button>
+           <button onclick="guardarYImprimirFormulario(null)" class="px-6 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl font-bold hover:bg-neutral-200 transition-colors">No, solo imprimir</button>
          </div>
-         <div id="asoc-select-container" class="hidden text-left border-t border-neutral-200 dark:border-neutral-800 pt-6 mt-4">
-           <select id="asoc-auto-select" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500"></select>
+         <div id="asoc-select-container" class="hidden text-left border-t dark:border-neutral-800 pt-6 mt-4">
+           <select id="asoc-auto-select" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500"></select>
            <button onclick="guardarYImprimirFormulario(document.getElementById('asoc-auto-select').value)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">Confirmar e Imprimir</button>
          </div>
       </div>
@@ -532,7 +538,7 @@
     
     <div id="modal-confirm-boleto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-confirm-boleto')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
+      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
          <h3 class="text-xl font-black mb-4">¡Venta Registrada!</h3>
          <p class="text-sm text-neutral-500 mb-6">El auto se marcó como vendido. ¿Deseas generar el Boleto ahora?</p>
          <div class="flex justify-center space-x-4">
@@ -544,8 +550,8 @@
 
     <div id="modal-comision" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-comision')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden">
-        <div class="px-8 py-6 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
+      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden">
+        <div class="px-8 py-6 border-b dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-xl font-black">Asignar Comisión/Bono</h3>
           <button onclick="closeModal('modal-comision')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full hover:bg-neutral-200 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
@@ -553,9 +559,9 @@
           <form id="form-comision" onsubmit="handleComisionSubmit(event)">
             <input type="hidden" id="comision-venta-id" value="">
             <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Personal</label>
-            <select id="comision-user" required class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
+            <select id="comision-user" required class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
             <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Monto a Pagar ($)</label>
-            <input id="comision-monto" type="number" required placeholder="Ej: 50000" class="w-full rounded-xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-lg" />
+            <input id="comision-monto" type="number" required placeholder="Ej: 50000" class="w-full rounded-xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-lg" />
             <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] transition-transform">Guardar Asignación</button>
           </form>
         </div>
@@ -564,13 +570,11 @@
     
     <div id="modal-cerrar-pagos" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('modal-cerrar-pagos')"></div>
-      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden p-8 text-center">
-         <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
-           <i data-lucide="alert-triangle" class="w-8 h-8"></i>
-         </div>
+      <div class="relative bg-white dark:bg-neutral-900 border dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden p-8 text-center">
+         <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
          <h3 class="text-xl font-black mb-2">Cerrar Pagos</h3>
          <p class="text-sm text-neutral-500 mb-6">Las comisiones pendientes se marcarán pagadas y se debitará el total de la Caja.</p>
-         <div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl p-4 mb-6 border border-neutral-200 dark:border-neutral-700 text-left">
+         <div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl p-4 mb-6 border dark:border-neutral-700 text-left">
            <p class="text-xs uppercase text-neutral-500 font-bold mb-1">Total a Liquidar</p>
            <p class="text-3xl font-black text-rose-600" id="monto-total-liquidar">$ 0</p>
          </div>
@@ -583,1404 +587,6 @@
 
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-    const firebaseConfig = { 
-      apiKey: "AIzaSyDCQSEAMGBfd8MgMMEgaYZ5jAjhaPYfeng", 
-      authDomain: "rivasauto.firebaseapp.com", 
-      projectId: "rivasauto", 
-      storageBucket: "rivasauto.firebasestorage.app", 
-      messagingSenderId: "281188948058", 
-      appId: "1:281188948058:web:fa17ccc44d58159da2e063" 
-    };
-    
-    const app = initializeApp(firebaseConfig); 
-    const db = getFirestore(app); 
-    window.db = db;
-
-    window.fbAdd = async (collName, data) => { 
-      try { 
-        return await addDoc(collection(db, collName), data); 
-      } catch (e) { 
-        console.error(e); 
-      } 
-    };
-    window.fbUpdate = async (collName, idStr, data) => { 
-      try { 
-        await updateDoc(doc(db, collName, idStr), data); 
-      } catch (e) { 
-        console.error(e); 
-      } 
-    };
-    window.fbDelete = async (collName, idStr) => { 
-      try { 
-        await deleteDoc(doc(db, collName, idStr)); 
-      } catch (e) { 
-        console.error(e); 
-      } 
-    };
-
-    function setupRealtimeSync() {
-      const collections = ['sucursales', 'usuarios', 'autos', 'transacciones', 'ventas', 'consultas', 'formularios', 'comisiones'];
-      collections.forEach(collName => {
-        onSnapshot(collection(db, collName), (snapshot) => {
-          const arr = []; 
-          snapshot.forEach((doc) => { 
-            arr.push({ id: doc.id, ...doc.data() }); 
-          });
-          
-          if(collName === 'sucursales') state.sucursales = arr;
-          if(collName === 'usuarios') state.usuarios = arr;
-          if(collName === 'autos') state.autos = arr;
-          if(collName === 'transacciones') state.transacciones = arr;
-          if(collName === 'ventas') state.ventas = arr;
-          if(collName === 'consultas') state.consultas = arr;
-          if(collName === 'formularios') state.formularios = arr;
-          if(collName === 'comisiones') state.comisiones = arr;
-          
-          if (state.currentUser) { 
-            const u = state.usuarios.find(u => u.id === state.currentUser.id); 
-            if(u) state.currentUser = u; 
-            initSelects(); 
-            if(window.renderAllViews) window.renderAllViews(); 
-          }
-        });
-      });
-    }
-
-    async function bootApp() {
-      setupRealtimeSync();
-      setTimeout(async () => {
-         const usersSnap = await getDocs(collection(db, "usuarios"));
-         if(usersSnap.empty) {
-            try {
-              const sucRef = await addDoc(collection(db, "sucursales"), { nombre: 'Casa Central' });
-              await addDoc(collection(db, "usuarios"), { 
-                nombre: 'Admin Principal', 
-                email: 'admin@rivasauto.com', 
-                password: '12345rivasauto', 
-                rol: 'Admin', 
-                sucursalId: sucRef.id, 
-                isFirstLogin: false 
-              });
-            } catch (err) {
-              console.error("Error al crear admin", err);
-            }
-         }
-         checkSessionAndReady();
-      }, 1500);
-    }
-
-    function checkSessionAndReady() {
-      const savedSession = localStorage.getItem('erp_session');
-      if (savedSession) { 
-        const user = state.usuarios.find(u => u.id === savedSession); 
-        if (user && !user.isFirstLogin) { 
-          state.currentUser = user; 
-          launchApp(); 
-        } 
-      }
-      
-      const loader = document.getElementById('loader-screen'); 
-      loader.style.opacity = '0';
-      setTimeout(() => { 
-        loader.style.display = 'none'; 
-        if (!state.currentUser) { 
-          document.getElementById('auth-wrapper').classList.remove('hidden'); 
-        } 
-      }, 500);
-    }
-    bootApp();
-  </script>
-
-  <script>
-    const state = {
-      activeTab: 'autos', 
-      isDarkMode: false, 
-      isSidebarOpen: false, 
-      currentUser: null,
-      sucursales: [], 
-      usuarios: [], 
-      autos: [], 
-      transacciones: [], 
-      ventas: [], 
-      consultas: [], 
-      formularios: [], 
-      comisiones: [],
-      categoriasGasto: ['Mecánica', 'Estética', 'Gestoría', 'Impuestos', 'Servicios Generales', 'Venta Vehículos', 'Gastos Varios', 'Liquidación Personal'],
-      cajaFilterUser: 'all', 
-      selectedAutoId: null, 
-      daActiveSection: 'crm', 
-      isVentaMode: false, 
-      autosViewMode: 'grid',
-      ventaData: { tienePermuta: false }, 
-      editingUserId: null, 
-      editingSucursalId: null, 
-      editingAutoId: null, 
-      tempFormData: null, 
-      pendingIngresoAutoId: null
-    };
-
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => { 
-      e.preventDefault(); 
-      deferredPrompt = e; 
-      document.getElementById('login-install-btn').classList.remove('hidden'); 
-      document.getElementById('sidebar-install-btn').classList.remove('hidden'); 
-    });
-    
-    window.installPWA = async () => { 
-      if (deferredPrompt) { 
-        deferredPrompt.prompt(); 
-        const { outcome } = await deferredPrompt.userChoice; 
-        if (outcome === 'accepted') { 
-          document.getElementById('login-install-btn').classList.add('hidden'); 
-          document.getElementById('sidebar-install-btn').classList.add('hidden'); 
-        } 
-        deferredPrompt = null; 
-      } 
-    };
-
-    const formatMoney = (a) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(a);
-    const formatDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
-    const checkDocStatus = (docs) => docs && docs.c08 && docs.verificacion && docs.libreDeuda;
-    const formatWhatsAppLink = (phone, text) => `https://wa.me/549${phone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
-    const generateId = () => Math.random().toString(36).substring(2, 9);
-
-    window.toggleDarkMode = () => { 
-      state.isDarkMode = !state.isDarkMode; 
-      document.documentElement.classList.toggle('dark', state.isDarkMode); 
-      document.getElementById('theme-icon').setAttribute('data-lucide', state.isDarkMode ? 'sun' : 'moon'); 
-      lucide.createIcons(); 
-    }
-    
-    window.togglePwd = (id) => { 
-      const i = document.getElementById(id); 
-      i.type = i.type === 'password' ? 'text' : 'password'; 
-    }
-    
-    window.toggleSidebar = () => { 
-      state.isSidebarOpen = !state.isSidebarOpen; 
-      document.getElementById('sidebar').classList.toggle('-translate-x-full', !state.isSidebarOpen); 
-      const b = document.getElementById('sidebar-backdrop'); 
-      if(state.isSidebarOpen) { 
-        b.classList.remove('hidden'); 
-        setTimeout(() => b.classList.remove('opacity-0'), 10); 
-      } else { 
-        b.classList.add('opacity-0'); 
-        setTimeout(() => b.classList.add('hidden'), 300); 
-      } 
-    }
-    
-    window.switchTab = (tabId) => { 
-      state.activeTab = tabId; 
-      document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden')); 
-      document.getElementById(`view-${tabId}`).classList.remove('hidden'); 
-      if(state.isSidebarOpen) toggleSidebar(); 
-      renderNav(); 
-    }
-    
-    window.openModal = (id) => {
-      document.getElementById(id).classList.remove('hidden');
-    }
-    
-    window.closeModal = (id) => { 
-      document.getElementById(id).classList.add('hidden'); 
-      if(id === 'modal-detalle-auto'){ 
-        state.selectedAutoId = null; 
-        state.isVentaMode = false; 
-      } 
-    }
-    
-    window.toggleNotifications = () => { 
-      document.getElementById('notif-dropdown').classList.toggle('hidden'); 
-    }
-
-    window.handleLogin = (e) => { 
-      e.preventDefault(); 
-      const em = document.getElementById('login-email').value.toLowerCase(); 
-      const pw = document.getElementById('login-pwd').value; 
-      const err = document.getElementById('login-error'); 
-      
-      const u = state.usuarios.find(x => x.email.toLowerCase() === em && x.password === pw); 
-      
-      if(u) { 
-        err.classList.add('hidden'); 
-        state.currentUser = u; 
-        if(u.isFirstLogin) { 
-          document.getElementById('login-form').classList.add('hidden'); 
-          document.getElementById('pwd-change-form').classList.remove('hidden'); 
-          document.getElementById('auth-title').innerText = "Cambiar Contraseña"; 
-        } else { 
-          launchApp(); 
-        } 
-      } else { 
-        err.classList.remove('hidden'); 
-      } 
-    }
-    
-    window.handlePwdChange = async (e) => { 
-      e.preventDefault(); 
-      const p1 = document.getElementById('new-pwd').value; 
-      const p2 = document.getElementById('confirm-pwd').value; 
-      const err = document.getElementById('pwd-error'); 
-      
-      if(p1 !== p2) { 
-        err.classList.remove('hidden'); 
-      } else { 
-        err.classList.add('hidden'); 
-        state.currentUser.password = p1; 
-        state.currentUser.isFirstLogin = false; 
-        await window.fbUpdate("usuarios", state.currentUser.id, { password: p1, isFirstLogin: false }); 
-        launchApp(); 
-      } 
-    }
-    
-    window.launchApp = () => { 
-      document.getElementById('auth-wrapper').classList.add('hidden'); 
-      document.getElementById('app-wrapper').classList.remove('hidden'); 
-      localStorage.setItem('erp_session', state.currentUser.id); 
-      
-      document.getElementById('user-name').innerText = state.currentUser.nombre; 
-      document.getElementById('user-role').innerText = state.currentUser.rol; 
-      document.getElementById('user-avatar').innerText = state.currentUser.nombre.charAt(0).toUpperCase(); 
-      
-      state.cajaFilterUser = 'all'; 
-      initSelects(); 
-      renderAllViews(); 
-      switchTab('autos'); 
-    }
-    
-    window.logout = () => { 
-      state.currentUser = null; 
-      localStorage.removeItem('erp_session'); 
-      document.getElementById('app-wrapper').classList.add('hidden'); 
-      document.getElementById('auth-wrapper').classList.remove('hidden'); 
-      document.getElementById('login-form').classList.remove('hidden'); 
-      document.getElementById('pwd-change-form').classList.add('hidden'); 
-      document.getElementById('auth-title').innerText = "Iniciar Sesión"; 
-      document.getElementById('login-form').reset(); 
-      document.getElementById('pwd-change-form').reset(); 
-    };
-
-    window.renderNav = () => {
-      if(!state.currentUser) return; 
-      const isAd = state.currentUser.rol === 'Admin';
-      
-      let tabs = [ 
-        { id: 'autos', icon: 'car', label: 'Flota' }, 
-        { id: 'caja', icon: 'wallet', label: 'Caja' }, 
-        { id: 'clientes', icon: 'users', label: 'CRM' } 
-      ];
-      
-      if(isAd) { 
-        tabs.splice(2, 0, { id: 'ventas', icon: 'shopping-bag', label: 'Historial Ventas' }); 
-        tabs.splice(3, 0, { id: 'facturas', icon: 'file-text', label: 'Facturas' }); 
-        tabs.splice(4, 0, { id: 'personal', icon: 'briefcase', label: 'Personal' }); 
-        tabs.splice(6, 0, { id: 'formularios', icon: 'printer', label: 'Formularios' }); 
-        tabs.push( 
-          { id: 'resumenes', icon: 'pie-chart', label: 'Resúmenes' }, 
-          { id: 'admin', icon: 'settings', label: 'Administración' } 
-        ); 
-      }
-      
-      document.getElementById('nav-menu').innerHTML = tabs.map(t => `
-        <button onclick="switchTab('${t.id}')" class="w-full flex items-center space-x-3 py-3 px-4 rounded-2xl transition-all font-bold text-sm ${state.activeTab === t.id ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'}">
-          <i data-lucide="${t.icon}" class="w-5 h-5"></i>
-          <span>${t.label}</span>
-        </button>
-      `).join(''); 
-      
-      lucide.createIcons();
-    }
-
-    // BOLETOS
-    window.openModalBoleto = (tipo, prefillData = null) => {
-      let content = ''; 
-      const t = tipo === 'simple' ? 'BOLETO COMPRA VENTA AUTOMOTOR' : 'BOLETO DE VENTA CON PERMUTA'; 
-      document.getElementById('boleto-title').innerText = t;
-      
-      if(tipo === 'simple') {
-        content = `
-          <form id="form-real-boleto" onsubmit="preGuardarBoleto(event, 'simple')">
-            <h4 class="font-bold text-slate-500 mb-4 uppercase">Datos de Partes</h4>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <input id="bf-vendedor" required placeholder="Vendedor (Nombre)" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.vendedor || ''}"/>
-              <input id="bf-comprador" required placeholder="Comprador (Nombre)" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.comprador || ''}"/>
-              <input id="bf-dni" required placeholder="D.N.I Comprador" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.dni || ''}"/>
-              <input id="bf-domicilio" required placeholder="Domicilio Comprador" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.domicilio || ''}"/>
-            </div>
-            
-            <h4 class="font-bold text-slate-500 mb-4 uppercase">Datos del Vehículo</h4>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-              <input id="bf-marca" required placeholder="Marca" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.marca || ''}" />
-              <input id="bf-modelo" required placeholder="Modelo y Tipo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.modelo || ''}"/>
-              <input id="bf-anio" required placeholder="Año" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.año || ''}"/>
-              <input id="bf-dominio" required placeholder="Dominio (Patente)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none uppercase font-bold" value="${prefillData?.auto?.patente || ''}"/>
-              <input id="bf-motor" required placeholder="Motor N°" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" />
-              <input id="bf-chasis" required placeholder="Chasis N°" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" />
-            </div>
-            
-            <h4 class="font-bold text-slate-500 mb-4 uppercase">Monto, Pago y Observaciones</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <input id="bf-monto" type="number" required placeholder="Suma Total ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-lg" value="${prefillData?.monto || ''}"/>
-              <input id="bf-formapago" required placeholder="Forma de pago (Ej: EFECTIVO EN ESTE ACTO)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="EFECTIVO EN ESTE ACTO" />
-            </div>
-            
-            <textarea id="bf-obs" maxlength="1500" rows="4" placeholder="Observaciones adicionales..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold resize-none mb-6"></textarea>
-            
-            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:scale-[1.01] transition-transform">
-              Continuar a Guardar e Imprimir
-            </button>
-          </form>
-        `;
-      } else {
-        content = `
-          <form id="form-real-boleto" onsubmit="preGuardarBoleto(event, 'permuta')">
-            <h4 class="font-bold text-slate-500 mb-4 uppercase">Datos de Partes</h4>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <input id="bf-vendedor" required placeholder="Vendedor (Agencia)" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.vendedor || 'RIVAS AUTO'}"/>
-              <input id="bf-comprador" required placeholder="Comprador (Nombre)" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.comprador || ''}"/>
-              <input id="bf-dni" required placeholder="D.N.I Comprador" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.dni || ''}"/>
-              <input id="bf-domicilio" required placeholder="Domicilio Comprador" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.domicilio || ''}"/>
-              <input id="bf-telefono" required placeholder="Teléfono" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.telefono || ''}"/>
-            </div>
-            
-            <h4 class="font-bold text-slate-500 mb-4 uppercase">Vehículo Entregado (Vendido)</h4>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-              <input id="bf-marca" required placeholder="Marca" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.marca || ''}" />
-              <input id="bf-modelo" required placeholder="Modelo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.modelo || ''}"/>
-              <input id="bf-anio" required placeholder="Año" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.auto?.año || ''}"/>
-              <input id="bf-dominio" required placeholder="Patente" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none uppercase font-bold" value="${prefillData?.auto?.patente || ''}"/>
-              <input id="bf-motor" required placeholder="Motor N°" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" />
-              <input id="bf-chasis" required placeholder="Chasis N°" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" />
-            </div>
-            
-            <h4 class="font-bold text-slate-500 mb-4 uppercase">Pago y Permuta Recibida</h4>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-              <input id="bf-monto" type="number" required placeholder="Venta Total ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-lg" value="${prefillData?.monto || ''}"/>
-              <input id="bf-efectivo" type="number" placeholder="Efectivo abonado ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.efectivo || ''}"/>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-green-50 dark:bg-green-900/10 rounded-2xl border border-green-200 dark:border-green-800">
-              <input id="bp-marca" required placeholder="Permuta: Marca" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.permuta?.marca || ''}"/>
-              <input id="bp-modelo" required placeholder="Permuta: Modelo" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.permuta?.modelo || ''}"/>
-              <input id="bp-anio" required type="number" placeholder="Permuta: Año" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.permuta?.anio || ''}"/>
-              <input id="bp-dominio" required placeholder="Permuta: Patente" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none uppercase font-bold" value="${prefillData?.permuta?.patente || ''}"/>
-              <input id="bp-tasado" type="number" required placeholder="Valor Tasado ($)" class="w-full rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-green-700" value="${prefillData?.permuta?.tasado || ''}"/>
-            </div>
-            
-            <h4 class="font-bold text-slate-500 mb-4 uppercase">Financiación y Observaciones</h4>
-            <div class="grid grid-cols-3 gap-4 mb-4">
-              <input id="bf-saldo" type="number" placeholder="Saldo Deudor ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold text-rose-500" value="${prefillData?.saldo || ''}" />
-              <input id="bf-cuotas" type="number" placeholder="Cant. Cuotas" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.cuotas || ''}" />
-              <input id="bf-valcuota" type="number" placeholder="Valor Cuota ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold" value="${prefillData?.valCuota || ''}" />
-            </div>
-            
-            <textarea id="bf-obs" maxlength="1500" rows="4" placeholder="Observaciones adicionales..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none font-bold resize-none mb-6"></textarea>
-            
-            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:scale-[1.01] transition-transform">
-              Continuar a Guardar e Imprimir
-            </button>
-          </form>
-        `;
-      }
-      document.getElementById('boleto-form-content').innerHTML = content;
-      if (prefillData && prefillData.auto) { 
-        state.tempFormData = { autoIdAsociado: prefillData.auto.id }; 
-      } else { 
-        state.tempFormData = {}; 
-      }
-      openModal('modal-boleto');
-    };
-
-    window.preGuardarBoleto = (e, tipo) => {
-      e.preventDefault();
-      const baseData = {
-        tipo: tipo === 'simple' ? 'Boleto Compra Venta' : 'Boleto Venta con Permuta', 
-        fecha: new Date().toISOString().split('T')[0],
-        vendedor: document.getElementById('bf-vendedor').value, 
-        comprador: document.getElementById('bf-comprador').value, 
-        dni: document.getElementById('bf-dni').value, 
-        domicilio: document.getElementById('bf-domicilio').value,
-        marca: document.getElementById('bf-marca').value, 
-        modelo: document.getElementById('bf-modelo').value, 
-        año: document.getElementById('bf-anio').value, 
-        dominio: document.getElementById('bf-dominio').value.toUpperCase(),
-        motor: document.getElementById('bf-motor').value, 
-        chasis: document.getElementById('bf-chasis').value, 
-        monto: document.getElementById('bf-monto').value, 
-        observaciones: document.getElementById('bf-obs').value
-      };
-      
-      if(tipo === 'simple') { 
-        baseData.formaPago = document.getElementById('bf-formapago').value; 
-      } else { 
-        baseData.telefono = document.getElementById('bf-telefono').value; 
-        baseData.efectivo = document.getElementById('bf-efectivo').value; 
-        baseData.p_marca = document.getElementById('bp-marca').value; 
-        baseData.p_modelo = document.getElementById('bp-modelo').value; 
-        baseData.p_anio = document.getElementById('bp-anio').value; 
-        baseData.p_dominio = document.getElementById('bp-dominio').value.toUpperCase(); 
-        baseData.p_tasado = document.getElementById('bp-tasado').value; 
-        baseData.saldo = document.getElementById('bf-saldo').value; 
-        baseData.cuotas = document.getElementById('bf-cuotas').value; 
-        baseData.valCuota = document.getElementById('bf-valcuota').value; 
-      }
-      
-      const autoId = state.tempFormData.autoIdAsociado; 
-      state.tempFormData = { ...baseData, autoIdAsociado: autoId };
-      
-      if (autoId) { 
-        guardarYImprimirFormulario(autoId); 
-      } else { 
-        document.getElementById('asoc-auto-select').innerHTML = `<option value="">-- Seleccionar Automóvil --</option>` + state.autos.filter(a => a.estado !== 'Vendido').map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
-        closeModal('modal-boleto'); 
-        document.getElementById('asoc-select-container').classList.add('hidden'); 
-        openModal('modal-asociar-form'); 
-      }
-    };
-
-    window.guardarYImprimirFormulario = async (autoIdAsociado) => {
-      const data = { ...state.tempFormData };
-      if (autoIdAsociado) { 
-        data.autoIdAsociado = autoIdAsociado; 
-        await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' }); 
-      }
-      await window.fbAdd("formularios", data);
-      closeModal('modal-asociar-form'); 
-      closeModal('modal-boleto');
-      imprimirBoletoHtml(data);
-    };
-
-    window.imprimirBoletoHtml = (data) => {
-      let printHtml = ''; 
-      const date = new Date(data.fecha); 
-      const fDate = `${date.getDate() + 1} de ${date.toLocaleString('es-ES', { month: 'long' })} del ${date.getFullYear()}`;
-      
-      if(data.tipo === 'Boleto Compra Venta') {
-        printHtml = `
-          <h2 class="text-center text-2xl font-black mb-8 underline uppercase">${data.tipo}</h2>
-          <p class="mb-4">Conste por el presente que entre el Señor/a: <strong>${data.vendedor}</strong> como VENDEDOR y el Señor/a: <strong>${data.comprador}</strong>, D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong> como COMPRADOR se conviene lo siguiente:</p>
-          <p class="mb-4">El Vendedor vende un AUTOMOVIL en las condiciones vistas con las siguientes características:</p>
-          <ul class="list-disc pl-8 mb-6 font-bold">
-            <li>Marca: ${data.marca}</li>
-            <li>Modelo y Tipo: ${data.modelo}</li>
-            <li>Año: ${data.año}</li>
-            <li>Dominio: ${data.dominio}</li>
-            <li>Motor N°: ${data.motor}</li>
-            <li>Chasis N°: ${data.chasis}</li>
-          </ul>
-          <p class="mb-4">En la suma total de pesos: <strong>$ ${data.monto}</strong></p>
-          <p class="mb-6">Pagaderos de la siguiente forma: <strong>${data.formaPago}</strong>, SIRVIENDO EL PRESENTE BOLETO DE RECIBO SUFICIENTE.</p>
-          <p class="mb-4 text-justify">Esta unidad se entrega en el estado de uso en que se encuentra y que el comprador declara conocer, al igual que todo lo concerniente a la marca, modelo, numeros de motor y/o chasis del referido vehiculo, que ha sido revisado y constatado y acepta de plena conformidad, haciendose responsable civil y criminalmente, a partir de la fecha y hora de efectuada esta venta por cualquier accidente, daño y/o perjucio que pudiera ocasionar el vehiculo que es recibido en este acto con su documentacion completa y al dia.</p>
-          <p class="mb-4 text-justify">El comprador se compromente a efectuar la correspondiente transferencia de dominio del vehiculo dentro de los plazos de ley, estando a a su exclusivo cargo la totalidad de los gastos que demande la misma y los tramites y gestiones pertinentes.</p>
-          <p class="mb-6 font-bold">Observaciones: ${data.observaciones}</p>
-          <p class="mt-8">En la ciudad de GUALEGUAYCHÚ, a los ${fDate}, se firman dos ejemplares de un mismo tenor y a un solo efecto.</p>
-          <div class="mt-24 flex justify-between px-16">
-            <div class="text-center border-t border-black w-48 pt-2 font-bold">Firma Vendedor</div>
-            <div class="text-center border-t border-black w-48 pt-2 font-bold">Firma Comprador</div>
-          </div>
-        `;
-      } else {
-        printHtml = `
-          <h2 class="text-center text-xl font-black mb-8 underline uppercase">BOLETO DE VENTA CON PERMUTA</h2>
-          <p class="mb-4 text-justify">Conste por el presente que hemos vendido a Sr./Sra: <strong>${data.comprador}</strong><br>
-          D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong><br>
-          De la localidad de __________________ Celular: <strong>${data.telefono}</strong><br>
-          Por cuenta y orden de Sr./Sra. <strong>${data.vendedor}</strong> un automovil usado, en las condiciones vistas y que se encuentran libre de gravamenes y/o deudas nacionales, municipales o provinciales, dejando contancia que en la fecha el comprador toma posesion del mismo de conformidad, siendo sus caracteristicas las que se detallan a continuacion:</p>
-          
-          <p class="mb-4 font-bold">Marca: ${data.marca} Modelo: ${data.modelo}<br>
-          Año: ${data.año} Motor: ${data.motor} Nro. serie o chasis: ${data.chasis}<br>
-          Patentado en la localidad de __________________ bajo Nro. ${data.dominio}</p>
-          
-          <p class="mb-4 text-justify">La venta se realiza por la suma total de ($) <strong>${data.monto}</strong> , (____________________________________)<br>
-          Discriminados en la siguiente manera:<br>
-          Efectivo: ($) <strong>${data.efectivo || 0}</strong></p>
-          
-          <p class="mb-4 text-justify">Se recibe como parte de pago, un automovil marca: <strong>${data.p_marca}</strong> Modelo: <strong>${data.p_modelo}</strong><br>
-          Año: <strong>${data.p_anio}</strong> Motor Nro.: ________________ Nro. de serie o chasis: ________________<br>
-          Patente de: <strong>${data.p_dominio}</strong> Nro.: ____________ libre de deuda y gravamenes, tasado en la suma de ($): <strong>${data.p_tasado}</strong> , (____________________________________)<br>
-          debiendo cancelarse el remanente de ($): <strong>${data.saldo}</strong> , (____________________________________)</p>
-          
-          <p class="mb-6 text-justify">En <strong>${data.cuotas}</strong> cuotas de ($) <strong>${data.valCuota}</strong> cada una, con vencimiento la primera de ellas el dia ______ del mes ____________ del año ________. Y las cuotas restantes a cancelar cada treinta (30) dias, sucesivamente, hasta la cancelacion de la deuda total, cuyo efecto se firma de igual numero de Pagares que representan las cuotas convenidas y prenda con Registro, gravandose con todas las formalidades establecidas en la Ley Nro. 12.962 el automovil vendido, garantia del saldo deudor.</p>
-          
-          <p class="mb-4 font-bold text-justify">Observaciones: ${data.observaciones}</p>
-          
-          <p class="mb-12">En conformidad se forman dos ejemplares del mismo tenor y a un solo efecto, en Gualeguaychu a los ${fDate}.</p>
-          
-          <div class="mt-12 flex justify-between px-16">
-            <div class="text-center border-t border-black w-48 pt-2 font-bold">Firma Agencia</div>
-            <div class="text-center border-t border-black w-48 pt-2 font-bold">Firma Comprador</div>
-          </div>
-        `;
-      }
-      
-      document.getElementById('print-content').innerHTML = printHtml;
-      document.getElementById('app-wrapper').classList.add('hidden'); 
-      document.getElementById('print-section').classList.remove('hidden');
-      
-      setTimeout(() => { 
-        window.print(); 
-        document.getElementById('print-section').classList.add('hidden'); 
-        document.getElementById('app-wrapper').classList.remove('hidden'); 
-        renderFormulariosView(); 
-      }, 500);
-    };
-
-    window.imprimirFlota = () => {
-       const today = new Date().toLocaleDateString('es-AR');
-       let printHtml = `
-         <h2 class="text-center text-2xl font-black mb-4 uppercase">Listado de Flota Rivas Auto</h2>
-         <p class="mb-6 font-bold text-right text-sm">Fecha de impresión: ${today}</p>
-         <table class="w-full text-left border-collapse border border-black">
-            <thead>
-              <tr class="bg-gray-200 border-b border-black text-xs uppercase">
-                <th class="p-2 border-r border-black">Vehículo</th>
-                <th class="p-2 border-r border-black">Patente</th>
-                <th class="p-2 border-r border-black">Color</th>
-                <th class="p-2 border-r border-black">Km</th>
-                <th class="p-2 border-r border-black">Condición</th>
-                <th class="p-2 text-right">Precio</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${state.autos.filter(a => a.estado !== 'Vendido').map(a => `
-               <tr class="border-b border-black text-sm">
-                 <td class="p-2 border-r border-black font-bold">${a.marca} ${a.modelo} (${a.año})</td>
-                 <td class="p-2 border-r border-black uppercase">${a.patente}</td>
-                 <td class="p-2 border-r border-black capitalize">${a.color || '-'}</td>
-                 <td class="p-2 border-r border-black">${a.km || '-'}</td>
-                 <td class="p-2 border-r border-black uppercase text-[10px]">${a.condicion || '-'}</td>
-                 <td class="p-2 text-right font-bold">${formatMoney(a.precio)}</td>
-               </tr>
-              `).join('')}
-            </tbody>
-         </table>
-       `;
-       
-       document.getElementById('print-content').innerHTML = printHtml;
-       document.getElementById('app-wrapper').classList.add('hidden'); 
-       document.getElementById('print-section').classList.remove('hidden');
-       
-       setTimeout(() => { 
-         window.print(); 
-         document.getElementById('print-section').classList.add('hidden'); 
-         document.getElementById('app-wrapper').classList.remove('hidden'); 
-       }, 500);
-    }
-
-
-    // ==========================================
-    //            COMISIONES Y PERSONAL
-    // ==========================================
-    
-    window.renderPersonalView = () => {
-      if(state.currentUser?.rol !== 'Admin') return;
-      const table = document.getElementById('personal-table');
-      
-      const usuariosAgencia = state.usuarios.filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado');
-      
-      let totLiq = 0;
-      
-      const dataRows = usuariosAgencia.map(u => {
-        const pdtes = state.comisiones.filter(c => c.userId === u.id && c.estado === 'Pendiente');
-        const totPdte = pdtes.reduce((a,c) => a + c.monto, 0);
-        totLiq += totPdte;
-        
-        const suc = state.sucursales.find(s => s.id == u.sucursalId)?.nombre || '-';
-        
-        return `
-          <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-            <td class="px-6 py-4 font-bold">${u.nombre}</td>
-            <td class="px-6 py-4 text-xs font-bold text-neutral-500 uppercase">${u.rol}</td>
-            <td class="px-6 py-4 text-sm">${suc}</td>
-            <td class="px-6 py-4 text-right font-black text-lg ${totPdte > 0 ? 'text-green-600 dark:text-green-500' : 'text-neutral-400'}">${formatMoney(totPdte)}</td>
-          </tr>
-        `;
-      }).join('');
-      
-      table.innerHTML = dataRows || `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay personal para comisionar.</td></tr>`;
-      
-      document.getElementById('monto-total-liquidar').innerText = formatMoney(totLiq);
-      
-      document.getElementById('comision-user').innerHTML = `<option value="">-- Seleccione Empleado --</option>` + usuariosAgencia.map(u => `<option value="${u.id}">${u.nombre} (${u.rol})</option>`).join('');
-    };
-
-    window.openModalAsignarBono = () => { 
-      document.getElementById('form-comision').reset(); 
-      document.getElementById('comision-venta-id').value = ""; 
-      openModal('modal-comision'); 
-    };
-    
-    window.openModalComisionPorVenta = (ventaId) => { 
-      document.getElementById('form-comision').reset(); 
-      document.getElementById('comision-venta-id').value = ventaId; 
-      openModal('modal-comision'); 
-    };
-
-    window.handleComisionSubmit = async (e) => {
-      e.preventDefault();
-      const uId = document.getElementById('comision-user').value;
-      const monto = Number(document.getElementById('comision-monto').value);
-      const vId = document.getElementById('comision-venta-id').value;
-      
-      if(!uId || monto <= 0) return alert("Complete los datos correctamente.");
-      
-      await window.fbAdd("comisiones", { 
-        userId: uId, 
-        ventaId: vId || null, 
-        monto: monto, 
-        estado: 'Pendiente', 
-        fecha: new Date().toISOString().split('T')[0] 
-      });
-      
-      closeModal('modal-comision'); 
-      alert("Comisión/Bono asignado correctamente.");
-    };
-
-    window.openModalCerrarPagos = () => { 
-      openModal('modal-cerrar-pagos'); 
-    };
-    
-    window.calcularTotalPagos = () => {
-      // Refresh real time the total
-      const pdtes = state.comisiones.filter(c => c.estado === 'Pendiente');
-      const tot = pdtes.reduce((a,c) => a + c.monto, 0);
-      document.getElementById('monto-total-liquidar').innerText = formatMoney(tot);
-    };
-
-    window.confirmarCierrePagos = async () => {
-      const pdtes = state.comisiones.filter(c => c.estado === 'Pendiente');
-      const tot = pdtes.reduce((a,c) => a + c.monto, 0);
-      
-      if(tot <= 0) { 
-        closeModal('modal-cerrar-pagos'); 
-        return alert("No hay comisiones pendientes de pago."); 
-      }
-      
-      const fDate = new Date().toISOString().split('T')[0];
-      const adminUsr = state.usuarios.find(u => u.rol === 'Admin') || state.currentUser;
-      
-      await window.fbAdd("transacciones", { 
-        fecha: fDate, 
-        descripcion: `Liquidación de Personal (Cierre de Pagos)`, 
-        tipo: 'gasto', 
-        categoria: 'Liquidación Personal', 
-        valor: tot, 
-        userId: adminUsr.id, 
-        sucursalId: adminUsr.sucursalId, 
-        tipoComprobante: 'X', 
-        numComprobante: '', 
-        iva: 0, 
-        estadoCobro: 'disponible' 
-      });
-      
-      // Batch update for all pending commissions
-      for(let p of pdtes) { 
-        await window.fbUpdate("comisiones", p.id, { estado: 'Pagada', fechaPago: fDate }); 
-      }
-      
-      closeModal('modal-cerrar-pagos'); 
-      alert("Pagos liquidados. Se generó el egreso en Caja automáticamente.");
-    };
-
-    // ==========================================
-    //            RENDER DE VISTAS (RESTO)
-    // ==========================================
-    
-    window.renderFormulariosView = () => {
-       const table = document.getElementById('formularios-table');
-       
-       if(state.formularios.length === 0) { 
-         table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay formularios generados.</td></tr>`; 
-       } else {
-         table.innerHTML = state.formularios.slice().reverse().map(f => `
-           <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-             <td class="px-6 py-4 text-sm font-bold text-neutral-500">${formatDate(f.fecha)}</td>
-             <td class="px-6 py-4 font-bold">
-               <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500 px-2 py-1 rounded text-xs uppercase">
-                 ${f.tipo}
-               </span>
-             </td>
-             <td class="px-6 py-4 font-bold text-sm">${f.comprador}</td>
-             <td class="px-6 py-4 text-center">
-               <button onclick='imprimirBoletoHtml(${JSON.stringify(f)})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform">
-                 <i data-lucide="printer" class="w-4 h-4 inline"></i> Reimprimir
-               </button>
-             </td>
-           </tr>
-         `).join('');
-       }
-       lucide.createIcons();
-    };
-
-    window.toggleAutosViewMode = (mode) => { 
-      state.autosViewMode = mode; 
-      renderAutosView(); 
-    }
-    
-    window.renderAutosView = () => {
-      const container = document.getElementById('autos-container');
-      
-      document.getElementById('btn-view-grid').className = state.autosViewMode === 'grid' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
-      document.getElementById('btn-view-list').className = state.autosViewMode === 'list' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
-      
-      const autosValidos = state.autos.filter(a => a.estado !== 'Vendido');
-      
-      if (autosValidos.length === 0) { 
-        container.innerHTML = '<div class="col-span-full py-12 text-center text-neutral-500 font-bold">No hay vehículos en la flota.</div>'; 
-        return; 
-      }
-
-      if (state.autosViewMode === 'grid') {
-        container.innerHTML = `
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
-            ${autosValidos.map(auto => {
-              const totalGastos = auto.gastos?.reduce((s, g) => s + Number(g.monto), 0) || 0; 
-              const sName = state.sucursales.find(x => x.id === auto.sucursalId)?.nombre || 'Sin Asignar';
-              
-              let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
-              if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
-              if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 border border-amber-300 dark:border-amber-700';
-              
-              return `
-                <div onclick="openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
-                  <div class="bg-neutral-50/50 dark:bg-neutral-800/50 rounded-[2rem] p-6 h-full flex flex-col relative">
-                    <div class="flex justify-between items-start mb-4">
-                      <div class="flex flex-col space-y-1">
-                        <div class="flex space-x-2">
-                          <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-xl ${bClass}">
-                            ${auto.estado}
-                          </span>
-                        </div>
-                        <span class="text-xs text-neutral-500 font-bold ml-1">
-                          <i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${sName} | <span class="uppercase text-[10px]">${auto.condicion || 'Propio'}</span>
-                        </span>
-                      </div>
-                      <div class="bg-white dark:bg-neutral-900 p-2 rounded-xl border border-neutral-200 dark:border-neutral-700">
-                        <span class="font-mono text-sm font-bold">${auto.patente}</span>
-                      </div>
-                    </div>
-                    <div class="mb-4">
-                      <h3 class="text-2xl font-black">${auto.marca} <br/><span class="text-neutral-500">${auto.modelo}</span></h3>
-                      <p class="text-sm text-neutral-400 mt-1 font-bold">Año ${auto.año} • ${auto.color || ''} • ${auto.km || 0} km</p>
-                    </div>
-                    <div class="mt-auto space-y-3">
-                      <div class="flex justify-between items-center p-3 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700">
-                        <span class="text-xs font-bold text-neutral-500 uppercase">Precio</span>
-                        <span class="text-lg font-black">${formatMoney(auto.precio)}</span>
-                      </div>
-                      <div class="flex justify-between items-center px-2">
-                        <span class="text-xs text-neutral-500 font-bold">
-                          <i data-lucide="wrench" class="w-3 h-3 inline"></i> Inversión
-                        </span>
-                        <span class="text-sm font-bold">${formatMoney(totalGastos)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        `;
-      } else {
-        container.innerHTML = `
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden fade-in">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                    <th class="px-6 py-4 font-bold">Vehículo</th>
-                    <th class="px-6 py-4 font-bold">Patente</th>
-                    <th class="px-6 py-4 font-bold">Detalles</th>
-                    <th class="px-6 py-4 font-bold">Estado</th>
-                    <th class="px-6 py-4 font-bold text-right">Precio Venta</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
-                  ${autosValidos.map(auto => {
-                    let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
-                    if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
-                    if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500';
-                    
-                    return `
-                      <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="openDetalleAuto('${auto.id}')">
-                        <td class="px-6 py-4">
-                          <p class="font-bold">${auto.marca} ${auto.modelo}</p>
-                          <p class="text-xs text-neutral-500 font-bold mt-1">Año ${auto.año}</p>
-                        </td>
-                        <td class="px-6 py-4 font-mono text-sm font-bold uppercase">${auto.patente}</td>
-                        <td class="px-6 py-4 text-xs text-neutral-600 dark:text-neutral-400 font-bold capitalize">
-                          ${auto.color || '-'} • ${auto.km || 0} km • <span class="uppercase">${auto.condicion || 'Propio'}</span>
-                        </td>
-                        <td class="px-6 py-4">
-                          <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${bClass}">${auto.estado}</span>
-                        </td>
-                        <td class="px-6 py-4 text-right font-black text-lg">${formatMoney(auto.precio)}</td>
-                      </tr>
-                    `;
-                  }).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
-      }
-      lucide.createIcons();
-    }
-
-    // Modal Alta Auto
-    window.openModalCreateAuto = () => { 
-      state.editingAutoId = null; 
-      document.getElementById('form-auto').reset(); 
-      document.getElementById('modal-auto-title').innerText = "Alta Vehículo"; 
-      openModal('modal-auto'); 
-    }
-    
-    window.editAuto = (id) => { 
-      const a = state.autos.find(x => x.id === id); 
-      state.editingAutoId = id; 
-      document.getElementById('auto-marca').value = a.marca; 
-      document.getElementById('auto-modelo').value = a.modelo; 
-      document.getElementById('auto-color').value = a.color || ''; 
-      document.getElementById('auto-km').value = a.km || ''; 
-      document.getElementById('auto-anio').value = a.año; 
-      document.getElementById('auto-patente').value = a.patente; 
-      document.getElementById('auto-precio').value = a.precio; 
-      document.getElementById('auto-costo').value = a.costo || 0; 
-      document.getElementById('auto-condicion').value = a.condicion || 'Propio'; 
-      document.getElementById('auto-sucursal').value = a.sucursalId; 
-      document.getElementById('modal-auto-title').innerText = "Editar Vehículo"; 
-      closeModal('modal-detalle-auto'); 
-      openModal('modal-auto'); 
-    }
-    
-    window.deleteAuto = async (id) => { 
-      if(confirm('¿Estás seguro de eliminar este vehículo de manera permanente?')) { 
-        await window.fbDelete("autos", id); 
-        closeModal('modal-detalle-auto'); 
-      } 
-    }
-    
-    document.getElementById('form-auto').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const obj = { 
-        marca: document.getElementById('auto-marca').value, 
-        modelo: document.getElementById('auto-modelo').value, 
-        color: document.getElementById('auto-color').value, 
-        km: Number(document.getElementById('auto-km').value), 
-        año: Number(document.getElementById('auto-anio').value), 
-        patente: document.getElementById('auto-patente').value.toUpperCase(), 
-        precio: Number(document.getElementById('auto-precio').value), 
-        costo: Number(document.getElementById('auto-costo').value), 
-        condicion: document.getElementById('auto-condicion').value, 
-        sucursalId: document.getElementById('auto-sucursal').value 
-      };
-      
-      if(state.editingAutoId) { 
-        await window.fbUpdate("autos", state.editingAutoId, obj); 
-      } else { 
-        await window.fbAdd("autos", { 
-          ...obj, 
-          estado: 'Disponible', 
-          gastos: [], 
-          documentacion: { c08: false, verificacion: false, libreDeuda: false, vtv: '' } 
-        }); 
-      }
-      
-      closeModal('modal-auto'); 
-      e.target.reset(); 
-      initSelects();
-    });
-
-    // Detalle Auto y Flujos
-    window.switchDASection = (s) => { 
-      state.daActiveSection = s; 
-      renderDetalleAuto(); 
-    };
-    
-    window.toggleDoc = async (id, k) => { 
-      const a = state.autos.find(x => x.id === id); 
-      const docs = a.documentacion; 
-      docs[k] = !docs[k]; 
-      await window.fbUpdate("autos", id, { documentacion: docs }); 
-      renderDetalleAuto(); 
-    };
-    
-    window.updateVTV = async (id, v) => { 
-      const a = state.autos.find(x => x.id === id); 
-      const docs = a.documentacion; docs.vtv = v; 
-      await window.fbUpdate("autos", id, { documentacion: docs }); 
-      renderDetalleAuto(); 
-    };
-    
-    window.openDetalleAuto = (id) => { 
-      state.selectedAutoId = id; 
-      state.daActiveSection = 'crm'; 
-      state.isVentaMode = false; 
-      
-      state.ventaData.tienePermuta = false;
-      
-      renderDetalleAuto(); 
-      openModal('modal-detalle-auto'); 
-    }
-
-    window.openModalIngreso = (id) => {
-      state.pendingIngresoAutoId = id; 
-      document.getElementById('ingreso-precio').value = ''; 
-      document.getElementById('ingreso-aviso-gastos').classList.add('hidden'); 
-      document.getElementById('btn-ingreso-gastos').classList.add('hidden'); 
-      
-      closeModal('modal-detalle-auto'); 
-      openModal('modal-ingreso-auto');
-    }
-    
-    window.confirmarIngresoAuto = async () => { 
-      const p = Number(document.getElementById('ingreso-precio').value); 
-      
-      if(p > 0) { 
-        await window.fbUpdate("autos", state.pendingIngresoAutoId, { estado: 'Disponible', precio: p }); 
-        document.getElementById('ingreso-aviso-gastos').classList.remove('hidden'); 
-        document.getElementById('btn-ingreso-gastos').classList.remove('hidden'); 
-      } else { 
-        alert("Debe establecer un precio mayor a 0."); 
-      } 
-    }
-    
-    window.abrirCajaParaGastos = () => { 
-      closeModal('modal-ingreso-auto'); 
-      switchTab('caja'); 
-      openModal('modal-caja'); 
-      setTimeout(() => { 
-        document.getElementById('caja-auto').value = state.pendingIngresoAutoId; 
-        document.getElementById('caja-tipo').value = 'gasto'; 
-      }, 500); 
-    }
-
-    window.renderDetalleAuto = () => {
-      const a = state.autos.find(x => x.id === state.selectedAutoId); 
-      if(!a) return;
-      
-      const tg = a.gastos?.reduce((ac, g) => ac + g.monto, 0) || 0;
-      
-      document.getElementById('da-header-actions').innerHTML = `
-        <button type="button" onclick="editAuto('${a.id}')" class="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition">
-          <i data-lucide="edit-2" class="w-4 h-4"></i>
-        </button>
-        <button type="button" onclick="deleteAuto('${a.id}')" class="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/30 text-rose-500 rounded-full transition">
-          <i data-lucide="trash-2" class="w-4 h-4"></i>
-        </button>
-        <div class="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-2"></div>
-        <button type="button" onclick="closeModal('modal-detalle-auto')" class="bg-neutral-100 dark:bg-neutral-800 p-2 rounded-full">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      `;
-      
-      let html = '';
-      
-      if(!state.isVentaMode) {
-        
-        // MODO VISTA NORMAL
-        html += `
-          <div class="bg-black text-white dark:bg-white dark:text-black rounded-[2rem] p-8 mb-6 relative overflow-hidden border border-neutral-800 dark:border-neutral-200">
-            <div class="flex justify-between items-start relative z-10">
-              <div>
-                <span class="bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 text-[10px] uppercase px-3 py-1 rounded-lg font-bold">
-                  ${a.estado}
-                </span>
-                <span class="ml-2 bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 text-[10px] uppercase px-3 py-1 rounded-lg font-bold">
-                  ${a.condicion || 'Propio'}
-                </span>
-                <h2 class="text-3xl font-black mt-3">${a.marca} ${a.modelo}</h2>
-                <p class="text-sm mt-1 opacity-80 font-bold">Año ${a.año} • ${a.color||''} • ${a.km||0} km</p>
-              </div>
-              <div class="text-right">
-                <p class="text-xs uppercase font-bold opacity-60">Precio Venta</p>
-                <p class="text-3xl font-black mt-1">${formatMoney(a.precio)}</p>
-              </div>
-            </div>
-        `;
-        
-        if (state.currentUser.rol === 'Admin' && a.costo > 0) { 
-          html += `<p class="mt-4 text-xs font-bold text-neutral-400">Costo Base Original: ${formatMoney(a.costo)}</p>`; 
-        }
-        
-        if(a.estado === 'A Ingresar') {
-          html += `
-            <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
-              <button onclick="openModalIngreso('${a.id}')" class="w-full py-4 bg-amber-500 text-black font-black rounded-2xl shadow hover:bg-amber-400 transition-all">
-                Marcar como Disponible / Fijar Precio
-              </button>
-            </div>
-          `;
-        } else if (a.estado !== 'Vendido') { 
-          if (state.currentUser.rol === 'Admin') { 
-            html += `
-              <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
-                <button onclick="state.isVentaMode=true; renderDetalleAuto()" class="w-full py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all">
-                  Cerrar Venta con Cliente
-                </button>
-              </div>
-            `; 
-          } 
-        } else {
-          html += `
-            <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
-              <button onclick="generarBoletoDesdeVendido('${a.id}')" class="w-full py-4 bg-white text-black font-black rounded-2xl shadow hover:bg-neutral-200 hover:scale-[1.02] transition-all">
-                <i data-lucide="file-text" class="w-5 h-5 inline mr-2"></i> Generar Boleto de esta Unidad
-              </button>
-            </div>
-          `;
-        }
-        
-        html += `</div>`;
-        
-        html += `
-          <div class="flex space-x-4 border-b border-neutral-200 dark:border-neutral-800 mb-6 overflow-x-auto no-scrollbar">
-            <button onclick="switchDASection('crm')" class="pb-3 font-bold border-b-2 flex items-center ${state.daActiveSection === 'crm' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
-              <i data-lucide="users" class="w-4 h-4 mr-2"></i> Leads
-            </button>
-            <button onclick="switchDASection('doc')" class="pb-3 font-bold border-b-2 flex items-center ${state.daActiveSection === 'doc' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
-              <i data-lucide="file-check" class="w-4 h-4 mr-2"></i> Papeles
-            </button>
-          </div>
-        `;
-        
-        if(state.daActiveSection === 'doc') {
-          html += `
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              ${[{k:'c08', l:'08 Firmado'},{k:'verificacion', l:'Verificación (12D)'},{k:'libreDeuda', l:'Libre Deuda'}].map(i => `
-                <div onclick="toggleDoc('${a.id}','${i.k}')" class="p-5 rounded-2xl border-2 flex items-center space-x-4 cursor-pointer transition-colors ${a.documentacion[i.k] ? 'border-green-600 bg-green-50/50 dark:bg-green-900/10' : 'border-neutral-200 dark:border-neutral-700'}">
-                  <div class="w-6 h-6 rounded-full flex items-center justify-center ${a.documentacion[i.k] ? 'bg-green-600 text-white' : 'bg-neutral-200 dark:bg-neutral-800'}">
-                    ${a.documentacion[i.k] ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
-                  </div>
-                  <span class="font-bold">${i.l}</span>
-                </div>
-              `).join('')}
-            </div>
-          `;
-        } else if(state.daActiveSection === 'crm') {
-           html += `
-             <div>
-               <form onsubmit="handleDA_CRMSubmit(event, '${a.id}')" class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700 mb-6">
-                 <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Cargar Interesado</h4>
-                 <div class="grid grid-cols-2 gap-4">
-                   <input id="dac-nombre" required placeholder="Nombre" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
-                   <input id="dac-tel" required placeholder="Teléfono" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
-                 </div>
-                 <textarea id="dac-nota" placeholder="Notas..." class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none resize-none focus:border-green-500 font-bold"></textarea>
-                 <button type="submit" class="w-full py-3 bg-black text-white dark:bg-white dark:text-black rounded-xl font-bold shadow-lg hover:scale-[1.02] transition-transform">
-                   Guardar Lead
-                 </button>
-               </form>
-             </div>
-           `;
-        }
-      } else {
-        
-        // ==========================================
-        //        MODO CERRAR VENTA (CHECKOUT)
-        // ==========================================
-        
-        html += `
-          <button type="button" onclick="state.isVentaMode=false; renderDetalleAuto()" class="mb-6 text-sm font-bold flex items-center hover:underline text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors">
-            <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Volver a Ficha
-          </button>
-          
-          <div class="bg-black dark:bg-white text-white dark:text-black rounded-[2rem] p-6 mb-6 flex justify-between shadow-xl border border-neutral-800 dark:border-neutral-200">
-            <div>
-              <p class="text-xs uppercase opacity-70 mb-1 font-bold">Costo Inversión Total</p>
-              <p class="text-xl font-bold">${formatMoney((a.costo||0) + tg)}</p>
-            </div>
-            <div class="text-right">
-              <p class="text-xs uppercase opacity-70 mb-1 font-bold">Ganancia Bruta Est.</p>
-              <p class="text-xl font-black text-green-400 dark:text-green-600">${formatMoney(a.precio - ((a.costo||0) + tg))}</p>
-            </div>
-          </div>
-          
-          <form onsubmit="handleDAVentaSubmit(event, '${a.id}')">
-            
-            <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-6">
-              <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Datos Comprador</h4>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <input id="vent-comp-nombre" required placeholder="Nombre y Apellido" class="col-span-2 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-                <input id="vent-comp-tel" required placeholder="Teléfono" class="col-span-2 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-                <input id="vent-comp-dni" required placeholder="D.N.I" class="col-span-2 md:col-span-1 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-                <input id="vent-comp-domicilio" required placeholder="Domicilio" class="col-span-2 md:col-span-3 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-              </div>
-            </div>
-            
-            <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-6">
-              <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Formas de Pago Aplicadas</h4>
-              
-              <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
-                <input type="checkbox" id="chk-efectivo" onchange="document.getElementById('div-efectivo').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
-                <span>Efectivo / Transferencia (Inmediato a Caja)</span>
-              </label>
-              <div id="div-efectivo" class="hidden pl-8 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 fade-in">
-                <input id="val-efectivo" type="number" placeholder="Monto ($)" class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 font-bold text-lg outline-none focus:border-green-500">
-                <input id="nota-efectivo" type="text" placeholder="Nota / Banco..." class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none focus:border-green-500 font-bold">
-              </div>
-              
-              <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
-                <input type="checkbox" id="chk-credito" onchange="document.getElementById('div-credito').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
-                <span>Crédito Pre-Aprobado (Pendiente)</span>
-              </label>
-              <div id="div-credito" class="hidden pl-8 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl fade-in">
-                <input id="val-credito" type="number" placeholder="Monto ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
-                <input id="cuotas-credito" type="number" placeholder="Cant. Cuotas" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
-                <input id="venc-credito" type="date" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 text-xs font-bold outline-none focus:border-green-500" title="1º Vencimiento">
-                <input id="nota-credito" type="text" placeholder="Entidad / Financiera..." class="col-span-4 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
-              </div>
-              
-              <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
-                <input type="checkbox" id="chk-pagare" onchange="document.getElementById('div-pagare').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
-                <span>Pagaré Personal (Pendiente)</span>
-              </label>
-              <div id="div-pagare" class="hidden pl-8 mb-4 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl fade-in">
-                <input id="val-pagare" type="number" placeholder="Monto ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
-                <input id="cuotas-pagare" type="number" placeholder="Cant. Cuotas" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
-                <input id="venc-pagare" type="date" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 text-xs font-bold outline-none focus:border-green-500" title="1º Vencimiento">
-                <input id="nota-pagare" type="text" placeholder="Detalle / Aval..." class="col-span-4 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
-              </div>
-            </div>
-            
-            <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-8">
-              <div class="flex justify-between items-center mb-6">
-                <h4 class="font-bold flex items-center text-neutral-700 dark:text-neutral-300">
-                  <i data-lucide="repeat" class="w-5 h-5 mr-2 opacity-60"></i> Recibe Vehículo en Permuta
-                </h4>
-                
-                <label class="flex items-center cursor-pointer">
-                  <input type="checkbox" id="vent-hasperm" class="sr-only toggle-checkbox" onchange="document.getElementById('permuta-fields').classList.toggle('hidden', !this.checked); state.ventaData.tienePermuta=this.checked;" ${state.ventaData.tienePermuta ? 'checked' : ''} />
-                  <div class="toggle-label bg-neutral-300 dark:bg-neutral-600 relative">
-                    <div class="absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${state.ventaData.tienePermuta ? 'translate-x-6' : ''}"></div>
-                  </div>
-                </label>
-              </div>
-              
-              <div id="permuta-fields" class="${state.ventaData.tienePermuta ? '' : 'hidden'} grid grid-cols-2 md:grid-cols-3 gap-4 fade-in">
-                <input id="p-marca" placeholder="Marca" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-                <input id="p-modelo" placeholder="Modelo" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-                <input id="p-color" placeholder="Color" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-                <input id="p-km" type="number" placeholder="Km" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-                <input id="p-anio" type="number" placeholder="Año" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-                <input id="p-pat" placeholder="Patente" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 uppercase outline-none font-bold focus:border-green-500" />
-                
-                <select id="p-condicion" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500">
-                  <option value="Propio">Propio</option>
-                  <option value="Consignación">Consignación</option>
-                </select>
-                
-                <div class="col-span-2 mt-2">
-                  <label class="block text-xs font-bold uppercase mb-2 text-neutral-500">Valor Real de Toma / Costo ($)</label>
-                  <input id="p-valor" type="number" placeholder="Ingresará a la flota con este costo base" class="w-full rounded-xl px-4 py-4 text-lg font-black bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
-                </div>
-              </div>
-            </div>
-            
-            <button type="submit" class="w-full py-5 bg-green-600 text-white font-black text-lg rounded-2xl shadow-xl hover:bg-green-700 hover:scale-[1.01] transition-transform">
-              Confirmar Cierre de Venta
-            </button>
-          </form>
-        `;
-      }
-      
-      document.getElementById('da-content').innerHTML = html;
-      lucide.createIcons();
-    }
-
-    // Submit CRM Global
-    window.handleDA_CRMSubmit = async (e, autoId) => { 
-      e.preventDefault(); 
-      const a = state.autos.find(x => x.id === autoId);
-      
-      await window.fbAdd("consultas", { 
-        autoId: autoId, 
-        marcaInteres: a.marca, 
-        nombre: document.getElementById('dac-nombre').value, 
-        telefono: document.getElementById('dac-tel').value, 
-        notas: document.getElementById('dac-nota').value, 
-        estadoLead: 'Tibio', 
-        recordatorio: new Date().toISOString().split('T')[0], 
-        fecha: new Date().toISOString().split('T')[0] 
-      }); 
-      
-      document.getElementById('dac-nombre').value = ''; 
-      document.getElementById('dac-tel').value = ''; 
-      document.getElementById('dac-nota').value = '';
-    };
-
-    // CIERRE VENTA DEFINITIVO
-    window.handleDAVentaSubmit = async (e, autoId) => {
-      e.preventDefault(); 
-      const auto = state.autos.find(x => x.id === autoId);
-      const adminUsr = state.usuarios.find(u => u.rol === 'Admin') || state.currentUser;
-      
-      const vEf = document.getElementById('chk-efectivo')?.checked ? Number(document.getElementById('val-efectivo').value) : 0;
-      const vCr = document.getElementById('chk-credito')?.checked ? Number(document.getElementById('val-credito').value) : 0;
-      const vPa = document.getElementById('chk-pagare')?.checked ? Number(document.getElementById('val-pagare').value) : 0;
-      const vPe = state.ventaData.tienePermuta ? Number(document.getElementById('p-valor').value) : 0;
-      
-      const tVenta = vEf + vCr + vPa + vPe;
-
-      if(tVenta <= 0) {
-        return alert("Debe especificar al menos una forma de pago válida o recibir permuta para cerrar la venta.");
-      }
-
-      const fDate = new Date().toISOString().split('T')[0];
-
-      // 1. Ingresar Efectivo a Caja Directo
-      if(vEf > 0) {
-        await window.fbAdd("transacciones", { 
-          fecha: fDate, 
-          descripcion: `Cobro Venta: ${auto.marca} ${auto.modelo} (${document.getElementById('nota-efectivo').value||'Efectivo'})`, 
-          tipo: 'ingreso', 
-          categoria: 'Venta Vehículos', 
-          valor: vEf, 
-          userId: adminUsr.id, 
-          sucursalId: adminUsr.sucursalId, 
-          tipoComprobante: 'X', 
-          iva: 0, 
-          estadoCobro: 'disponible', 
-          fechaAcreditacion: null 
-        });
-      }
-      
-      // 2. Ingresar Pendiente Credito a Caja
-      if(vCr > 0) {
-        await window.fbAdd("transacciones", { 
-          fecha: fDate, 
-          descripcion: `Cobro Crédito: ${auto.marca} ${auto.modelo} (${document.getElementById('nota-credito').value||'-'})`, 
-          tipo: 'ingreso', 
-          categoria: 'Venta Vehículos', 
-          valor: vCr, 
-          userId: adminUsr.id, 
-          sucursalId: adminUsr.sucursalId, 
-          tipoComprobante: 'X', 
-          iva: 0, 
-          estadoCobro: 'pendiente', 
-          fechaAcreditacion: document.getElementById('venc-credito').value 
-        });
-      }
-      
-      // 3. Ingresar Pendiente Pagare a Caja
-      if(vPa > 0) {
-        await window.fbAdd("transacciones", { 
-          fecha: fDate, 
-          descripcion: `Cobro Pagaré: ${auto.marca} ${auto.modelo} (${document.getElementById('nota-pagare').value||'-'})`, 
-          tipo: 'ingreso', 
-          categoria: 'Venta Vehículos', 
-          valor: vPa, 
-          userId: adminUsr.id, 
-          sucursalId: adminUsr.sucursalId, 
-          tipoComprobante: 'X', 
-          iva: 0, 
-          estadoCobro: 'pendiente', 
-          fechaAcreditacion: document.getElementById('venc-pagare').value 
-        });
-      }
-
-      // Registro de Venta Histórica
-      let metodos = [];
-      if(vEf > 0) metodos.push('Efectivo');
-      if(vCr > 0) metodos.push('Crédito');
-      if(vPa > 0) metodos.push('Pagaré');
-      if(vPe > 0) metodos.push('Permuta');
-      
-      const cuotas = Math.max(Number(document.getElementById('cuotas-credito')?.value||0), Number(document.getElementById('cuotas-pagare')?.value||0));
-
-      await window.fbAdd("ventas", {
-        fecha: fDate, 
-        autoDesc: `${auto.marca} ${auto.modelo} (${auto.patente})`,
-        compradorNombre: document.getElementById('vent-comp-nombre').value, 
-        compradorTelefono: document.getElementById('vent-comp-tel').value,
-        compradorDNI: document.getElementById('vent-comp-dni').value,
-        compradorDomicilio: document.getElementById('vent-comp-domicilio').value,
-        montoTotal: tVenta, 
-        metodoPago: metodos.join(' + '), 
-        cuotasTotales: cuotas, 
-        cuotasPagadas: 0, 
-        tienePermuta: state.ventaData.tienePermuta,
-        detallePermuta: state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
-      });
-
-      // Auto en Permuta ingresa a Flota "A Ingresar"
-      if(state.ventaData.tienePermuta) {
-        await window.fbAdd("autos", { 
-          marca: document.getElementById('p-marca').value, 
-          modelo: document.getElementById('p-modelo').value, 
-          color: document.getElementById('p-color').value, 
-          km: Number(document.getElementById('p-km').value||0),
-          año: Number(document.getElementById('p-anio').value), 
-          patente: document.getElementById('p-pat').value.toUpperCase(), 
-          precio: 0, 
-          costo: vPe, 
-          condicion: document.getElementById('p-condicion').value, 
-          estado: 'A Ingresar', 
-          sucursalId: auto.sucursalId, 
-          gastos: [], 
-          documentacion: {c08: false, verificacion: false, libreDeuda: false, vtv: ''} 
-        });
-      }
-      
-      // Auto actual se marca como vendido
-      await window.fbUpdate("autos", autoId, { estado: 'Vendido' }); 
-      
-      // Armar la data pre-cargada para el Modal Confirmación Boleto
-      state.tempFormData = {
-        auto: auto,
-        comprador: document.getElementById('vent-comp-nombre').value, 
-        telefono: document.getElementById('vent-comp-tel').value, 
-        dni: document.getElementById('vent-comp-dni').value, 
-        domicilio: document.getElementById('vent-comp-domicilio').value,
-        monto: tVenta, 
-        efectivo: vEf, 
-        saldo: vCr + vPa, 
-        cuotas: cuotas, 
-        valCuota: '',
-        permuta: state.ventaData.tienePermuta ? { 
-          marca: document.getElementById('p-marca').value, 
-          modelo: document.getElementById('p-modelo').value, 
-          anio: document.getElementById('p-anio').value, 
-          patente: document.getElementById('p-pat').value.toUpperCase(), 
-          tasado: document.getElementById('p-valor').value 
-        } : null
-      };
-
-      closeModal('modal-detalle-auto'); 
-      
-      // Mostrar Modal Preguntando si quiere generar el boleto ahora
-      document.getElementById('btn-go-to-boleto').onclick = () => {
-         closeModal('modal-confirm-boleto');
-         switchTab('formularios'); 
-         openModalBoleto(state.ventaData.tienePermuta ? 'permuta' : 'simple', state.tempFormData);
-      };
-      
-      openModal('modal-confirm-boleto');
-    };
-
-    window.generarBoletoDesdeVendido = (autoId) => {
-      const a = state.autos.find(x => x.id === autoId); 
-      const v = state.ventas.find(venta => venta.autoDesc.includes(a.patente));
-      
-      const prefillData = { 
-        auto: a, 
-        comprador: v ? v.compradorNombre : '', 
-        dni: v ? v.compradorDNI : '', 
-        domicilio: v ? v.compradorDomicilio : '', 
-        monto: v ? v.montoTotal : a.precio, 
-        efectivo: v ? v.montoTotal : a.precio 
-      };
-      
-      closeModal('modal-detalle-auto'); 
-      switchTab('formularios'); 
-      openModalBoleto(v && v.tienePermuta ? 'permuta' : 'simple', prefillData);
-    }
-  </script>
+  <script src="js/app.js" type="module"></script>
 </body>
 </html>
