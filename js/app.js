@@ -38,9 +38,7 @@ function checkSessionAndReady() {
   const savedSession = localStorage.getItem('erp_session');
   
   if (savedSession) { 
-    // Buscar usuario en la memoria recién cargada de Firebase
     const user = window.state.usuarios.find(u => u.id === savedSession); 
-    
     if (user && !user.isFirstLogin) { 
       window.state.currentUser = user; 
       if (window.launchApp) window.launchApp(); 
@@ -61,11 +59,9 @@ function checkSessionAndReady() {
 async function bootApp() {
   setupRealtimeSync();
   
-  // Damos 1.5 segundos para asegurar la primera descarga de datos
   setTimeout(async () => {
      const usersSnap = await getDocs(collection(db, "usuarios"));
      
-     // Si la base de datos está totalmente vacía, creamos el Admin por defecto
      if(usersSnap.empty) {
         try {
           const sucRef = await addDoc(collection(db, "sucursales"), { nombre: 'Casa Central' });
@@ -85,6 +81,15 @@ async function bootApp() {
      checkSessionAndReady();
   }, 1500);
 }
+
+// Asignamos los Listeners de Formularios Fijos
+document.addEventListener("DOMContentLoaded", () => {
+  const formCaja = document.getElementById('form-caja');
+  if(formCaja) formCaja.addEventListener('submit', window.handleCajaSubmit);
+  
+  const formAuto = document.getElementById('form-auto');
+  if(formAuto) formAuto.addEventListener('submit', window.handleAutoSubmit);
+});
 
 // Iniciar Motor
 bootApp();
