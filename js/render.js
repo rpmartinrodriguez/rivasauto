@@ -749,12 +749,12 @@ window.renderFormulariosView = () => {
            </span>
          </td>
          <td class="px-6 py-4 font-bold text-sm">${f.comprador}</td>
-         <td class="px-6 py-4 text-center space-x-2">
-           <button onclick='window.openModalBoleto("${f.tipo === 'Boleto Compra Venta' ? 'simple' : 'permuta'}", ${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 text-xs font-bold rounded-lg hover:scale-105 transition-transform">
-             <i data-lucide="edit-2" class="w-4 h-4 inline"></i> Editar
+         <td class="px-6 py-4 text-center space-x-2 flex justify-center">
+           <button onclick='window.openModalBoleto("${f.tipo === 'Boleto Compra Venta' ? 'simple' : 'permuta'}", ${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 ${f.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200'} text-xs font-bold rounded-lg hover:scale-105 transition-transform flex items-center">
+             <i data-lucide="edit-2" class="w-4 h-4 mr-1"></i> ${f.estado === 'Pendiente' ? 'Terminar' : 'Editar'}
            </button>
-           <button onclick='window.imprimirBoletoHtml(${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform">
-             <i data-lucide="printer" class="w-4 h-4 inline"></i> Reimprimir
+           <button onclick='window.imprimirBoletoHtml(${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform flex items-center">
+             <i data-lucide="printer" class="w-4 h-4 mr-1"></i> Reimprimir
            </button>
          </td>
        </tr>
