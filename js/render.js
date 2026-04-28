@@ -315,7 +315,8 @@ window.renderDetalleAuto = () => {
        if(window.state.currentUser.rol === 'Vendedor') {
          leadsAuto = leadsAuto.filter(c => c.userId === window.state.currentUser.id);
        } else if (window.state.currentUser.rol === 'Encargado') {
-         leadsAuto = leadsAuto.filter(c => c.sucursalId === window.state.currentUser.sucursalId);
+         const validUsers = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+         leadsAuto = leadsAuto.filter(c => validUsers.includes(c.userId));
        }
        
        leadsAuto = leadsAuto.sort((x,y) => new Date(y.fecha) - new Date(x.fecha));
@@ -492,7 +493,6 @@ window.renderDetalleAuto = () => {
   lucide.createIcons();
 };
 
-// --- RENDERIZADO CAJA ---
 window.renderCajaView = () => {
   let myTrans = window.state.transacciones;
   
@@ -733,7 +733,6 @@ window.openModalPendientes = () => {
   lucide.createIcons();
 };
 
-// --- RENDERIZADO FORMULARIOS ---
 window.renderFormulariosView = () => {
    const table = document.getElementById('formularios-table');
    if(!table) return;
@@ -742,7 +741,7 @@ window.renderFormulariosView = () => {
      table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay formularios generados.</td></tr>`; 
    } else {
      table.innerHTML = window.state.formularios.slice().reverse().map(f => `
-       <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors ${f.estado === 'Pendiente' ? 'cursor-pointer border-l-4 border-l-amber-500' : ''}" ${f.estado === 'Pendiente' ? `onclick="window.openModalBoleto('${f.tipo === 'Boleto Compra Venta' ? 'simple' : 'permuta'}', ${JSON.stringify(f).replace(/"/g, '&quot;')})"` : ''}>
+       <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
          <td class="px-6 py-4 text-sm font-bold text-neutral-500">${window.formatDate(f.fecha)}</td>
          <td class="px-6 py-4 font-bold">
            <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500 px-2 py-1 rounded text-xs uppercase tracking-wider">
@@ -750,16 +749,13 @@ window.renderFormulariosView = () => {
            </span>
          </td>
          <td class="px-6 py-4 font-bold text-sm">${f.comprador}</td>
-         <td class="px-6 py-4 text-center">
-           ${f.estado === 'Pendiente' ? `
-             <span class="text-xs uppercase font-bold text-amber-500 flex items-center justify-center">
-               <i data-lucide="edit" class="w-4 h-4 mr-1"></i> Completar
-             </span>
-           ` : `
-             <button onclick='event.stopPropagation(); window.imprimirBoletoHtml(${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform">
-               <i data-lucide="printer" class="w-4 h-4 inline"></i> Reimprimir
-             </button>
-           `}
+         <td class="px-6 py-4 text-center space-x-2">
+           <button onclick='window.openModalBoleto("${f.tipo === 'Boleto Compra Venta' ? 'simple' : 'permuta'}", ${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 text-xs font-bold rounded-lg hover:scale-105 transition-transform">
+             <i data-lucide="edit-2" class="w-4 h-4 inline"></i> Editar
+           </button>
+           <button onclick='window.imprimirBoletoHtml(${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform">
+             <i data-lucide="printer" class="w-4 h-4 inline"></i> Reimprimir
+           </button>
          </td>
        </tr>
      `).join('');
@@ -767,7 +763,6 @@ window.renderFormulariosView = () => {
    lucide.createIcons();
 };
 
-// --- RENDERIZADO PERSONAL, COMISIONES Y CIERRES ---
 window.renderPersonalView = () => {
   if(window.state.currentUser?.rol !== 'Admin') return;
   
@@ -984,7 +979,6 @@ window.openDetalleCierre = (cierreId) => {
   window.openModal('modal-detalle-cierre');
 };
 
-// --- RENDERIZADO VENTAS ---
 window.renderVentasView = () => { 
   let misVentas = window.state.ventas;
   
@@ -1131,7 +1125,6 @@ window.openDetalleVenta = (id) => {
   lucide.createIcons();
 };
 
-// --- RENDERIZADO FACTURAS ---
 window.renderFacturasView = () => { 
   if(window.state.currentUser?.rol !== 'Admin') return; 
   
@@ -1226,7 +1219,6 @@ window.openDetalleFactura = (id) => {
   window.openModal('modal-detalle-factura'); 
 };
 
-// --- RENDERIZADO CRM ---
 window.renderClientesView = () => { 
   const table = document.getElementById('crm-table'); 
   if(!table) return;
@@ -1298,7 +1290,6 @@ window.renderClientesView = () => {
   } 
 };
 
-// --- RENDERIZADO DASHBOARD EJECUTIVO ---
 window.renderResumenesView = () => { 
   if(window.state.currentUser?.rol !== 'Admin') return; 
   const dc = document.getElementById('dashboard-content');
@@ -1364,7 +1355,6 @@ window.renderResumenesView = () => {
   `; 
 };
 
-// --- RENDERIZADO ADMINISTRACIÓN ---
 window.renderAdminView = () => { 
   if(window.state.currentUser?.rol !== 'Admin') return; 
   
