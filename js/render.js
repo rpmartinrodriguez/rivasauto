@@ -21,16 +21,32 @@ window.renderAllViews = () => {
 
 window.initSelects = () => { 
   const elCat = document.getElementById('caja-cat');
-  if (elCat) elCat.innerHTML = window.state.categoriasGasto.map(c => `<option value="${c}">${c}</option>`).join(''); 
+  if (elCat) {
+    elCat.innerHTML = window.state.categoriasGasto.map(c => `
+      <option value="${c}">${c}</option>
+    `).join(''); 
+  }
   
   const elSuc = document.getElementById('auto-sucursal');
-  if (elSuc) elSuc.innerHTML = window.state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
+  if (elSuc) {
+    elSuc.innerHTML = window.state.sucursales.map(s => `
+      <option value="${s.id}">${s.nombre}</option>
+    `).join(''); 
+  }
   
   const elAuto = document.getElementById('caja-auto');
-  if (elAuto) elAuto.innerHTML = `<option value="">-- Gasto General de Agencia --</option>` + window.state.autos.map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
+  if (elAuto) {
+    elAuto.innerHTML = `
+      <option value="">-- Gasto General de Agencia --</option>
+    ` + window.state.autos.map(a => `
+      <option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>
+    `).join(''); 
+  }
   
   const elFecha = document.getElementById('caja-fecha');
-  if (elFecha) elFecha.value = new Date().toISOString().split('T')[0]; 
+  if (elFecha) {
+    elFecha.value = new Date().toISOString().split('T')[0]; 
+  }
 };
 
 window.checkNotifications = () => {
@@ -86,7 +102,11 @@ window.checkNotifications = () => {
     `).join('');
   } else {
     badge.classList.add('hidden');
-    list.innerHTML = '<div class="p-6 text-center text-sm text-neutral-500">No hay alertas de recompra en este momento.</div>';
+    list.innerHTML = `
+      <div class="p-6 text-center text-sm text-neutral-500">
+        No hay alertas de recompra en este momento.
+      </div>
+    `;
   }
 };
 
@@ -103,13 +123,26 @@ window.renderAutosView = () => {
   const btnGrid = document.getElementById('btn-view-grid');
   const btnList = document.getElementById('btn-view-list');
   
-  if(btnGrid) btnGrid.className = window.state.autosViewMode === 'grid' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
-  if(btnList) btnList.className = window.state.autosViewMode === 'list' ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
+  if(btnGrid) {
+    btnGrid.className = window.state.autosViewMode === 'grid' 
+      ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' 
+      : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
+  }
+  
+  if(btnList) {
+    btnList.className = window.state.autosViewMode === 'list' 
+      ? 'p-2 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white transition-colors' 
+      : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
+  }
   
   const autosValidos = window.state.autos.filter(a => a.estado !== 'Vendido');
   
   if (autosValidos.length === 0) { 
-    container.innerHTML = '<div class="col-span-full py-12 text-center text-neutral-500 font-bold">No hay vehículos en la flota.</div>'; 
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-neutral-500 font-bold">
+        No hay vehículos en la flota.
+      </div>
+    `; 
     return; 
   }
 
@@ -121,8 +154,12 @@ window.renderAutosView = () => {
           const sName = window.state.sucursales.find(x => x.id === auto.sucursalId)?.nombre || 'Sin Asignar';
           
           let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
-          if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
-          if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 border border-amber-300 dark:border-amber-700';
+          if(auto.estado === 'Disponible') {
+            bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
+          }
+          if(auto.estado === 'A Ingresar') {
+            bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 border border-amber-300 dark:border-amber-700';
+          }
           
           return `
             <div onclick="window.openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
@@ -143,8 +180,12 @@ window.renderAutosView = () => {
                   </div>
                 </div>
                 <div class="mb-4">
-                  <h3 class="text-2xl font-black">${auto.marca} <br/><span class="text-neutral-500">${auto.modelo}</span></h3>
-                  <p class="text-sm text-neutral-400 mt-1 font-bold">Año ${auto.año} • ${auto.color || ''} • ${auto.km || 0} km</p>
+                  <h3 class="text-2xl font-black">${auto.marca} <br/>
+                    <span class="text-neutral-500">${auto.modelo}</span>
+                  </h3>
+                  <p class="text-sm text-neutral-400 mt-1 font-bold">
+                    Año ${auto.año} • ${auto.color || ''} • ${auto.km || 0} km
+                  </p>
                 </div>
                 <div class="mt-auto space-y-3">
                   <div class="flex justify-between items-center p-3 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700">
@@ -181,8 +222,12 @@ window.renderAutosView = () => {
             <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
               ${autosValidos.map(auto => {
                 let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
-                if(auto.estado === 'Disponible') bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
-                if(auto.estado === 'A Ingresar') bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500';
+                if(auto.estado === 'Disponible') {
+                  bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
+                }
+                if(auto.estado === 'A Ingresar') {
+                  bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500';
+                }
                 
                 return `
                   <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="window.openDetalleAuto('${auto.id}')">
@@ -195,9 +240,13 @@ window.renderAutosView = () => {
                       ${auto.color || '-'} • ${auto.km || 0} km • <span class="uppercase">${auto.condicion || 'Propio'}</span>
                     </td>
                     <td class="px-6 py-4">
-                      <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${bClass}">${auto.estado}</span>
+                      <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${bClass}">
+                        ${auto.estado}
+                      </span>
                     </td>
-                    <td class="px-6 py-4 text-right font-black text-lg">${window.formatMoney(auto.precio)}</td>
+                    <td class="px-6 py-4 text-right font-black text-lg">
+                      ${window.formatMoney(auto.precio)}
+                    </td>
                   </tr>
                 `;
               }).join('')}
@@ -249,13 +298,21 @@ window.renderDetalleAuto = () => {
           <div class="text-right">
             <p class="text-xs uppercase font-bold opacity-60">Precio Venta</p>
             <p class="text-3xl font-black mt-1">${window.formatMoney(a.precio)}</p>
-            ${tg > 0 ? `<p class="text-[10px] font-bold mt-2 text-rose-400 dark:text-rose-600 uppercase tracking-widest">+ Gastos Aplicados: ${window.formatMoney(tg)}</p>` : ''}
+            ${tg > 0 ? `
+              <p class="text-[10px] font-bold mt-2 text-rose-400 dark:text-rose-600 uppercase tracking-widest">
+                + Gastos Aplicados: ${window.formatMoney(tg)}
+              </p>
+            ` : ''}
           </div>
         </div>
     `;
     
     if (window.state.currentUser.rol === 'Admin' && a.costo > 0) { 
-      html += `<p class="mt-4 text-xs font-bold text-neutral-400">Costo Base Original: ${window.formatMoney(a.costo)}</p>`; 
+      html += `
+        <p class="mt-4 text-xs font-bold text-neutral-400">
+          Costo Base Original: ${window.formatMoney(a.costo)}
+        </p>
+      `; 
     }
     
     if(a.estado === 'A Ingresar') {
@@ -280,6 +337,7 @@ window.renderDetalleAuto = () => {
     
     html += `</div>`;
     
+    // PESTAÑAS (TABS)
     html += `
       <div class="flex space-x-4 border-b border-neutral-200 dark:border-neutral-800 mb-6 overflow-x-auto no-scrollbar">
         <button onclick="window.switchDASection('crm')" class="pb-3 font-bold border-b-2 flex items-center ${window.state.daActiveSection === 'crm' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
@@ -332,7 +390,11 @@ window.renderDetalleAuto = () => {
            </div>
          `).join('');
        } else {
-         listHtml = '<p class="text-xs text-neutral-500 py-2">No hay leads registrados por tu usuario para este vehículo.</p>';
+         listHtml = `
+           <p class="text-xs text-neutral-500 py-2">
+             No hay leads registrados por tu usuario para este vehículo.
+           </p>
+         `;
        }
       
        html += `
@@ -359,7 +421,11 @@ window.renderDetalleAuto = () => {
        `;
     } else if (window.state.daActiveSection === 'taller') {
        if(!a.gastos || a.gastos.length === 0) {
-         html += `<p class="text-neutral-500 text-sm font-bold text-center py-6">No hay gastos de taller registrados para este vehículo.</p>`;
+         html += `
+           <p class="text-neutral-500 text-sm font-bold text-center py-6">
+             No hay gastos de taller registrados para este vehículo.
+           </p>
+         `;
        } else {
          html += `
          <div class="space-y-3">
@@ -570,7 +636,13 @@ window.renderCajaView = () => {
   const tableContainer = document.getElementById('caja-table');
   if (tableContainer) {
     if (transWithSaldo.length === 0) { 
-      tableContainer.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">Sin movimientos en la caja seleccionada.</td></tr>`; 
+      tableContainer.innerHTML = `
+        <tr>
+          <td colspan="4" class="text-center py-8 text-neutral-500 font-bold">
+            Sin movimientos en la caja seleccionada.
+          </td>
+        </tr>
+      `; 
     } else {
       tableContainer.innerHTML = transWithSaldo.slice().reverse().map(t => {
         const u = window.state.usuarios.find(x => x.id === t.userId); 
@@ -643,7 +715,11 @@ window.openModalPendientes = () => {
   if(!content) return;
 
   if (oldPendientes.length === 0 && ventasPendientes.length === 0) { 
-    content.innerHTML = `<p class="text-center text-neutral-500 py-6 font-bold">Sin cobros pendientes por el momento.</p>`; 
+    content.innerHTML = `
+      <p class="text-center text-neutral-500 py-6 font-bold">
+        Sin cobros pendientes por el momento.
+      </p>
+    `; 
     window.openModal('modal-pendientes');
     return;
   }
@@ -737,7 +813,13 @@ window.renderFormulariosView = () => {
    if(!table) return;
    
    if(window.state.formularios.length === 0) { 
-     table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay formularios generados.</td></tr>`; 
+     table.innerHTML = `
+       <tr>
+         <td colspan="4" class="text-center py-8 text-neutral-500 font-bold">
+           No hay formularios generados.
+         </td>
+       </tr>
+     `; 
    } else {
      table.innerHTML = window.state.formularios.slice().reverse().map(f => `
        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
@@ -808,7 +890,13 @@ window.renderPersonalView = () => {
       `;
     }).join('');
     
-    table.innerHTML = dataRows || `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay personal para comisionar.</td></tr>`;
+    table.innerHTML = dataRows || `
+      <tr>
+        <td colspan="4" class="text-center py-8 text-neutral-500 font-bold">
+          No hay personal para comisionar.
+        </td>
+      </tr>
+    `;
   }
   
   if(modalCierreList) {
@@ -824,14 +912,24 @@ window.renderPersonalView = () => {
   }
   
   if (select) {
-    select.innerHTML = `<option value="">-- Seleccione Empleado --</option>` + usuariosAgencia.map(u => `<option value="${u.id}">${u.nombre} (${u.rol})</option>`).join('');
+    select.innerHTML = `
+      <option value="">-- Seleccione Empleado --</option>
+    ` + usuariosAgencia.map(u => `
+      <option value="${u.id}">${u.nombre} (${u.rol})</option>
+    `).join('');
   }
   
   if (tableCierres) {
     const cierres = window.state.cierres_personal || [];
     
     if(cierres.length === 0) {
-      tableCierres.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay cierres registrados.</td></tr>`;
+      tableCierres.innerHTML = `
+        <tr>
+          <td colspan="4" class="text-center py-8 text-neutral-500 font-bold">
+            No hay cierres registrados.
+          </td>
+        </tr>
+      `;
     } else {
       tableCierres.innerHTML = cierres.slice().reverse().map(c => `
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
@@ -868,7 +966,11 @@ window.openDetallePersonal = (userId) => {
   `;
   
   if(comisionesUsuario.length === 0) {
-    html += `<p class="text-neutral-500 text-center py-6 font-bold">No hay registro de comisiones para este empleado.</p>`;
+    html += `
+      <p class="text-neutral-500 text-center py-6 font-bold">
+        No hay registro de comisiones para este empleado.
+      </p>
+    `;
   } else {
     html += `
       <table class="w-full text-left border-collapse">
@@ -932,7 +1034,11 @@ window.openDetalleCierre = (cierreId) => {
   `;
   
   if(comisionesPagadas.length === 0) {
-    html += `<p class="text-neutral-500">Detalle no disponible o vacío.</p>`;
+    html += `
+      <p class="text-neutral-500">
+        Detalle no disponible o vacío.
+      </p>
+    `;
   } else {
     const agrupado = {};
     comisionesPagadas.forEach(c => {
@@ -992,7 +1098,13 @@ window.renderVentasView = () => {
   if(!table) return;
   
   if (misVentas.length === 0) { 
-    table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay ventas registradas.</td></tr>`; 
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center py-8 text-neutral-500 font-bold">
+          No hay ventas registradas.
+        </td>
+      </tr>
+    `; 
   } else { 
     table.innerHTML = misVentas.slice().reverse().map(v => { 
       let badge = ''; 
@@ -1005,9 +1117,17 @@ window.renderVentasView = () => {
         if(!v.credito && !v.pagare) pendientes = (v.cuotasTotales || 0) - (v.cuotasPagadas || 0);
 
         if (pendientes > 0) {
-          badge = `<span class="block mt-1 text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded font-bold">${pendientes} Pendientes</span>`; 
+          badge = `
+            <span class="block mt-1 text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded font-bold">
+              ${pendientes} Pendientes
+            </span>
+          `; 
         } else if (pendientes === 0) {
-          badge = `<span class="block mt-1 text-[10px] text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded font-bold">Finalizado</span>`; 
+          badge = `
+            <span class="block mt-1 text-[10px] text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded font-bold">
+              Finalizado
+            </span>
+          `; 
         }
       } 
       
@@ -1149,7 +1269,13 @@ window.renderFacturasView = () => {
   if(!table) return;
   
   if(facturas.length === 0) { 
-    table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay facturas.</td></tr>`; 
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center py-8 text-neutral-500 font-bold">
+          No hay facturas.
+        </td>
+      </tr>
+    `; 
   } else { 
     table.innerHTML = facturas.slice().reverse().map(f => { 
       const u = window.state.usuarios.find(x => x.id === f.userId); 
@@ -1172,7 +1298,9 @@ window.renderFacturasView = () => {
               <button onclick="window.openDetalleFactura('${f.id}')" class="text-xs font-bold uppercase tracking-wider bg-black text-white dark:bg-neutral-700 px-4 py-2 rounded-xl hover:bg-neutral-800 transition-colors">
                 Ver Detalle
               </button>
-            ` : '<span class="text-neutral-300 dark:text-neutral-700">-</span>'}
+            ` : `
+              <span class="text-neutral-300 dark:text-neutral-700">-</span>
+            `}
           </td>
         </tr>
       `; 
@@ -1234,7 +1362,13 @@ window.renderClientesView = () => {
   const today = new Date();
 
   if (misConsultas.length === 0) { 
-    table.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-neutral-500 font-bold">No hay clientes en la base de datos.</td></tr>`; 
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center py-8 text-neutral-500 font-bold">
+          No hay clientes en la base de datos.
+        </td>
+      </tr>
+    `; 
   } else { 
     table.innerHTML = misConsultas.slice().reverse().map(c => { 
       const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
@@ -1272,7 +1406,15 @@ window.renderClientesView = () => {
             ${c.telefono}
           </td>
           <td class="px-6 py-4">
-            ${a ? `<span class="font-bold text-sm text-green-600 dark:text-green-500 cursor-pointer hover:underline" onclick="window.openDetalleAuto('${a.id}')">${a.marca} ${a.modelo}</span>` : `<span class="font-bold text-sm">${c.marcaInteres}</span>`}
+            ${a ? `
+              <span class="font-bold text-sm text-green-600 dark:text-green-500 cursor-pointer hover:underline" onclick="window.openDetalleAuto('${a.id}')">
+                ${a.marca} ${a.modelo}
+              </span>
+            ` : `
+              <span class="font-bold text-sm">
+                ${c.marcaInteres}
+              </span>
+            `}
             <p class="text-xs text-neutral-500 italic mt-1 max-w-[200px] truncate">"${c.notas}"</p>
           </td>
           <td class="px-6 py-4 text-sm font-bold text-neutral-500">
@@ -1313,7 +1455,11 @@ window.renderResumenesView = () => {
   
   let catHTML = ''; 
   if(Object.keys(cats).length === 0) { 
-    catHTML = '<p class="text-neutral-500 py-4 font-bold">Sin datos de gastos en el periodo.</p>'; 
+    catHTML = `
+      <p class="text-neutral-500 py-4 font-bold">
+        Sin datos de gastos en el periodo.
+      </p>
+    `; 
   } else { 
     catHTML = Object.entries(cats).sort((a,b) => b[1] - a[1]).map(([c,v]) => `
       <div class="mb-4">
@@ -1360,7 +1506,11 @@ window.renderAdminView = () => {
   const sucList = document.getElementById('admin-suc-list'); 
   if(sucList) {
     if (window.state.sucursales.length === 0) { 
-      sucList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay sucursales.</p>'; 
+      sucList.innerHTML = `
+        <p class="text-neutral-500 text-center py-4 font-bold">
+          No hay sucursales.
+        </p>
+      `; 
     } else { 
       sucList.innerHTML = window.state.sucursales.map(s => `
         <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
@@ -1380,13 +1530,19 @@ window.renderAdminView = () => {
   
   const elSuc = document.getElementById('new-user-suc');
   if(elSuc) {
-    elSuc.innerHTML = window.state.sucursales.map(s => `<option value="${s.id}">${s.nombre}</option>`).join(''); 
+    elSuc.innerHTML = window.state.sucursales.map(s => `
+      <option value="${s.id}">${s.nombre}</option>
+    `).join(''); 
   }
   
   const usrList = document.getElementById('admin-users-list'); 
   if(usrList) {
     if (window.state.usuarios.length === 0) { 
-      usrList.innerHTML = '<p class="text-neutral-500 text-center py-4 font-bold">No hay usuarios.</p>'; 
+      usrList.innerHTML = `
+        <p class="text-neutral-500 text-center py-4 font-bold">
+          No hay usuarios.
+        </p>
+      `; 
     } else { 
       usrList.innerHTML = window.state.usuarios.map(u => { 
         const s = window.state.sucursales.find(x => x.id == u.sucursalId); 
