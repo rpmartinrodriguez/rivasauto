@@ -659,64 +659,69 @@ window.imprimirBoletoHtml = (data) => {
   
   if(data.tipo === 'Boleto Compra Venta') {
     printHtml = `
-      <h2 class="text-center text-xl font-black mb-8 underline uppercase">BOLETO COMPRA VENTA AUTOMOTOR</h2>
+      <h2 class="text-center text-xl font-black mb-4 underline uppercase">BOLETO COMPRA VENTA AUTOMOTOR</h2>
       
-      <p class="mb-4 text-justify">Conste por el presente que entre el Señor: <strong>${data.vendedor}</strong> como VENDEDOR y el Señor: <strong>${data.comprador}</strong>, como comprador se conviene lo siguiente:</p>
-      
-      <p class="mb-4 text-justify">El señor: <strong>${data.vendedor}</strong>, vende un: <strong>${data.categoria}</strong> en las condiciones vistas.<br>
-      Marca: <strong>${data.marca}</strong>, Modelo: <strong>${data.modelo}</strong>, Tipo: <strong>${data.tipoVehiculo}</strong>, Año: <strong>${data.año}</strong>, Motor Nro: <strong>${data.motor || '___________'}</strong>, Chasis Nro.: <strong>${data.chasis || '___________'}</strong>, Dominio: <strong>${data.dominio}</strong>.</p>
-      
-      <p class="mb-4 text-justify">En la suma total de pesos ($): <strong>${data.monto}</strong>, (<strong>${data.montoLetras}</strong>), Pagaderos de la siguiente forma: <strong>${data.formaPago}</strong></p>
-      
-      <p class="mb-4 text-justify text-sm">Esta unidad se entrega en el estado de uso en que se encuentra y que el comprador declara conocer, al igual que todo lo concerniente a la marca, modelo, números de motor y/o chasis del referido vehículo, que ha sido revisado y constatado y acepta de plena conformidad, haciéndose responsable civil y criminalmente, a partir de la fecha y hora de efectuada esta venta por cualquier accidente, daño y/o perjuicio que pudiera ocasionar el vehículo que es recibido en este acto con su documentación completa y al día. El comprador se compromete a efectuar la correspondiente transferencia de dominio del vehículo dentro de los <strong>${data.diasTransf}</strong> días de la fecha, de acuerdo a lo establecido al respecto por la ley 22.977 y sus normas complementarias, interpretativas y/o complementarias, estando a a su exclusivo cargo la totalidad de los gastos que demande la misma y los tramites y gestiones pertinentes, incluyendo la firma del formulario 08 o el que a tales fines lo subsista y/o reemplace y/o el otorgamiento de los poderes, todos ello en forma directa con el titular dominal. Transcurrido dicho plazo sin que realizara la transferencia el vendedor no se responsabiliza por los inconvenientes de cualquier índole que pudieran existir anteriores o posteriores a la fecha, que imposibilitan la efectivización de dicho tramite, incluyendo embargos y/o prendas o medidas judiciales de cualquier tipo sobre el vehículo, al igual que deudas emergentes de patentes municipales y/o multas. Con absoluta conformidad del Comprador.----------------------------------------------------------------------------------------------------/</p>
-      
-      <p class="mb-6 text-justify">En <strong>${data.ciudadFirma}</strong> a los <strong>${dia}</strong> dias, del mes de <strong>${mes}</strong> del Año <strong>${anio}</strong>, se firman dos ejemplares del mismo tenor y a un solo efecto.</p>
-      
-      <p class="mb-8 font-bold text-justify">Observaciones: ${data.observaciones}</p>
+      <div class="text-[12px] leading-snug space-y-2">
+          <p class="text-justify">Conste por el presente que entre el Señor: <strong>${data.vendedor}</strong> como VENDEDOR y el Señor: <strong>${data.comprador}</strong>, como comprador se conviene lo siguiente:</p>
+          
+          <p class="text-justify">El señor: <strong>${data.vendedor}</strong>, vende un: <strong>${data.categoria}</strong> en las condiciones vistas.<br>
+          Marca: <strong>${data.marca}</strong>, Modelo: <strong>${data.modelo}</strong>, Tipo: <strong>${data.tipoVehiculo}</strong>, Año: <strong>${data.año}</strong>, Motor Nro: <strong>${data.motor || '___________'}</strong>, Chasis Nro.: <strong>${data.chasis || '___________'}</strong>, Dominio: <strong>${data.dominio}</strong>.</p>
+          
+          <p class="text-justify">En la suma total de pesos ($): <strong>${data.monto}</strong>, (<strong>${data.montoLetras}</strong>), Pagaderos de la siguiente forma: <strong>${data.formaPago}</strong></p>
+          
+          <p class="text-justify">Esta unidad se entrega en el estado de uso en que se encuentra y que el comprador declara conocer, al igual que todo lo concerniente a la marca, modelo, números de motor y/o chasis del referido vehículo, que ha sido revisado y constatado y acepta de plena conformidad, haciéndose responsable civil y criminalmente, a partir de la fecha y hora de efectuada esta venta por cualquier accidente, daño y/o perjuicio que pudiera ocasionar el vehículo que es recibido en este acto con su documentación completa y al día. El comprador se compromete a efectuar la correspondiente transferencia de dominio del vehículo dentro de los <strong>${data.diasTransf}</strong> días de la fecha, de acuerdo a lo establecido al respecto por la ley 22.977 y sus normas complementarias, interpretativas y/o complementarias, estando a a su exclusivo cargo la totalidad de los gastos que demande la misma y los tramites y gestiones pertinentes, incluyendo la firma del formulario 08 o el que a tales fines lo subsista y/o reemplace y/o el otorgamiento de los poderes, todos ello en forma directa con el titular dominal. Transcurrido dicho plazo sin que realizara la transferencia el vendedor no se responsabiliza por los inconvenientes de cualquier índole que pudieran existir anteriores o posteriores a la fecha, que imposibilitan la efectivización de dicho tramite, incluyendo embargos y/o prendas o medidas judiciales de cualquier tipo sobre el vehículo, al igual que deudas emergentes de patentes municipales y/o multas. Con absoluta conformidad del Comprador.----------------------------------------------------------------------------------------------------/</p>
+          
+          <p class="text-justify">En <strong>${data.ciudadFirma}</strong> a los <strong>${dia}</strong> dias, del mes de <strong>${mes}</strong> del Año <strong>${anio}</strong>, se firman dos ejemplares del mismo tenor y a un solo efecto.</p>
+          
+          <p class="font-bold text-justify mt-2">Observaciones: ${data.observaciones}</p>
+      </div>
 
-      <div class="grid grid-cols-2 gap-8 text-sm mt-8">
+      <div class="grid grid-cols-2 gap-8 text-[11px] mt-6">
         <div>
-          <p class="font-bold mb-4">Comprador</p>
+          <p class="font-bold mb-2">Comprador</p>
           <p>Nombre y Apellido: <strong>${data.comprador}</strong></p>
           <p>Direccion: <strong>${data.domicilio}</strong></p>
           <p>Localidad: <strong>${data.locComp}</strong></p>
           <p>Celular: <strong>${data.telefono}</strong></p>
-          <div class="border-t border-black mt-16 pt-2 font-bold w-[80%] text-center">FIRMA:</div>
+          <div class="border-t border-black mt-12 pt-1 font-bold w-[80%] text-center">FIRMA:</div>
         </div>
         <div>
-          <p class="font-bold mb-4">Vendedor</p>
+          <p class="font-bold mb-2">Vendedor</p>
           <p>Nombre y Apellido: <strong>${data.vendedor}</strong></p>
           <p>Direccion: <strong>${data.vendedorDomicilio}</strong></p>
           <p>Localidad: <strong>${data.vendedorLoc}</strong></p>
           <p>Celular: <strong>${data.vendedorTel}</strong></p>
-          <div class="border-t border-black mt-16 pt-2 font-bold w-[80%] text-center">FIRMA:</div>
+          <div class="border-t border-black mt-12 pt-1 font-bold w-[80%] text-center">FIRMA:</div>
         </div>
       </div>
     `;
   } else {
     printHtml = `
-      <h2 class="text-center text-xl font-black mb-8 underline uppercase">BOLETO DE VENTA CON PERMUTA</h2>
-      <p class="mb-4 text-justify">Conste por el presente que hemos vendido a Sr./Sra: <strong>${data.comprador}</strong> con D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong> Nro.: <strong>${data.altura}</strong> de la localidad de <strong>${data.locComp}</strong> con Celular: <strong>${data.telefono}</strong>.</p>
+      <h2 class="text-center text-xl font-black mb-4 underline uppercase">BOLETO DE VENTA CON PERMUTA</h2>
       
-      <p class="mb-4 text-justify">Por cuenta y orden de Sr./Sra. <strong>${data.vendedor}</strong> un automóvil usado, en las condiciones vistas y que se encuentran libre de gravámenes y/o deudas nacionales, municipales o provinciales, dejando constancia que en la fecha el comprador toma posesión del mismo de conformidad, siendo sus características las que se detallan a continuación:</p>
-      
-      <p class="mb-4 font-bold">Marca: ${data.marca} Modelo: ${data.modelo} Año: ${data.año} Motor: ${data.motor || '___________'}, Nro. serie o chasis: ${data.chasis || '___________'}<br>
-      Patentado en la localidad de: ${data.locPat || '___________'} bajo Nro.: ${data.dominio}</p>
-      
-      <p class="mb-4 text-justify">La venta se realiza por la suma total de ($) <strong>${data.monto}</strong> , (<strong>${data.montoLetras}</strong>); Discriminados en la siguiente manera:<br>
-      Efectivo: ($) <strong>${data.efectivo || 0}</strong></p>
-      
-      <p class="mb-4 text-justify">Se recibe como parte de pago un automovil marca: <strong>${data.p_marca}</strong> Modelo: <strong>${data.p_modelo}</strong> Año: <strong>${data.p_anio}</strong> Motor Nro.: <strong>${data.p_motor || '___________'}</strong> Nro. de serie o chasis: <strong>${data.p_chasis || '___________'}</strong> patentado en la localidad de: <strong>${data.p_locPat || '___________'}</strong>, Nro.: <strong>${data.p_dominio}</strong>, libre de deuda y gravamenes, tasado en la suma de ($): <strong>${data.p_tasado}</strong> , (<strong>${data.p_tasadoLetras}</strong>), debiendo cancelarse el remanente de ($): <strong>${window.formatMoney((Number(data.monto) || 0) - (Number(data.p_tasado) || 0))}</strong> , (<strong>${data.remanenteLetras || '___________'}</strong>).</p>
-      
-      <p class="mb-6 text-justify uppercase font-bold">${data.detalleRemanente}</p>
-      
-      <p class="mb-6 text-justify">Y las cuotas restantes a cancelar cada treinta (30) dias, sucesivamente, hasta la cancelacion de la deuda total, cuyo efecto se firma de igual numero de Pagares que representan las cuotas convenidas y prenda con Registro, gravandose con todas las formalidades stablecidas en la Ley Nro. 12.962 el automovil vendido, garantia del saldo deudor.</p>
-      
-      <p class="mb-4 font-bold text-justify">Observaciones: ${data.observaciones}</p>
-      
-      <p class="mb-12">En conformidad se forman dos ejemplares del mismo tenor y a un solo efecto, en Gualeguaychu a los ${dia} dias del mes de ${mes} del año ${anio}.</p>
-      
-      <div class="mt-12 flex justify-between px-16">
+      <div class="text-[12px] leading-snug space-y-2">
+          <p class="text-justify">Conste por el presente que hemos vendido a Sr./Sra: <strong>${data.comprador}</strong> con D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong> Nro.: <strong>${data.altura}</strong> de la localidad de <strong>${data.locComp}</strong> con Celular: <strong>${data.telefono}</strong>.</p>
+          
+          <p class="text-justify">Por cuenta y orden de Sr./Sra. <strong>${data.vendedor}</strong> un automóvil usado, en las condiciones vistas y que se encuentran libre de gravámenes y/o deudas nacionales, municipales o provinciales, dejando constancia que en la fecha el comprador toma posesión del mismo de conformidad, siendo sus características las que se detallan a continuación:</p>
+          
+          <p class="font-bold text-justify">Marca: ${data.marca} Modelo: ${data.modelo} Año: ${data.año} Motor: ${data.motor || '___________'}, Nro. serie o chasis: ${data.chasis || '___________'}<br>
+          Patentado en la localidad de: ${data.locPat || '___________'} bajo Nro.: ${data.dominio}</p>
+          
+          <p class="text-justify">La venta se realiza por la suma total de ($) <strong>${data.monto}</strong> , (<strong>${data.montoLetras}</strong>); Discriminados en la siguiente manera:<br>
+          Efectivo: ($) <strong>${data.efectivo || 0}</strong></p>
+          
+          <p class="text-justify">Se recibe como parte de pago un automovil marca: <strong>${data.p_marca}</strong> Modelo: <strong>${data.p_modelo}</strong> Año: <strong>${data.p_anio}</strong> Motor Nro.: <strong>${data.p_motor || '___________'}</strong> Nro. de serie o chasis: <strong>${data.p_chasis || '___________'}</strong> patentado en la localidad de: <strong>${data.p_locPat || '___________'}</strong>, Nro.: <strong>${data.p_dominio}</strong>, libre de deuda y gravamenes, tasado en la suma de ($): <strong>${data.p_tasado}</strong> , (<strong>${data.p_tasadoLetras}</strong>), debiendo cancelarse el remanente de ($): <strong>${window.formatMoney((Number(data.monto) || 0) - (Number(data.p_tasado) || 0))}</strong> , (<strong>${data.remanenteLetras || '___________'}</strong>).</p>
+          
+          <p class="text-justify uppercase font-bold">${data.detalleRemanente}</p>
+          
+          <p class="text-justify">Y las cuotas restantes a cancelar cada treinta (30) dias, sucesivamente, hasta la cancelacion de la deuda total, cuyo efecto se firma de igual numero de Pagares que representan las cuotas convenidas y prenda con Registro, gravandose con todas las formalidades stablecidas en la Ley Nro. 12.962 el automovil vendido, garantia del saldo deudor.</p>
+          
+          <p class="font-bold text-justify">Observaciones: ${data.observaciones}</p>
+          
+          <p class="mt-4">En conformidad se forman dos ejemplares del mismo tenor y a un solo efecto, en Gualeguaychu a los ${dia} dias del mes de ${mes} del año ${anio}.</p>
+      </div>
+
+      <div class="mt-12 flex justify-between px-16 text-[11px]">
         <div class="text-center border-t border-black w-48 pt-2 font-bold">Firmas</div>
         <div class="text-center border-t border-black w-48 pt-2 font-bold">Firmas</div>
       </div>
