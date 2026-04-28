@@ -213,20 +213,20 @@
               <div>
                 <div class="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 text-green-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="file-text" class="w-6 h-6"></i></div>
                 <h3 class="text-2xl font-black mb-2">Boleto Compra Venta</h3>
-                <p class="text-neutral-500 text-sm mb-6">Contrato estándar.</p>
+                <p class="text-neutral-500 text-sm mb-6">Contrato estándar para ventas directas.</p>
               </div>
-              <button onclick="window.openModalBoleto('simple')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:scale-[1.02] transition-transform">Completar</button>
+              <button onclick="window.openModalBoleto('simple')" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl hover:scale-[1.02] transition-transform">Completar Boleto</button>
             </div>
             <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-8 flex flex-col justify-between hover:border-green-500/50 transition-colors">
               <div>
                 <div class="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 text-green-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="file-text" class="w-6 h-6"></i><i data-lucide="repeat" class="w-4 h-4 -ml-2 mt-2"></i></div>
                 <h3 class="text-2xl font-black mb-2">Boleto con Permuta</h3>
-                <p class="text-neutral-500 text-sm mb-6">Incluye auto entregado y cuotas.</p>
+                <p class="text-neutral-500 text-sm mb-6">Contrato que incluye recepción de vehículo.</p>
               </div>
-              <button onclick="window.openModalBoleto('permuta')" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl hover:bg-green-700 hover:scale-[1.02] transition-transform">Completar</button>
+              <button onclick="window.openModalBoleto('permuta')" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl hover:bg-green-700 hover:scale-[1.02] transition-transform">Completar Boleto</button>
             </div>
           </div>
-          <h3 class="text-xl font-bold mt-8 mb-4">Historial</h3>
+          <h3 class="text-xl font-bold mt-8 mb-4">Historial de Formularios y Borradores</h3>
           <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
             <table class="w-full text-left">
               <thead><tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30"><th class="px-6 py-4 font-bold">Fecha</th><th class="px-6 py-4 font-bold">Tipo</th><th class="px-6 py-4 font-bold">Comprador</th><th class="px-6 py-4 font-bold text-center">Acción</th></tr></thead>
@@ -382,7 +382,7 @@
               <div class="mb-4"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Total ($)</label><input type="number" id="caja-monto" required class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-green-500" /></div>
               <div id="caja-iva-container" class="hidden"><label class="block text-xs font-bold uppercase mb-2">IVA Incluido ($)</label><input type="number" id="caja-iva" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" /></div>
             </div>
-            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Movimiento</button>
+            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center"><span>Guardar Movimiento</span></button>
           </form>
         </div>
       </div>
@@ -465,7 +465,7 @@
                 <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
               </div>
             </div>
-            <button type="submit" id="modal-auto-submit" class="w-full mt-2 py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Vehículo</button>
+            <button type="submit" id="modal-auto-submit" class="w-full mt-2 py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center"><span>Guardar Vehículo</span></button>
           </form>
         </div>
       </div>
@@ -478,7 +478,7 @@
          <h3 class="text-2xl font-black mb-2">Hacer Disponible</h3>
          <p class="text-sm text-neutral-500 mb-6">Establece el precio de venta final:</p>
          <input type="number" id="ingreso-precio" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-4 text-lg font-bold mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 text-center" />
-         <button onclick="window.confirmarIngresoAuto()" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg mb-4 hover:scale-105 transition-transform">Guardar y Habilitar</button>
+         <button onclick="window.confirmarIngresoAuto(event)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg mb-4 hover:scale-105 transition-transform flex items-center justify-center"><span>Guardar y Habilitar</span></button>
          <p class="text-xs text-rose-500 font-bold hidden" id="ingreso-aviso-gastos">¡No olvides registrar gastos!</p>
          <button onclick="window.abrirCajaParaGastos()" id="btn-ingreso-gastos" class="hidden w-full py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold mt-2 rounded-2xl hover:bg-neutral-200 transition-colors">Cargar Gastos Ahora</button>
       </div>
@@ -517,7 +517,7 @@
               </select>
             </div>
             <textarea id="gl-nota" placeholder="Notas..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold"></textarea>
-            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors">Guardar Lead</button>
+            <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center"><span>Guardar Lead</span></button>
           </form>
         </div>
       </div>
@@ -545,7 +545,7 @@
          </div>
          <div id="asoc-select-container" class="hidden text-left border-t dark:border-neutral-800 pt-6 mt-4">
            <select id="asoc-auto-select" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500"></select>
-           <button onclick="window.guardarYImprimirFormulario(document.getElementById('asoc-auto-select').value)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">Confirmar e Imprimir</button>
+           <button onclick="window.guardarYImprimirFormulario(document.getElementById('asoc-auto-select').value)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform flex items-center justify-center"><span>Confirmar e Imprimir</span></button>
          </div>
       </div>
     </div>
@@ -554,10 +554,10 @@
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-confirm-boleto')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center">
          <h3 class="text-xl font-black mb-4">¡Venta Registrada!</h3>
-         <p class="text-sm text-neutral-500 mb-6">El auto se marcó como vendido. ¿Deseas generar el Boleto ahora?</p>
+         <p class="text-sm text-neutral-500 mb-6">El auto se marcó como vendido. Se ha generado un Borrador del Boleto en la sección Formularios.</p>
          <div class="flex justify-center space-x-4">
            <button onclick="window.closeModal('modal-confirm-boleto')" class="px-6 py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl font-bold hover:bg-neutral-200 transition-colors">Más tarde</button>
-           <button id="btn-go-to-boleto" class="px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-colors">Sí, generar boleto</button>
+           <button id="btn-go-to-boleto" class="px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-colors">Completar Boleto</button>
          </div>
       </div>
     </div>
@@ -581,7 +581,7 @@
             <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Monto a Pagar ($)</label>
             <input id="comision-monto" type="number" required placeholder="Ej: 50000" class="w-full rounded-xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-lg" />
             
-            <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] transition-transform">Guardar Asignación</button>
+            <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center"><span>Guardar Asignación</span></button>
           </form>
         </div>
       </div>
@@ -603,7 +603,7 @@
          </div>
          <div class="flex justify-center space-x-4 shrink-0">
            <button onclick="window.closeModal('modal-cerrar-pagos')" class="w-1/2 py-4 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-2xl font-bold hover:bg-neutral-200 transition-colors">Cancelar</button>
-           <button onclick="window.confirmarCierrePagos()" class="w-1/2 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-700 transition-colors">Pagar Selección</button>
+           <button onclick="window.confirmarCierrePagos(event)" class="w-1/2 py-4 bg-rose-600 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-700 transition-colors flex items-center justify-center"><span>Pagar Selección</span></button>
          </div>
       </div>
     </div>
