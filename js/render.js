@@ -280,6 +280,7 @@ window.renderDetalleAuto = () => {
     
     html += `</div>`;
     
+    // PESTAÑAS (TABS)
     html += `
       <div class="flex space-x-4 border-b border-neutral-200 dark:border-neutral-800 mb-6 overflow-x-auto no-scrollbar">
         <button onclick="window.switchDASection('crm')" class="pb-3 font-bold border-b-2 flex items-center ${window.state.daActiveSection === 'crm' ? 'border-green-600 text-green-600' : 'border-transparent text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'}">
@@ -498,7 +499,6 @@ window.renderCajaView = () => {
   if(window.state.currentUser.rol === 'Vendedor') { 
     myTrans = myTrans.filter(t => t.userId === window.state.currentUser.id); 
   } else if (window.state.currentUser.rol === 'Encargado') { 
-    // ENCARGADO: Ve su caja y la de sus vendedores de la sucursal, PERO NO DEL ADMIN
     const usuariosValidos = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
     myTrans = myTrans.filter(t => usuariosValidos.includes(t.userId)); 
   }
@@ -622,7 +622,6 @@ window.openModalPendientes = () => {
     myTrans = myTrans.filter(t => t.userId === window.state.currentUser.id); 
     myVentas = myVentas.filter(v => v.userId === window.state.currentUser.id); 
   } else if (window.state.currentUser.rol === 'Encargado') { 
-    // Filtro Encargado: Solo ve lo suyo y lo de sus vendedores (No Admin)
     const validUsers = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
     myTrans = myTrans.filter(t => validUsers.includes(t.userId)); 
     myVentas = myVentas.filter(v => validUsers.includes(v.userId)); 
@@ -652,7 +651,6 @@ window.openModalPendientes = () => {
 
   let html = '';
   
-  // TOTAL EXCLUSIVO ADMIN
   if (window.state.currentUser && window.state.currentUser.rol === 'Admin') {
     html += `
       <div class="mb-6 bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-400 p-4 rounded-2xl flex justify-between items-center">
