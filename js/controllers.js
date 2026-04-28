@@ -2,7 +2,6 @@
 // js/controllers.js
 // ==========================================
 
-// --- PERSISTENCIA Y UTILIDADES ---
 document.addEventListener("DOMContentLoaded", () => {
   const savedView = localStorage.getItem('autosViewMode');
   if (savedView && window.state) {
@@ -25,7 +24,6 @@ window.setBtnLoader = (btn, isLoading) => {
   if(window.lucide) window.lucide.createIcons();
 };
 
-// --- CONTROLADORES DE FLOTA Y AUTOS ---
 window.toggleAutosViewMode = (mode) => { 
   window.state.autosViewMode = mode; 
   localStorage.setItem('autosViewMode', mode); 
@@ -166,7 +164,6 @@ window.abrirCajaParaGastos = () => {
   }, 500); 
 };
 
-// --- CONTROLADORES DE ADMINISTRACIÓN ---
 window.handleSaveSucursal = async (e) => { 
   e.preventDefault(); 
   const btn = document.getElementById('new-suc-submit');
@@ -267,7 +264,6 @@ window.resetUserForm = () => {
   document.getElementById('new-user-cancel').classList.add('hidden'); 
 };
 
-// --- CONTROLADORES DE CAJA ---
 window.agregarCategoria = async () => { 
   const n = prompt('Ingrese el nombre de la nueva categoría (ej. Gastos de Gestoría):'); 
   if (n && n.trim() !== '') { 
@@ -402,7 +398,6 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
   }
 };
 
-// --- CONTROLADORES DE FORMULARIOS Y BOLETOS (RESTAURADOS) ---
 window.openModalBoleto = (tipo, prefillData = null) => {
   let content = ''; 
   const t = tipo === 'simple' ? 'BOLETO COMPRA VENTA AUTOMOTOR' : 'BOLETO DE VENTA CON PERMUTA'; 
@@ -799,7 +794,6 @@ window.imprimirFlota = () => {
    }, 500);
 };
 
-// --- CONTROLADOR DE VENTA MAESTRO ---
 window.handleDAVentaSubmit = async (e, autoId) => {
   e.preventDefault(); 
   const btn = document.querySelector('#btn-submit-venta button');
@@ -943,7 +937,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
   }
 };
 
-// --- CRM GLOBALES Y DE AUTO ---
 window.handleGlobalLeadSubmit = async (e) => { 
   e.preventDefault(); 
   const btn = document.querySelector('#modal-nuevo-lead form button[type="submit"]');
@@ -998,7 +991,6 @@ window.handleDA_CRMSubmit = async (e, autoId) => {
   }
 };
 
-// --- COMISIONES Y PERSONAL ---
 window.openModalAsignarBono = () => { 
   document.getElementById('form-comision').reset(); 
   document.getElementById('comision-venta-id').value = ""; 
