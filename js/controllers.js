@@ -991,6 +991,45 @@ window.handleDA_CRMSubmit = async (e, autoId) => {
   }
 };
 
+window.handleEditLeadSubmit = async (e, id) => {
+  e.preventDefault();
+  const btn = e.submitter || document.querySelector('#form-edit-lead button[type="submit"]');
+  if(btn) window.setBtnLoader(btn, true);
+  
+  try {
+    const nombre = document.getElementById('edit-lead-nombre').value;
+    const telefono = document.getElementById('edit-lead-tel').value;
+    const notas = document.getElementById('edit-lead-nota').value;
+    
+    await window.fbUpdate("consultas", id, {
+      nombre,
+      telefono,
+      notas
+    });
+    
+    window.closeModal('modal-detalle-lead');
+    if(window.renderClientesView) window.renderClientesView();
+    if(window.state.selectedAutoId && window.renderDetalleAuto) window.renderDetalleAuto();
+  } catch(err) {
+    console.error(err);
+  } finally {
+    if(btn) window.setBtnLoader(btn, false);
+  }
+};
+
+window.deleteLead = async (id) => {
+  if(confirm('¿Estás seguro de eliminar permanentemente a este interesado?')) {
+    try {
+      await window.fbDelete("consultas", id);
+      window.closeModal('modal-detalle-lead');
+      if(window.renderClientesView) window.renderClientesView();
+      if(window.state.selectedAutoId && window.renderDetalleAuto) window.renderDetalleAuto();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+};
+
 window.openModalAsignarBono = () => { 
   document.getElementById('form-comision').reset(); 
   document.getElementById('comision-venta-id').value = ""; 
