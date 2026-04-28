@@ -381,7 +381,7 @@ window.renderDetalleAuto = () => {
        let listHtml = '';
        if (leadsAuto.length > 0) {
          listHtml = leadsAuto.map(c => `
-           <div class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800">
+           <div onclick="window.openDetalleLead('${c.id}')" class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors">
              <div>
                <p class="text-sm font-bold">${c.nombre}</p>
                <p class="text-xs text-neutral-500">${c.telefono} • ${window.formatDate(c.fecha)}</p>
@@ -391,7 +391,7 @@ window.renderDetalleAuto = () => {
          `).join('');
        } else {
          listHtml = `
-           <p class="text-xs text-neutral-500 py-2">
+           <p class="text-xs text-neutral-500 py-2 p-4">
              No hay leads registrados por tu usuario para este vehículo.
            </p>
          `;
@@ -1346,6 +1346,66 @@ window.openDetalleFactura = (id) => {
   window.openModal('modal-detalle-factura'); 
 };
 
+window.openDetalleLead = (id) => {
+  const c = window.state.consultas.find(x => x.id === id);
+  if(!c) return;
+
+  const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null;
+  const autoInfo = a ? `${a.marca} ${a.modelo} (${a.patente})` : c.marcaInteres;
+
+  const today = new Date();
+  const leadDate = new Date(c.fecha + 'T00:00:00');
+  const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
+  
+  let dynamicState = 'Frío';
+  if (diffDays <= 7) dynamicState = 'Caliente'; 
+  else if (diffDays <= 20) dynamicState = 'Tibio'; 
+
+  let html = `
+    <form id="form-edit-lead" onsubmit="window.handleEditLeadSubmit(event, '${c.id}')">
+      <div class="flex justify-between items-center mb-6 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-2xl">
+         <div>
+           <p class="text-xs text-neutral-500 font-bold uppercase">Estado Actual</p>
+           <p class="font-black text-lg">${dynamicState} (${diffDays} días)</p>
+         </div>
+         <div class="text-right">
+           <p class="text-xs text-neutral-500 font-bold uppercase">Fecha Carga</p>
+           <p class="font-black">${window.formatDate(c.fecha)}</p>
+         </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Nombre y Apellido</label>
+          <input id="edit-lead-nombre" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.nombre}" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Teléfono</label>
+          <input id="edit-lead-tel" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.telefono}" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Vehículo / Interés</label>
+          <input id="edit-lead-interes" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${autoInfo}" ${a ? 'readonly title="Viene de un auto en stock"' : ''} />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Notas y Seguimiento</label>
+          <textarea id="edit-lead-nota" rows="5" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold">${c.notas || ''}</textarea>
+        </div>
+      </div>
+      <div class="mt-8 flex space-x-3">
+         <button type="button" onclick="window.deleteLead('${c.id}')" class="w-1/3 py-3 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-bold rounded-xl hover:scale-[1.02] transition-transform flex items-center justify-center"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+         <button type="submit" class="w-2/3 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:scale-[1.02] transition-transform flex justify-center items-center">
+           <span>Guardar Cambios</span>
+         </button>
+      </div>
+    </form>
+  `;
+
+  document.getElementById('lead-detail-content').innerHTML = html;
+  window.openModal('modal-detalle-lead');
+  lucide.createIcons();
+};
+
 window.renderClientesView = () => { 
   const table = document.getElementById('crm-table'); 
   if(!table) return;
@@ -1388,7 +1448,7 @@ window.renderClientesView = () => {
       } 
       
       return `
-        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetalleLead('${c.id}')">
           <td class="px-6 py-4">
             <div class="flex items-center">
               <div class="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center mr-4 font-black text-lg">
@@ -1407,7 +1467,7 @@ window.renderClientesView = () => {
           </td>
           <td class="px-6 py-4">
             ${a ? `
-              <span class="font-bold text-sm text-green-600 dark:text-green-500 cursor-pointer hover:underline" onclick="window.openDetalleAuto('${a.id}')">
+              <span class="font-bold text-sm text-green-600 dark:text-green-500 hover:underline" onclick="event.stopPropagation(); window.openDetalleAuto('${a.id}')">
                 ${a.marca} ${a.modelo}
               </span>
             ` : `
@@ -1421,7 +1481,7 @@ window.renderClientesView = () => {
             Orig: ${window.formatDate(c.fecha)}
           </td>
           <td class="px-6 py-4">
-            <a href="${window.formatWhatsAppLink(c.telefono, '')}" target="_blank" class="px-4 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 inline-block">
+            <a href="${window.formatWhatsAppLink(c.telefono, '')}" onclick="event.stopPropagation()" target="_blank" class="px-4 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 inline-block">
               Contactar
             </a>
           </td>
