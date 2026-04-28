@@ -22,25 +22,31 @@ window.renderAllViews = () => {
 window.initSelects = () => { 
   const elCat = document.getElementById('caja-cat');
   if (elCat) {
-    elCat.innerHTML = window.state.categoriasGasto.map(c => `
-      <option value="${c}">${c}</option>
-    `).join(''); 
+    elCat.innerHTML = window.state.categoriasGasto
+      .slice()
+      .sort((a, b) => a.localeCompare(b))
+      .map(c => `<option value="${c}">${c}</option>`)
+      .join(''); 
   }
   
   const elSuc = document.getElementById('auto-sucursal');
   if (elSuc) {
-    elSuc.innerHTML = window.state.sucursales.map(s => `
-      <option value="${s.id}">${s.nombre}</option>
-    `).join(''); 
+    elSuc.innerHTML = window.state.sucursales
+      .slice()
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
+      .map(s => `<option value="${s.id}">${s.nombre}</option>`)
+      .join(''); 
   }
   
   const elAuto = document.getElementById('caja-auto');
   if (elAuto) {
     elAuto.innerHTML = `
       <option value="">-- Gasto General de Agencia --</option>
-    ` + window.state.autos.map(a => `
-      <option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>
-    `).join(''); 
+    ` + window.state.autos
+      .slice()
+      .sort((a, b) => a.marca.localeCompare(b.marca) || a.modelo.localeCompare(b.modelo))
+      .map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`)
+      .join(''); 
   }
   
   const elFecha = document.getElementById('caja-fecha');
@@ -135,7 +141,9 @@ window.renderAutosView = () => {
       : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
   }
   
-  const autosValidos = window.state.autos.filter(a => a.estado !== 'Vendido');
+  const autosValidos = window.state.autos
+    .filter(a => a.estado !== 'Vendido')
+    .sort((a, b) => a.marca.localeCompare(b.marca) || a.modelo.localeCompare(b.modelo));
   
   if (autosValidos.length === 0) { 
     container.innerHTML = `
@@ -852,7 +860,7 @@ window.renderPersonalView = () => {
   const tableCierres = document.getElementById('cierres-table');
   const modalCierreList = document.getElementById('cierre-checkboxes-list');
   
-  const usuariosAgencia = window.state.usuarios.filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado');
+  const usuariosAgencia = window.state.usuarios.filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado').sort((a, b) => a.nombre.localeCompare(b.nombre));
   
   let totLiq = 0;
   let checkboxHtml = '';
@@ -1393,7 +1401,9 @@ window.openDetalleLead = (id) => {
         </div>
       </div>
       <div class="mt-8 flex space-x-3">
-         <button type="button" onclick="window.deleteLead('${c.id}')" class="w-1/3 py-3 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-bold rounded-xl hover:scale-[1.02] transition-transform flex items-center justify-center"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+         <button type="button" onclick="window.deleteLead('${c.id}')" class="w-1/3 py-3 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-bold rounded-xl hover:scale-[1.02] transition-transform flex items-center justify-center">
+           <i data-lucide="trash-2" class="w-5 h-5"></i>
+         </button>
          <button type="submit" class="w-2/3 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:scale-[1.02] transition-transform flex justify-center items-center">
            <span>Guardar Cambios</span>
          </button>
@@ -1430,7 +1440,7 @@ window.renderClientesView = () => {
       </tr>
     `; 
   } else { 
-    table.innerHTML = misConsultas.slice().reverse().map(c => { 
+    table.innerHTML = misConsultas.slice().sort((a, b) => a.nombre.localeCompare(b.nombre)).map(c => { 
       const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
       
       const leadDate = new Date(c.fecha + 'T00:00:00');
@@ -1572,7 +1582,7 @@ window.renderAdminView = () => {
         </p>
       `; 
     } else { 
-      sucList.innerHTML = window.state.sucursales.map(s => `
+      sucList.innerHTML = window.state.sucursales.slice().sort((a,b) => a.nombre.localeCompare(b.nombre)).map(s => `
         <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
           <span class="font-bold text-sm">${s.nombre}</span>
           <div class="flex space-x-1">
@@ -1590,7 +1600,7 @@ window.renderAdminView = () => {
   
   const elSuc = document.getElementById('new-user-suc');
   if(elSuc) {
-    elSuc.innerHTML = window.state.sucursales.map(s => `
+    elSuc.innerHTML = window.state.sucursales.slice().sort((a,b) => a.nombre.localeCompare(b.nombre)).map(s => `
       <option value="${s.id}">${s.nombre}</option>
     `).join(''); 
   }
@@ -1604,7 +1614,7 @@ window.renderAdminView = () => {
         </p>
       `; 
     } else { 
-      usrList.innerHTML = window.state.usuarios.map(u => { 
+      usrList.innerHTML = window.state.usuarios.slice().sort((a,b) => a.nombre.localeCompare(b.nombre)).map(u => { 
         const s = window.state.sucursales.find(x => x.id == u.sucursalId); 
         return `
           <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
