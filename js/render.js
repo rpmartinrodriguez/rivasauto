@@ -5,6 +5,7 @@
 window.renderAllViews = () => { 
   if(!window.state.currentUser) return; 
   
+  if(window.renderDolarWidget) window.renderDolarWidget();
   if(window.renderCajaView) window.renderCajaView(); 
   if(window.renderVentasView) window.renderVentasView();
   if(window.renderFacturasView) window.renderFacturasView(); 
@@ -25,7 +26,11 @@ window.initSelects = () => {
     elCat.innerHTML = window.state.categoriasGasto
       .slice()
       .sort((a, b) => a.localeCompare(b))
-      .map(c => `<option value="${c}">${c}</option>`)
+      .map(c => `
+        <option value="${c}">
+          ${c}
+        </option>
+      `)
       .join(''); 
   }
   
@@ -34,20 +39,32 @@ window.initSelects = () => {
     elSuc.innerHTML = window.state.sucursales
       .slice()
       .sort((a, b) => a.nombre.localeCompare(b.nombre))
-      .map(s => `<option value="${s.id}">${s.nombre}</option>`)
+      .map(s => `
+        <option value="${s.id}">
+          ${s.nombre}
+        </option>
+      `)
       .join(''); 
   }
   
   const elAuto = document.getElementById('caja-auto');
   if (elAuto) {
     elAuto.innerHTML = `
-      <option value="">-- Gasto General de Agencia --</option>
+      <option value="">
+        -- Gasto General de Agencia --
+      </option>
     ` + window.state.autos
       .slice()
       .sort((a, b) => a.marca.localeCompare(b.marca) || a.modelo.localeCompare(b.modelo))
       .map(a => {
-        const pFmt = a.moneda === 'USD' ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(a.precio);
-        return `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente}) - ${pFmt}</option>`;
+        const pFmt = a.moneda === 'USD' 
+          ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() 
+          : window.formatMoney(a.precio);
+        return `
+          <option value="${a.id}">
+            ${a.marca} ${a.modelo} (${a.patente}) - ${pFmt}
+          </option>
+        `;
       })
       .join(''); 
   }
@@ -102,8 +119,12 @@ window.checkNotifications = () => {
     badge.classList.remove('hidden');
     list.innerHTML = notifs.map(n => `
       <div class="p-4 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
-        <p class="font-bold text-sm">${n.v.compradorNombre || 'Sin Nombre'}</p>
-        <p class="text-xs text-neutral-500 mb-3">${n.v.autoDesc || '-'} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span></p>
+        <p class="font-bold text-sm">
+          ${n.v.compradorNombre || 'Sin Nombre'}
+        </p>
+        <p class="text-xs text-neutral-500 mb-3">
+          ${n.v.autoDesc || '-'} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span>
+        </p>
         <a href="${window.formatWhatsAppLink(n.v.compradorTelefono || '', '')}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
           <i data-lucide="message-circle" class="w-3.5 h-3.5 mr-1.5"></i> Ofrecer Recompra
         </a>
@@ -173,7 +194,9 @@ window.renderAutosView = () => {
             bClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-300 dark:border-purple-700';
           }
           
-          const precioFmt = auto.moneda === 'USD' ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(auto.precio);
+          const precioFmt = auto.moneda === 'USD' 
+            ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() 
+            : window.formatMoney(auto.precio);
 
           return `
             <div onclick="window.openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
@@ -194,7 +217,8 @@ window.renderAutosView = () => {
                   </div>
                 </div>
                 <div class="mb-4">
-                  <h3 class="text-2xl font-black uppercase">${auto.marca} <br/>
+                  <h3 class="text-2xl font-black uppercase">
+                    ${auto.marca} <br/>
                     <span class="text-neutral-500">${auto.modelo}</span>
                   </h3>
                   <p class="text-sm text-neutral-400 mt-1 font-bold uppercase">
@@ -244,7 +268,9 @@ window.renderAutosView = () => {
                   bClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
                 }
                 
-                const precioFmt = auto.moneda === 'USD' ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(auto.precio);
+                const precioFmt = auto.moneda === 'USD' 
+                  ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() 
+                  : window.formatMoney(auto.precio);
 
                 return `
                   <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="window.openDetalleAuto('${auto.id}')">
@@ -304,7 +330,9 @@ window.renderDetalleAuto = () => {
       bClass = 'bg-purple-800 text-white dark:bg-purple-300 dark:text-purple-900';
     }
 
-    const precioFmt = a.moneda === 'USD' ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(a.precio);
+    const precioFmt = a.moneda === 'USD' 
+      ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() 
+      : window.formatMoney(a.precio);
     
     html += `
       <div class="bg-black text-white dark:bg-white dark:text-black rounded-[2rem] p-8 mb-6 relative overflow-hidden border border-neutral-800 dark:border-neutral-200">
@@ -316,12 +344,20 @@ window.renderDetalleAuto = () => {
             <span class="ml-2 bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 text-[10px] uppercase px-3 py-1 rounded-lg font-bold">
               ${a.condicion || 'Propio'}
             </span>
-            <h2 class="text-3xl font-black mt-3 uppercase">${a.marca} ${a.modelo}</h2>
-            <p class="text-sm mt-1 opacity-80 font-bold uppercase">Año ${a.año} • ${a.color||''} • ${a.km||0} km</p>
+            <h2 class="text-3xl font-black mt-3 uppercase">
+              ${a.marca} ${a.modelo}
+            </h2>
+            <p class="text-sm mt-1 opacity-80 font-bold uppercase">
+              Año ${a.año} • ${a.color||''} • ${a.km||0} km
+            </p>
           </div>
           <div class="text-right">
-            <p class="text-xs uppercase font-bold opacity-60">Precio Venta</p>
-            <p class="text-3xl font-black mt-1 whitespace-nowrap">${precioFmt}</p>
+            <p class="text-xs uppercase font-bold opacity-60">
+              Precio Venta
+            </p>
+            <p class="text-3xl font-black mt-1 whitespace-nowrap">
+              ${precioFmt}
+            </p>
             ${tg > 0 ? `
               <p class="text-[10px] font-bold mt-2 text-rose-400 dark:text-rose-600 uppercase tracking-widest">
                 + Gastos Aplicados: ${window.formatMoney(tg)}
@@ -329,22 +365,31 @@ window.renderDetalleAuto = () => {
             ` : ''}
           </div>
         </div>
+      </div>
     `;
 
     if (a.estado === 'Señado') {
       html += `
-        <div class="mt-6 p-4 bg-purple-900/30 border border-purple-500/30 rounded-2xl">
-          <p class="text-xs text-purple-200 dark:text-purple-600 font-bold uppercase mb-1">Vehículo Reservado</p>
-          <p class="text-sm font-bold">Señado por: <span class="font-black">${a.señadoPorNombre || 'Vendedor'}</span></p>
-          <p class="text-sm">Cliente: <span class="font-black">${a.señadoClienteNombre || '-'}</span> (${a.señadoClienteTel || '-'})</p>
+        <div class="mt-6 p-4 bg-purple-900/30 border border-purple-500/30 rounded-2xl mb-6">
+          <p class="text-xs text-purple-200 dark:text-purple-600 font-bold uppercase mb-1">
+            Vehículo Reservado
+          </p>
+          <p class="text-sm font-bold">
+            Señado por: <span class="font-black">${a.señadoPorNombre || 'Vendedor'}</span>
+          </p>
+          <p class="text-sm">
+            Cliente: <span class="font-black">${a.señadoClienteNombre || '-'}</span> (${a.señadoClienteTel || '-'})
+          </p>
         </div>
       `;
     }
     
     if (window.state.currentUser.rol === 'Admin' && a.costo > 0) { 
-      const costoFmt = a.moneda === 'USD' ? 'U$S ' + window.formatMoney(a.costo).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(a.costo);
+      const costoFmt = a.moneda === 'USD' 
+        ? 'U$S ' + window.formatMoney(a.costo).replace(/[^0-9.,]/g, '').trim() 
+        : window.formatMoney(a.costo);
       html += `
-        <p class="mt-4 text-xs font-bold text-neutral-400">
+        <p class="mt-4 text-xs font-bold text-neutral-400 mb-6">
           Costo Base Original: ${costoFmt}
         </p>
       `; 
@@ -352,7 +397,7 @@ window.renderDetalleAuto = () => {
     
     if(a.estado === 'A Ingresar') {
       html += `
-        <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
+        <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800">
           <button onclick="window.openModalIngreso('${a.id}')" class="w-full py-4 bg-amber-500 text-black font-black rounded-2xl shadow hover:bg-amber-400 transition-all">
             Marcar como Disponible / Fijar Precio
           </button>
@@ -362,7 +407,7 @@ window.renderDetalleAuto = () => {
       if (window.state.currentUser.rol === 'Admin' || window.state.currentUser.rol === 'Vendedor' || window.state.currentUser.rol === 'Encargado') { 
         if (a.estado === 'Disponible') {
           html += `
-            <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10 flex space-x-3">
+            <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800 flex space-x-3 mb-6">
               <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="flex-1 py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all text-sm md:text-base">
                 Cerrar Venta
               </button>
@@ -373,7 +418,7 @@ window.renderDetalleAuto = () => {
           `; 
         } else if (a.estado === 'Señado') {
           html += `
-            <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10 flex space-x-3">
+            <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800 flex space-x-3 mb-6">
               <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="flex-1 py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all text-sm md:text-base">
                 Cerrar Venta
               </button>
@@ -385,8 +430,6 @@ window.renderDetalleAuto = () => {
         }
       } 
     }
-    
-    html += `</div>`;
     
     // PESTAÑAS (TABS)
     html += `
@@ -434,7 +477,9 @@ window.renderDetalleAuto = () => {
          listHtml = leadsAuto.map(c => {
            const autor = window.state.usuarios.find(u => u.id === c.userId);
            const nombreAutor = autor ? autor.nombre : 'Desconocido';
-           const txtAutor = window.state.currentUser.rol !== 'Vendedor' ? ` • <span class="text-amber-600 dark:text-amber-400 font-bold">Por: ${nombreAutor}</span>` : '';
+           const txtAutor = window.state.currentUser.rol !== 'Vendedor' 
+             ? ` • <span class="text-amber-600 dark:text-amber-400 font-bold">Por: ${nombreAutor}</span>` 
+             : '';
            
            return `
              <div onclick="window.openDetalleLead('${c.id}')" class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors">
@@ -457,7 +502,9 @@ window.renderDetalleAuto = () => {
        html += `
          <div>
            <form id="btn-submit-lead-auto" onsubmit="window.handleDA_CRMSubmit(event, '${a.id}')" class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700 mb-6">
-             <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Cargar Interesado</h4>
+             <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">
+               Cargar Interesado
+             </h4>
              <div class="grid grid-cols-2 gap-4">
                <input id="dac-nombre" required placeholder="Nombre" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
                <input id="dac-tel" required placeholder="Teléfono" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
@@ -469,7 +516,9 @@ window.renderDetalleAuto = () => {
            </form>
            
            <div class="mt-4">
-             <h5 class="font-bold text-xs uppercase mb-2 text-neutral-500 tracking-wider">Historial de Leads del Vehículo</h5>
+             <h5 class="font-bold text-xs uppercase mb-2 text-neutral-500 tracking-wider">
+               Historial de Leads del Vehículo
+             </h5>
              <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
                ${listHtml}
              </div>
@@ -516,11 +565,15 @@ window.renderDetalleAuto = () => {
         <div class="bg-black dark:bg-white text-white dark:text-black rounded-[2rem] p-6 mb-6 flex justify-between shadow-xl border border-neutral-800 dark:border-neutral-200">
           <div>
             <p class="text-xs uppercase opacity-70 mb-1 font-bold">Costo Inversión Total</p>
-            <p class="text-xl font-bold">${a.moneda === 'USD' ? 'U$S ' : ''}${window.formatMoney((a.costo||0) + tg).replace('$', '').trim()}</p>
+            <p class="text-xl font-bold">
+              ${a.moneda === 'USD' ? 'U$S ' : ''}${window.formatMoney((a.costo||0) + tg).replace('$', '').trim()}
+            </p>
           </div>
           <div class="text-right">
             <p class="text-xs uppercase opacity-70 mb-1 font-bold">Ganancia Bruta Est.</p>
-            <p class="text-xl font-black text-green-400 dark:text-green-600">${gananciaFmt}</p>
+            <p class="text-xl font-black text-green-400 dark:text-green-600">
+              ${gananciaFmt}
+            </p>
           </div>
         </div>
       `;
@@ -547,7 +600,7 @@ window.renderDetalleAuto = () => {
             <span>Efectivo / Transferencia (Inmediato a Caja)</span>
           </label>
           <div id="div-efectivo" class="hidden pl-8 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 fade-in">
-            <input id="val-efectivo" type="number" placeholder="Monto ($)" class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 font-bold text-lg outline-none focus:border-green-500">
+            <input id="val-efectivo" type="text" oninput="window.formatInputMoney(this)" placeholder="Monto ($)" class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 font-bold text-lg outline-none focus:border-green-500">
             <input id="nota-efectivo" type="text" placeholder="Nota / Banco..." class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none focus:border-green-500 font-bold">
           </div>
           
@@ -556,7 +609,7 @@ window.renderDetalleAuto = () => {
             <span>Crédito Pre-Aprobado (Cobro en Caja)</span>
           </label>
           <div id="div-credito" class="hidden pl-8 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl fade-in">
-            <input id="val-credito" type="number" placeholder="Monto Total a Financiar ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+            <input id="val-credito" type="text" oninput="window.formatInputMoney(this)" placeholder="Monto Total a Financiar ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
             <input id="cuotas-credito" type="number" placeholder="Cant. Cuotas" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
             <input id="venc-credito" type="date" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 text-xs font-bold outline-none focus:border-green-500" title="1º Vencimiento">
             <input id="nota-credito" type="text" placeholder="Entidad / Financiera..." class="col-span-4 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
@@ -567,7 +620,7 @@ window.renderDetalleAuto = () => {
             <span>Pagaré Personal (Cobro en Caja)</span>
           </label>
           <div id="div-pagare" class="hidden pl-8 mb-4 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl fade-in">
-            <input id="val-pagare" type="number" placeholder="Monto Total a Financiar ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
+            <input id="val-pagare" type="text" oninput="window.formatInputMoney(this)" placeholder="Monto Total a Financiar ($)" class="col-span-2 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
             <input id="cuotas-pagare" type="number" placeholder="Cant. Cuotas" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
             <input id="venc-pagare" type="date" class="rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 text-xs font-bold outline-none focus:border-green-500" title="1º Vencimiento">
             <input id="nota-pagare" type="text" placeholder="Detalle / Aval..." class="col-span-4 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-900 font-bold outline-none focus:border-green-500">
@@ -641,11 +694,15 @@ window.renderCajaView = () => {
     if(fc) {
       fc.innerHTML = `
         <div class="flex-1 min-w-[200px]">
-          <label class="text-xs font-bold text-neutral-500 block mb-1">Filtrar por Usuario</label>
+          <label class="text-xs font-bold text-neutral-500 block mb-1">
+            Filtrar por Usuario
+          </label>
           <select onchange="window.state.cajaFilterUser=this.value; window.renderCajaView()" class="w-full bg-white dark:bg-neutral-900 rounded-xl px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500">
             <option value="all">Todas las cajas permitidas</option>
             ${users.map(u => `
-              <option value="${u.id}" ${window.state.cajaFilterUser === u.id ? 'selected' : ''}>${u.nombre}</option>
+              <option value="${u.id}" ${window.state.cajaFilterUser === u.id ? 'selected' : ''}>
+                ${u.nombre}
+              </option>
             `).join('')}
           </select>
         </div>
@@ -681,15 +738,21 @@ window.renderCajaView = () => {
     statContainer.innerHTML = `
       <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
         <h3 class="text-sm font-medium text-neutral-500 mb-1">Saldo Real Disponible</h3>
-        <p class="text-3xl font-black ${saldo >= 0 ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">${window.formatMoney(saldo)}</p>
+        <p class="text-3xl font-black ${saldo >= 0 ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-400'}">
+          ${window.formatMoney(saldo)}
+        </p>
       </div>
       <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
         <h3 class="text-sm font-medium text-neutral-500 mb-1">Ingresos Efectivizados</h3>
-        <p class="text-3xl font-black text-green-600 dark:text-green-500">${window.formatMoney(ing)}</p>
+        <p class="text-3xl font-black text-green-600 dark:text-green-500">
+          ${window.formatMoney(ing)}
+        </p>
       </div>
       <div class="relative p-6 bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-sm">
         <h3 class="text-sm font-medium text-neutral-500 mb-1">Egresos Registrados</h3>
-        <p class="text-3xl font-black text-rose-600 dark:text-rose-400">${window.formatMoney(egr)}</p>
+        <p class="text-3xl font-black text-rose-600 dark:text-rose-400">
+          ${window.formatMoney(egr)}
+        </p>
       </div>
     `;
   }
@@ -1305,7 +1368,6 @@ window.openDetalleVenta = (id) => {
   lucide.createIcons();
 };
 
-// --- MODAL DE FACTURAS ---
 window.renderFacturasView = () => { 
   if(window.state.currentUser?.rol !== 'Admin') return; 
   
@@ -1408,320 +1470,45 @@ window.openDetalleFactura = (id) => {
   window.openModal('modal-detalle-factura'); 
 };
 
-// --- CONTROLADORES DE FORMATOS Y SEÑAS (NUEVOS) ---
-window.formatInputMoney = (input) => {
-  let val = input.value.replace(/[^0-9]/g, '');
-  if(val) {
-    val = parseInt(val, 10);
-    input.value = new Intl.NumberFormat('es-AR').format(val);
-  }
-};
-
-window.openModalSeñado = (autoId) => {
-  window.state.señaAutoId = autoId;
-  document.getElementById('form-seña').reset();
-  window.closeModal('modal-detalle-auto');
-  window.openModal('modal-señado');
-};
-
-window.confirmarSeñado = async (e) => {
-  e.preventDefault();
-  e.stopImmediatePropagation();
+// --- DOLAR API WIDGET ---
+window.renderDolarWidget = async () => {
+  const widget = document.getElementById('dolar-widget-container');
+  if (!widget) return;
   
-  if(window.state.isSubmittingSeña) return;
-  window.state.isSubmittingSeña = true;
-
-  const btn = document.querySelector('#form-seña button');
-  if(btn) window.setBtnLoader(btn, true);
-
+  const showDolar = localStorage.getItem('showDolarWidget') !== 'false'; 
+  if (!showDolar) {
+    widget.classList.add('hidden');
+    return;
+  }
+  
+  widget.classList.remove('hidden');
+  
   try {
-    const autoId = window.state.señaAutoId;
-    const clNombre = document.getElementById('s-cliente-nombre').value;
-    const clTel = document.getElementById('s-cliente-tel').value;
+    const res = await fetch('https://dolarapi.com/v1/dolares/blue');
+    if (!res.ok) throw new Error("Network response was not ok");
+    const data = await res.json();
     
-    await window.fbUpdate("autos", autoId, {
-      estado: 'Señado',
-      señadoPorNombre: window.state.currentUser.nombre,
-      señadoPorUserId: window.state.currentUser.id,
-      señadoClienteNombre: clNombre,
-      señadoClienteTel: clTel
-    });
-
-    window.closeModal('modal-señado');
-    if(window.renderAutosView) window.renderAutosView();
-  } catch(err) {
-    console.error(err);
-  } finally {
-    window.state.isSubmittingSeña = false;
-    if(btn) window.setBtnLoader(btn, false);
-  }
-};
-
-window.quitarSeña = async (autoId) => {
-  if(confirm("¿Estás seguro de cancelar la seña? El auto volverá a estar 'Disponible'.")) {
-    try {
-      await window.fbUpdate("autos", autoId, {
-        estado: 'Disponible',
-        señadoPorNombre: null,
-        señadoPorUserId: null,
-        señadoClienteNombre: null,
-        señadoClienteTel: null
-      });
-      window.closeModal('modal-detalle-auto');
-      if(window.renderAutosView) window.renderAutosView();
-    } catch(err) {
-      console.error(err);
-    }
-  }
-};
-
-// --- CONTROLADORES DE RENDERIZADO GLOBAL (DASHBOARD Y CRM) ---
-window.renderClientesView = () => { 
-  const table = document.getElementById('crm-table'); 
-  if(!table) return;
-  
-  let misConsultas = window.state.consultas;
-  
-  if(window.state.currentUser.rol === 'Vendedor') {
-     misConsultas = misConsultas.filter(c => c.userId === window.state.currentUser.id);
-  } else if (window.state.currentUser.rol === 'Encargado') {
-     const validUsers = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
-     misConsultas = misConsultas.filter(c => validUsers.includes(c.userId));
-  }
-
-  const today = new Date();
-
-  if (misConsultas.length === 0) { 
-    table.innerHTML = `
-      <tr>
-        <td colspan="5" class="text-center py-8 text-neutral-500 font-bold">
-          No hay clientes en la base de datos.
-        </td>
-      </tr>
-    `; 
-  } else { 
-    let html = `
-      <thead>
-        <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-          <th class="px-6 py-4 font-bold">Cliente</th>
-          <th class="px-6 py-4 font-bold">Contacto</th>
-          <th class="px-6 py-4 font-bold">Interés</th>
-          <th class="px-6 py-4 font-bold">Registro</th>
-          <th class="px-6 py-4 font-bold text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
+    widget.innerHTML = `
+      <div class="flex flex-col items-end justify-center bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-xl border border-green-200 dark:border-green-800/50 cursor-help transition-all hover:bg-green-100" title="Actualizado: ${new Date(data.fechaActualizacion).toLocaleString('es-AR')}">
+        <span class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest leading-none">Dólar Blue</span>
+        <div class="flex space-x-2 text-xs font-black text-green-700 dark:text-green-500 mt-0.5">
+          <span>C: $${data.compra}</span>
+          <span>V: $${data.venta}</span>
+        </div>
+      </div>
     `;
-
-    html += misConsultas.slice().sort((a, b) => a.nombre.localeCompare(b.nombre)).map(c => { 
-      const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
-      
-      const leadDate = new Date(c.fecha + 'T00:00:00');
-      const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
-      
-      let dynamicState = 'Frío';
-      let lClass = 'bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'; 
-
-      if (diffDays <= 7) { 
-        dynamicState = 'Caliente'; 
-        lClass = 'bg-black text-white dark:bg-white dark:text-black'; 
-      } else if (diffDays <= 20) { 
-        dynamicState = 'Tibio'; 
-        lClass = 'bg-neutral-400 text-neutral-900 dark:bg-neutral-600 dark:text-white'; 
-      } 
-      
-      const autor = window.state.usuarios.find(u => u.id === c.userId);
-      const nombreAutor = autor ? autor.nombre : 'Desconocido';
-      const txtAutor = window.state.currentUser.rol !== 'Vendedor' ? `<p class="text-[10px] text-neutral-400 font-bold mt-1 uppercase tracking-wider">Cargado por: ${nombreAutor}</p>` : '';
-
-      return `
-        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetalleLead('${c.id}')">
-          <td class="px-6 py-4">
-            <div class="flex items-center">
-              <div class="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center mr-4 font-black text-lg">
-                ${c.nombre.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p class="font-bold">${c.nombre}</p>
-                <span class="inline-flex px-2 py-0.5 mt-1 rounded-md text-[10px] font-black uppercase tracking-widest ${lClass}">
-                  ${dynamicState}
-                </span>
-                ${txtAutor}
-              </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-sm font-bold">
-            ${c.telefono}
-          </td>
-          <td class="px-6 py-4">
-            ${a ? `
-              <span class="font-bold text-sm text-green-600 dark:text-green-500 hover:underline" onclick="event.stopPropagation(); window.openDetalleAuto('${a.id}')">
-                ${a.marca} ${a.modelo}
-              </span>
-            ` : `
-              <span class="font-bold text-sm">
-                ${c.marcaInteres}
-              </span>
-            `}
-            <p class="text-xs text-neutral-500 italic mt-1 max-w-[200px] truncate">"${c.notas}"</p>
-          </td>
-          <td class="px-6 py-4 text-sm font-bold text-neutral-500">
-            Orig: ${window.formatDate(c.fecha)}
-          </td>
-          <td class="px-6 py-4 text-right">
-            <div class="flex justify-end items-center space-x-2">
-              <button onclick="event.stopPropagation(); window.openDetalleLead('${c.id}')" class="px-3 py-2 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-sm transition-transform hover:scale-105 flex items-center">
-                <i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Editar
-              </button>
-              <a href="${window.formatWhatsAppLink(c.telefono, '')}" onclick="event.stopPropagation()" target="_blank" class="px-3 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 flex items-center">
-                <i data-lucide="message-circle" class="w-3 h-3 mr-1"></i> Contactar
-              </a>
-            </div>
-          </td>
-        </tr>
-      `; 
-    }).join(''); 
-    
-    html += `</tbody>`;
-    table.innerHTML = html;
-  } 
+  } catch (error) {
+    console.error("Error fetching Dolar:", error);
+    widget.innerHTML = `
+      <span class="text-[10px] text-rose-500 font-bold px-2">
+        Error Dólar
+      </span>
+    `;
+  }
 };
 
-window.renderResumenesView = () => { 
-  if(window.state.currentUser?.rol !== 'Admin') return; 
-  const dc = document.getElementById('dashboard-content');
-  if(!dc) return;
-  
-  const ing = window.state.transacciones.filter(t => t.tipo === 'ingreso').reduce((a,c) => a + c.valor, 0); 
-  let egr = window.state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => a + c.valor, 0); 
-  
-  const cats = window.state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => { 
-    a[c.categoria] = (a[c.categoria] || 0) + c.valor; 
-    return a; 
-  }, {}); 
-  
-  window.state.autos.forEach(a => { 
-    a.gastos?.forEach(g => { 
-      cats[g.categoria] = (cats[g.categoria] || 0) + g.monto; 
-      egr += g.monto; 
-    }); 
-  }); 
-  
-  const max = Math.max(...Object.values(cats), 1); 
-  
-  let catHTML = ''; 
-  if(Object.keys(cats).length === 0) { 
-    catHTML = `
-      <p class="text-neutral-500 py-4 font-bold">
-        Sin datos de gastos en el periodo.
-      </p>
-    `; 
-  } else { 
-    catHTML = Object.entries(cats).sort((a,b) => b[1] - a[1]).map(([c,v]) => `
-      <div class="mb-4">
-        <div class="flex justify-between text-sm mb-2">
-          <span class="text-neutral-600 dark:text-neutral-300 font-bold uppercase tracking-wider text-[10px]">${c}</span>
-          <span class="font-black">${window.formatMoney(v)}</span>
-        </div>
-        <div class="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-3">
-          <div class="bg-green-600 h-3 rounded-full" style="width: ${(v/max)*100}%"></div>
-        </div>
-      </div>
-    `).join(''); 
-  } 
-  
-  dc.innerHTML = `
-    <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2rem] shadow-sm">
-      <h3 class="font-black text-2xl mb-8">Flujo de Fondos Operativo</h3>
-      <div class="space-y-6">
-        <div class="flex justify-between items-center">
-          <span class="text-neutral-500 font-bold uppercase tracking-wider text-xs">Ingresos Totales</span>
-          <span class="font-black text-xl text-green-600 dark:text-green-500">${window.formatMoney(ing)}</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-neutral-500 font-bold uppercase tracking-wider text-xs">Egresos (Caja + Taller)</span>
-          <span class="font-black text-xl text-rose-600 dark:text-rose-400">${window.formatMoney(egr)}</span>
-        </div>
-        <div class="pt-6 border-t border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
-          <span class="font-black text-xl uppercase">Balance Neto</span>
-          <span class="font-black text-3xl ${ing - egr >= 0 ? 'text-black dark:text-white' : 'text-rose-600'}">${window.formatMoney(ing - egr)}</span>
-        </div>
-      </div>
-    </div>
-    
-    <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2rem] shadow-sm">
-      <h3 class="font-black text-2xl mb-8">Distribución de Gastos</h3>
-      ${catHTML}
-    </div>
-  `; 
-};
-
-window.renderAdminView = () => { 
-  if(window.state.currentUser?.rol !== 'Admin') return; 
-  
-  const sucList = document.getElementById('admin-suc-list'); 
-  if(sucList) {
-    if (window.state.sucursales.length === 0) { 
-      sucList.innerHTML = `
-        <p class="text-neutral-500 text-center py-4 font-bold">
-          No hay sucursales.
-        </p>
-      `; 
-    } else { 
-      sucList.innerHTML = window.state.sucursales.slice().sort((a,b) => a.nombre.localeCompare(b.nombre)).map(s => `
-        <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
-          <span class="font-bold text-sm">${s.nombre}</span>
-          <div class="flex space-x-1">
-            <button onclick="window.editSucursal('${s.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
-              <i data-lucide="edit-2" class="w-4 h-4"></i>
-            </button>
-            <button onclick="window.deleteSucursal('${s.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-      `).join(''); 
-    } 
-  }
-  
-  const elSuc = document.getElementById('new-user-suc');
-  if(elSuc) {
-    elSuc.innerHTML = window.state.sucursales.slice().sort((a,b) => a.nombre.localeCompare(b.nombre)).map(s => `
-      <option value="${s.id}">${s.nombre}</option>
-    `).join(''); 
-  }
-  
-  const usrList = document.getElementById('admin-users-list'); 
-  if(usrList) {
-    if (window.state.usuarios.length === 0) { 
-      usrList.innerHTML = `
-        <p class="text-neutral-500 text-center py-4 font-bold">
-          No hay usuarios.
-        </p>
-      `; 
-    } else { 
-      usrList.innerHTML = window.state.usuarios.slice().sort((a,b) => a.nombre.localeCompare(b.nombre)).map(u => { 
-        const s = window.state.sucursales.find(x => x.id == u.sucursalId); 
-        return `
-          <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
-            <div>
-              <p class="font-bold text-sm">${u.nombre}</p>
-              <p class="text-[10px] font-bold text-neutral-500 mt-1 uppercase tracking-wider">
-                ${u.rol} • ${s ? s.nombre : '-'} • ${u.email}
-              </p>
-            </div>
-            <div class="flex space-x-1">
-              <button onclick="window.editUser('${u.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
-                <i data-lucide="edit-2" class="w-4 h-4"></i>
-              </button>
-              <button onclick="window.deleteUser('${u.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-        `; 
-      }).join(''); 
-    } 
-  }
-  lucide.createIcons(); 
+window.toggleDolarWidget = () => {
+  const current = localStorage.getItem('showDolarWidget') !== 'false';
+  localStorage.setItem('showDolarWidget', !current);
+  window.renderDolarWidget();
 };
