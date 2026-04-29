@@ -470,7 +470,7 @@ window.renderDetalleAuto = () => {
          leadsAuto = leadsAuto.filter(c => validUsers.includes(c.userId));
        }
        
-       leadsAuto = leadsAuto.sort((a,b) => (a.nombre || '').localeCompare(b.nombre || ''));
+       leadsAuto = leadsAuto.sort((x,y) => new Date(y.fecha) - new Date(x.fecha));
        
        let listHtml = '';
        if (leadsAuto.length > 0) {
@@ -1168,6 +1168,48 @@ window.imprimirBoletoHtml = (data) => {
   }, 500);
 };
 
+window.imprimirFlota = () => {
+   let printHtml = `
+     <table class="w-full text-left border-collapse border border-black text-[12px]">
+        <thead>
+          <tr class="bg-gray-200 border-b border-black uppercase">
+            <th class="p-1 border-r border-black font-bold">Vehículo</th>
+            <th class="p-1 border-r border-black font-bold">Año</th>
+            <th class="p-1 border-r border-black font-bold">KM</th>
+            <th class="p-1 border-r border-black font-bold">Color</th>
+            <th class="p-1 border-r border-black font-bold">Categoría</th>
+            <th class="p-1 text-right font-bold">Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${window.state.autos.filter(a => a.estado !== 'Vendido').sort((a,b) => (a.marca || '').localeCompare(b.marca || '') || (a.modelo || '').localeCompare(b.modelo || '')).map(a => {
+            const precioFmt = a.moneda === 'USD' ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(a.precio);
+            return `
+             <tr class="border-b border-black">
+               <td class="p-1 border-r border-black font-bold uppercase">${a.marca} ${a.modelo}</td>
+               <td class="p-1 border-r border-black uppercase">${a.año}</td>
+               <td class="p-1 border-r border-black">${a.km || '-'}</td>
+               <td class="p-1 border-r border-black uppercase">${a.color || '-'}</td>
+               <td class="p-1 border-r border-black uppercase">${a.condicion || '-'}</td>
+               <td class="p-1 text-right font-bold whitespace-nowrap">${precioFmt}</td>
+             </tr>
+            `;
+          }).join('')}
+        </tbody>
+     </table>
+   `;
+   
+   document.getElementById('print-content').innerHTML = printHtml;
+   document.getElementById('app-wrapper').classList.add('hidden'); 
+   document.getElementById('print-section').classList.remove('hidden');
+   
+   setTimeout(() => { 
+     window.print(); 
+     document.getElementById('print-section').classList.add('hidden'); 
+     document.getElementById('app-wrapper').classList.remove('hidden'); 
+   }, 500);
+};
+
 window.renderPersonalView = () => {
   if(window.state.currentUser?.rol !== 'Admin') return;
   
@@ -1711,4 +1753,66 @@ window.toggleDolarWidget = () => {
   const current = localStorage.getItem('showDolarWidget') !== 'false';
   localStorage.setItem('showDolarWidget', !current);
   window.renderDolarWidget();
+};
+
+window.openDetalleLead = (id) => {
+  const c = window.state.consultas.find(x => x.id === id);
+  if(!c) return;
+
+  const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null;
+  const autoInfo = a ? `${a.marca} ${a.modelo} (${a.patente})` : c.marcaInteres;
+
+  const today = new Date();
+  const leadDate = new Date(c.fecha + 'T00:00:00');
+  const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
+  
+  let dynamicState = 'Frío';
+  if (diffDays <= 7) dynamicState = 'Caliente'; 
+  else if (diffDays <= 20) dynamicState = 'Tibio'; 
+
+  let html = `
+    <form id="form-edit-lead" onsubmit="window.handleEditLeadSubmit(event, '${c.id}')">
+      <div class="flex justify-between items-center mb-6 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-2xl">
+         <div>
+           <p class="text-xs text-neutral-500 font-bold uppercase">Estado Actual</p>
+           <p class="font-black text-lg">${dynamicState} (${diffDays} días)</p>
+         </div>
+         <div class="text-right">
+           <p class="text-xs text-neutral-500 font-bold uppercase">Fecha Carga</p>
+           <p class="font-black">${window.formatDate(c.fecha)}</p>
+         </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Nombre y Apellido</label>
+          <input id="edit-lead-nombre" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.nombre}" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Teléfono</label>
+          <input id="edit-lead-tel" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.telefono}" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Vehículo / Interés</label>
+          <input id="edit-lead-interes" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${autoInfo}" ${a ? 'readonly title="Viene de un auto en stock"' : ''} />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Notas y Seguimiento</label>
+          <textarea id="edit-lead-nota" rows="5" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold">${c.notas || ''}</textarea>
+        </div>
+      </div>
+      <div class="mt-8 flex space-x-3">
+         <button type="button" onclick="window.deleteLead('${c.id}')" class="w-1/3 py-3 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-bold rounded-xl hover:scale-[1.02] transition-transform flex items-center justify-center">
+           <i data-lucide="trash-2" class="w-5 h-5"></i>
+         </button>
+         <button type="submit" class="w-2/3 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:scale-[1.02] transition-transform flex justify-center items-center">
+           <span>Guardar Cambios</span>
+         </button>
+      </div>
+    </form>
+  `;
+
+  document.getElementById('lead-detail-content').innerHTML = html;
+  window.openModal('modal-detalle-lead');
+  if(window.lucide) window.lucide.createIcons();
 };
