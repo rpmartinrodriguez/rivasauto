@@ -25,6 +25,14 @@ window.setBtnLoader = (btn, isLoading) => {
   if(window.lucide) window.lucide.createIcons();
 };
 
+window.formatInputMoney = (input) => {
+  let val = input.value.replace(/[^0-9]/g, '');
+  if(val) {
+    val = parseInt(val, 10);
+    input.value = new Intl.NumberFormat('es-AR').format(val);
+  }
+};
+
 // --- CONTROLADORES DE FLOTA Y AUTOS ---
 window.toggleAutosViewMode = (mode) => { 
   window.state.autosViewMode = mode; 
@@ -48,10 +56,13 @@ window.editAuto = (id) => {
   document.getElementById('auto-km').value = a.km || ''; 
   document.getElementById('auto-anio').value = a.año; 
   document.getElementById('auto-patente').value = a.patente; 
-  document.getElementById('auto-precio').value = a.precio; 
-  document.getElementById('auto-costo').value = a.costo || 0; 
+  document.getElementById('auto-precio').value = window.formatMoney(a.precio).replace(/[^0-9]/g, ''); 
+  document.getElementById('auto-costo').value = window.formatMoney(a.costo || 0).replace(/[^0-9]/g, ''); 
   document.getElementById('auto-condicion').value = a.condicion || 'Propio'; 
   document.getElementById('auto-sucursal').value = a.sucursalId; 
+  if (document.getElementById('auto-moneda')) {
+    document.getElementById('auto-moneda').value = a.moneda || 'ARS';
+  }
   document.getElementById('modal-auto-title').innerText = "Editar Vehículo"; 
   window.closeModal('modal-detalle-auto'); 
   window.openModal('modal-auto'); 
@@ -68,7 +79,7 @@ window.handleAutoSubmit = async (e) => {
   e.preventDefault();
   e.stopImmediatePropagation();
   
-  if (window.state.isSubmittingAuto) return; // Candado anti-doble clic
+  if (window.state.isSubmittingAuto) return; 
   window.state.isSubmittingAuto = true;
 
   const btn = document.getElementById('modal-auto-submit');
@@ -76,16 +87,17 @@ window.handleAutoSubmit = async (e) => {
   
   try {
     const obj = { 
-      marca: document.getElementById('auto-marca').value, 
-      modelo: document.getElementById('auto-modelo').value, 
-      color: document.getElementById('auto-color').value, 
+      marca: document.getElementById('auto-marca').value.toUpperCase(), 
+      modelo: document.getElementById('auto-modelo').value.toUpperCase(), 
+      color: document.getElementById('auto-color').value.toUpperCase(), 
       km: Number(document.getElementById('auto-km').value), 
       año: Number(document.getElementById('auto-anio').value), 
       patente: document.getElementById('auto-patente').value.toUpperCase(), 
-      precio: Number(document.getElementById('auto-precio').value), 
-      costo: Number(document.getElementById('auto-costo').value), 
+      precio: Number(document.getElementById('auto-precio').value.replace(/[^0-9]/g, '')), 
+      costo: Number(document.getElementById('auto-costo').value.replace(/[^0-9]/g, '')), 
       condicion: document.getElementById('auto-condicion').value, 
-      sucursalId: document.getElementById('auto-sucursal').value 
+      sucursalId: document.getElementById('auto-sucursal').value,
+      moneda: document.getElementById('auto-moneda') ? document.getElementById('auto-moneda').value : 'ARS'
     };
     
     if(window.state.editingAutoId) { 
@@ -106,7 +118,7 @@ window.handleAutoSubmit = async (e) => {
     console.error("Error al guardar auto:", error);
     alert("Hubo un error. Revisa tu conexión a internet.");
   } finally {
-    window.state.isSubmittingAuto = false; // Se libera el candado
+    window.state.isSubmittingAuto = false; 
     if(btn) window.setBtnLoader(btn, false);
   }
 };
@@ -143,7 +155,7 @@ window.openModalIngreso = (id) => {
 };
 
 window.confirmarIngresoAuto = async (event) => { 
-  const p = Number(document.getElementById('ingreso-precio').value); 
+  const p = Number(document.getElementById('ingreso-precio').value.replace(/[^0-9]/g, '')); 
   const btn = event ? event.target : document.querySelector('#modal-ingreso-auto button.bg-black');
   
   if (window.state.isConfirmandoIngreso) return; 
@@ -175,6 +187,64 @@ window.abrirCajaParaGastos = () => {
     document.getElementById('caja-auto').value = window.state.pendingIngresoAutoId; 
     document.getElementById('caja-tipo').value = 'gasto'; 
   }, 500); 
+};
+
+window.openModalSeñado = (autoId) => {
+  window.state.señaAutoId = autoId;
+  document.getElementById('form-seña').reset();
+  window.closeModal('modal-detalle-auto');
+  window.openModal('modal-señado');
+};
+
+window.confirmarSeñado = async (e) => {
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  
+  if(window.state.isSubmittingSeña) return;
+  window.state.isSubmittingSeña = true;
+
+  const btn = document.querySelector('#form-seña button[type="submit"]');
+  if(btn) window.setBtnLoader(btn, true);
+
+  try {
+    const autoId = window.state.señaAutoId;
+    const clNombre = document.getElementById('s-cliente-nombre').value;
+    const clTel = document.getElementById('s-cliente-tel').value;
+    
+    await window.fbUpdate("autos", autoId, {
+      estado: 'Señado',
+      señadoPorNombre: window.state.currentUser.nombre,
+      señadoPorUserId: window.state.currentUser.id,
+      señadoClienteNombre: clNombre,
+      señadoClienteTel: clTel
+    });
+
+    window.closeModal('modal-señado');
+    if(window.renderAutosView) window.renderAutosView();
+  } catch(err) {
+    console.error(err);
+  } finally {
+    window.state.isSubmittingSeña = false;
+    if(btn) window.setBtnLoader(btn, false);
+  }
+};
+
+window.quitarSeña = async (autoId) => {
+  if(confirm("¿Estás seguro de cancelar la seña? El auto volverá a estar 'Disponible'.")) {
+    try {
+      await window.fbUpdate("autos", autoId, {
+        estado: 'Disponible',
+        señadoPorNombre: null,
+        señadoPorUserId: null,
+        señadoClienteNombre: null,
+        señadoClienteTel: null
+      });
+      window.closeModal('modal-detalle-auto');
+      if(window.renderAutosView) window.renderAutosView();
+    } catch(err) {
+      console.error(err);
+    }
+  }
 };
 
 // --- CONTROLADORES DE ADMINISTRACIÓN ---
@@ -562,139 +632,6 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
   }
 };
 
-window.imprimirBoletoHtml = (data) => {
-  let printHtml = ''; 
-  const dateObj = new Date(data.fecha + 'T00:00:00');
-  const dia = dateObj.getDate();
-  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  const mes = meses[dateObj.getMonth()];
-  const anio = dateObj.getFullYear();
-  
-  if(data.tipo === 'Boleto Compra Venta') {
-    printHtml = `
-      <h2 class="text-center text-xl font-black mb-4 underline uppercase">BOLETO COMPRA VENTA AUTOMOTOR</h2>
-      
-      <div class="text-[12px] leading-snug space-y-2">
-          <p class="text-justify">Conste por el presente que entre el Señor: <strong>${data.vendedor}</strong> como VENDEDOR y el Señor: <strong>${data.comprador}</strong>, como comprador se conviene lo siguiente:</p>
-          
-          <p class="text-justify">El señor: <strong>${data.vendedor}</strong>, vende un: <strong>${data.categoria}</strong> en las condiciones vistas.<br>
-          Marca: <strong>${data.marca}</strong>, Modelo: <strong>${data.modelo}</strong>, Tipo: <strong>${data.tipoVehiculo}</strong>, Año: <strong>${data.año}</strong>, Motor Nro: <strong>${data.motor || '___________'}</strong>, Chasis Nro.: <strong>${data.chasis || '___________'}</strong>, Dominio: <strong>${data.dominio}</strong>.</p>
-          
-          <p class="text-justify">En la suma total de pesos ($): <strong>${data.monto}</strong>, (<strong>${data.montoLetras}</strong>), Pagaderos de la siguiente forma: <strong>${data.formaPago}</strong></p>
-          
-          <p class="text-justify">Esta unidad se entrega en el estado de uso en que se encuentra y que el comprador declara conocer, al igual que todo lo concerniente a la marca, modelo, números de motor y/o chasis del referido vehículo, que ha sido revisado y constatado y acepta de plena conformidad, haciéndose responsable civil y criminalmente, a partir de la fecha y hora de efectuada esta venta por cualquier accidente, daño y/o perjuicio que pudiera ocasionar el vehículo que es recibido en este acto con su documentación completa y al día. El comprador se compromete a efectuar la correspondiente transferencia de dominio del vehículo dentro de los <strong>${data.diasTransf}</strong> días de la fecha, de acuerdo a lo establecido al respecto por la ley 22.977 y sus normas complementarias, interpretativas y/o complementarias, estando a a su exclusivo cargo la totalidad de los gastos que demande la misma y los tramites y gestiones pertinentes, incluyendo la firma del formulario 08 o el que a tales fines lo subsista y/o reemplace y/o el otorgamiento de los poderes, todos ello en forma directa con el titular dominal. Transcurrido dicho plazo sin que realizara la transferencia el vendedor no se responsabiliza por los inconvenientes de cualquier índole que pudieran existir anteriores o posteriores a la fecha, que imposibilitan la efectivización de dicho tramite, incluyendo embargos y/o prendas o medidas judiciales de cualquier tipo sobre el vehículo, al igual que deudas emergentes de patentes municipales y/o multas. Con absoluta conformidad del Comprador.----------------------------------------------------------------------------------------------------/</p>
-          
-          <p class="text-justify">En <strong>${data.ciudadFirma}</strong> a los <strong>${dia}</strong> dias, del mes de <strong>${mes}</strong> del Año <strong>${anio}</strong>, se firman dos ejemplares del mismo tenor y a un solo efecto.</p>
-          
-          <p class="font-bold text-justify mt-2">Observaciones: ${data.observaciones}</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-8 text-[11px] mt-6">
-        <div>
-          <p class="font-bold mb-2">Comprador</p>
-          <p>Nombre y Apellido: <strong>${data.comprador}</strong></p>
-          <p>Direccion: <strong>${data.domicilio}</strong></p>
-          <p>Localidad: <strong>${data.locComp}</strong></p>
-          <p>Celular: <strong>${data.telefono}</strong></p>
-          <div class="border-t border-black mt-12 pt-1 font-bold w-[80%] text-center">FIRMA:</div>
-        </div>
-        <div>
-          <p class="font-bold mb-2">Vendedor</p>
-          <p>Nombre y Apellido: <strong>${data.vendedor}</strong></p>
-          <p>Direccion: <strong>${data.vendedorDomicilio}</strong></p>
-          <p>Localidad: <strong>${data.vendedorLoc}</strong></p>
-          <p>Celular: <strong>${data.vendedorTel}</strong></p>
-          <div class="border-t border-black mt-12 pt-1 font-bold w-[80%] text-center">FIRMA:</div>
-        </div>
-      </div>
-    `;
-  } else {
-    printHtml = `
-      <h2 class="text-center text-xl font-black mb-4 underline uppercase">BOLETO DE VENTA CON PERMUTA</h2>
-      
-      <div class="text-[12px] leading-snug space-y-2">
-          <p class="text-justify">Conste por el presente que hemos vendido a Sr./Sra: <strong>${data.comprador}</strong> con D.N.I: <strong>${data.dni}</strong> y domicilio en calle <strong>${data.domicilio}</strong> Nro.: <strong>${data.altura}</strong> de la localidad de <strong>${data.locComp}</strong> con Celular: <strong>${data.telefono}</strong>.</p>
-          
-          <p class="text-justify">Por cuenta y orden de Sr./Sra. <strong>${data.vendedor}</strong> un automóvil usado, en las condiciones vistas y que se encuentran libre de gravámenes y/o deudas nacionales, municipales o provinciales, dejando constancia que en la fecha el comprador toma posesión del mismo de conformidad, siendo sus características las que se detallan a continuación:</p>
-          
-          <p class="font-bold text-justify">Marca: ${data.marca} Modelo: ${data.modelo} Año: ${data.año} Motor: ${data.motor || '___________'}, Nro. serie o chasis: ${data.chasis || '___________'}<br>
-          Patentado en la localidad de: ${data.locPat || '___________'} bajo Nro.: ${data.dominio}</p>
-          
-          <p class="text-justify">La venta se realiza por la suma total de ($) <strong>${data.monto}</strong> , (<strong>${data.montoLetras}</strong>); Discriminados en la siguiente manera:<br>
-          Efectivo: ($) <strong>${data.efectivo || 0}</strong></p>
-          
-          <p class="text-justify">Se recibe como parte de pago un automovil marca: <strong>${data.p_marca}</strong> Modelo: <strong>${data.p_modelo}</strong> Año: <strong>${data.p_anio}</strong> Motor Nro.: <strong>${data.p_motor || '___________'}</strong> Nro. de serie o chasis: <strong>${data.p_chasis || '___________'}</strong> patentado en la localidad de: <strong>${data.p_locPat || '___________'}</strong>, Nro.: <strong>${data.p_dominio}</strong>, libre de deuda y gravamenes, tasado en la suma de ($): <strong>${data.p_tasado}</strong> , (<strong>${data.p_tasadoLetras}</strong>), debiendo cancelarse el remanente de ($): <strong>${window.formatMoney((Number(data.monto) || 0) - (Number(data.p_tasado) || 0))}</strong> , (<strong>${data.remanenteLetras || '___________'}</strong>).</p>
-          
-          <p class="text-justify uppercase font-bold">${data.detalleRemanente}</p>
-          
-          <p class="text-justify">Y las cuotas restantes a cancelar cada treinta (30) dias, sucesivamente, hasta la cancelacion de la deuda total, cuyo efecto se firma de igual numero de Pagares que representan las cuotas convenidas y prenda con Registro, gravandose con todas las formalidades stablecidas en la Ley Nro. 12.962 el automovil vendido, garantia del saldo deudor.</p>
-          
-          <p class="font-bold text-justify">Observaciones: ${data.observaciones}</p>
-          
-          <p class="mt-4">En conformidad se forman dos ejemplares del mismo tenor y a un solo efecto, en Gualeguaychu a los ${dia} dias del mes de ${mes} del año ${anio}.</p>
-      </div>
-
-      <div class="mt-12 flex justify-between px-16 text-[11px]">
-        <div class="text-center border-t border-black w-48 pt-2 font-bold">Firmas</div>
-        <div class="text-center border-t border-black w-48 pt-2 font-bold">Firmas</div>
-      </div>
-    `;
-  }
-  
-  document.getElementById('print-content').innerHTML = printHtml;
-  document.getElementById('app-wrapper').classList.add('hidden'); 
-  document.getElementById('print-section').classList.remove('hidden');
-  
-  setTimeout(() => { 
-    window.print(); 
-    document.getElementById('print-section').classList.add('hidden'); 
-    document.getElementById('app-wrapper').classList.remove('hidden'); 
-    if(window.renderFormulariosView) window.renderFormulariosView(); 
-  }, 500);
-};
-
-window.imprimirFlota = () => {
-   const today = new Date().toLocaleDateString('es-AR');
-   let printHtml = `
-     <h2 class="text-center text-2xl font-black mb-4 uppercase">Listado de Flota Rivas Auto</h2>
-     <p class="mb-6 font-bold text-right text-sm">Fecha de impresión: ${today}</p>
-     <table class="w-full text-left border-collapse border border-black">
-        <thead>
-          <tr class="bg-gray-200 border-b border-black text-xs uppercase">
-            <th class="p-2 border-r border-black">Vehículo</th>
-            <th class="p-2 border-r border-black">Patente</th>
-            <th class="p-2 border-r border-black">Color</th>
-            <th class="p-2 border-r border-black">Km</th>
-            <th class="p-2 border-r border-black">Condición</th>
-            <th class="p-2 text-right">Precio</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${window.state.autos.filter(a => a.estado !== 'Vendido').map(a => `
-           <tr class="border-b border-black text-sm">
-             <td class="p-2 border-r border-black font-bold">${a.marca} ${a.modelo} (${a.año})</td>
-             <td class="p-2 border-r border-black uppercase">${a.patente}</td>
-             <td class="p-2 border-r border-black capitalize">${a.color || '-'}</td>
-             <td class="p-2 border-r border-black">${a.km || '-'}</td>
-             <td class="p-2 border-r border-black uppercase text-[10px]">${a.condicion || '-'}</td>
-             <td class="p-2 text-right font-bold">${window.formatMoney(a.precio)}</td>
-           </tr>
-          `).join('')}
-        </tbody>
-     </table>
-   `;
-   
-   document.getElementById('print-content').innerHTML = printHtml;
-   document.getElementById('app-wrapper').classList.add('hidden'); 
-   document.getElementById('print-section').classList.remove('hidden');
-   
-   setTimeout(() => { 
-     window.print(); 
-     document.getElementById('print-section').classList.add('hidden'); 
-     document.getElementById('app-wrapper').classList.remove('hidden'); 
-   }, 500);
-};
-
 // --- CONTROLADOR DE VENTA MAESTRO ---
 window.handleDAVentaSubmit = async (e, autoId) => {
   e.preventDefault(); 
@@ -715,7 +652,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
     const cCr = Number(document.getElementById('cuotas-credito')?.value || 0);
     const vPa = document.getElementById('chk-pagare')?.checked ? Number(document.getElementById('val-pagare').value) : 0;
     const cPa = Number(document.getElementById('cuotas-pagare')?.value || 0);
-    const vPe = window.state.ventaData.tienePermuta ? Number(document.getElementById('p-valor').value) : 0;
+    const vPe = window.state.ventaData.tienePermuta ? Number(document.getElementById('p-valor').value.replace(/[^0-9]/g, '')) : 0;
     
     const tVenta = vEf + vCr + vPa + vPe;
 
@@ -780,9 +717,9 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 
     if(window.state.ventaData.tienePermuta) {
       await window.fbAdd("autos", { 
-        marca: document.getElementById('p-marca').value, 
-        modelo: document.getElementById('p-modelo').value, 
-        color: document.getElementById('p-color').value, 
+        marca: document.getElementById('p-marca').value.toUpperCase(), 
+        modelo: document.getElementById('p-modelo').value.toUpperCase(), 
+        color: document.getElementById('p-color').value.toUpperCase(), 
         km: Number(document.getElementById('p-km').value||0),
         año: Number(document.getElementById('p-anio').value), 
         patente: document.getElementById('p-pat').value.toUpperCase(), 
@@ -929,11 +866,13 @@ window.handleEditLeadSubmit = async (e, id) => {
     const nombre = document.getElementById('edit-lead-nombre').value;
     const telefono = document.getElementById('edit-lead-tel').value;
     const notas = document.getElementById('edit-lead-nota').value;
+    const estadoLead = document.getElementById('edit-lead-estado') ? document.getElementById('edit-lead-estado').value : 'Tibio';
     
     await window.fbUpdate("consultas", id, {
       nombre,
       telefono,
-      notas
+      notas,
+      estadoLead
     });
     
     window.closeModal('modal-detalle-lead');
