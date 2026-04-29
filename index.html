@@ -22,13 +22,13 @@
 
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* Reglas para limpiar la impresión de la Flota */
+    /* Reglas para limpiar la impresión de la Flota y Formularios */
     @media print {
-      @page { margin: 0.5cm; } /* Reduce al máximo los márgenes blancos */
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      a[href]:after { content: none !important; } /* Oculta los links generados por el navegador */
+      @page { margin: 0; } /* Elimina márgenes superior e inferior y textos del navegador */
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0.5cm; }
+      a[href]:after { content: none !important; }
       
-      /* Si se está imprimiendo la tabla de la Flota, oculta Logo y Marca de Agua */
+      /* Oculta la Marca de Agua y el Logo al imprimir la tabla de la Flota */
       #print-section:has(table) #print-watermark,
       #print-section:has(table) #print-logo {
         display: none !important;
@@ -151,6 +151,12 @@
               <h2 id="header-title" class="text-xl font-bold hidden sm:block">Panel de Control</h2>
             </div>
             <div class="flex items-center space-x-3">
+              <div id="dolar-widget-container"></div>
+              
+              <button onclick="window.toggleDolarWidget()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors" title="Mostrar/Ocultar Dólar">
+                <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+              </button>
+
               <div class="relative" id="notif-container">
                 <button onclick="window.toggleNotifications()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full relative transition-colors">
                   <i data-lucide="bell" class="w-5 h-5"></i>
@@ -502,7 +508,7 @@
                 <input id="auto-precio" type="text" oninput="window.formatInputMoney(this)" required placeholder="Precio" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-green-600 dark:text-green-500" />
               </div>
               <div>
-                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Ubicación Físcia</label>
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Ubicación Física</label>
                 <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
               </div>
             </div>
@@ -650,7 +656,7 @@
             <input id="comision-desc" type="text" required placeholder="Ej: Bono por objetivo..." class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
             
             <label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Monto a Pagar ($)</label>
-            <input id="comision-monto" type="number" required placeholder="Ej: 50000" class="w-full rounded-xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-lg" />
+            <input id="comision-monto" type="text" oninput="window.formatInputMoney(this)" required placeholder="Ej: 50.000" class="w-full rounded-xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-950 border dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-lg" />
             
             <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center"><span>Guardar Asignación</span></button>
           </form>
