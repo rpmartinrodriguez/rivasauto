@@ -5,66 +5,53 @@
 window.renderAllViews = () => { 
   if(!window.state.currentUser) return; 
   
-  if(window.renderDolarWidget) window.renderDolarWidget();
-  if(window.renderCajaView) window.renderCajaView(); 
-  if(window.renderVentasView) window.renderVentasView();
-  if(window.renderFacturasView) window.renderFacturasView(); 
-  if(window.renderAutosView) window.renderAutosView(); 
-  if(window.renderClientesView) window.renderClientesView(); 
-  if(window.renderFormulariosView) window.renderFormulariosView();
-  if(window.renderPersonalView) window.renderPersonalView();
-  if(window.renderResumenesView) window.renderResumenesView(); 
-  if(window.renderAdminView) window.renderAdminView(); 
+  // Usamos try-catch individuales para que si una vista falla, 
+  // no arrastre ni rompa a las demás (como pasó con el Dólar y el CRM)
+  try { if(window.renderDolarWidget) window.renderDolarWidget(); } catch(e) { console.error("Error Dólar:", e); }
+  try { if(window.renderCajaView) window.renderCajaView(); } catch(e) { console.error("Error Caja:", e); }
+  try { if(window.renderVentasView) window.renderVentasView(); } catch(e) { console.error("Error Ventas:", e); }
+  try { if(window.renderFacturasView) window.renderFacturasView(); } catch(e) { console.error("Error Facturas:", e); }
+  try { if(window.renderAutosView) window.renderAutosView(); } catch(e) { console.error("Error Autos:", e); }
+  try { if(window.renderClientesView) window.renderClientesView(); } catch(e) { console.error("Error CRM:", e); }
+  try { if(window.renderFormulariosView) window.renderFormulariosView(); } catch(e) { console.error("Error Formularios:", e); }
+  try { if(window.renderPersonalView) window.renderPersonalView(); } catch(e) { console.error("Error Personal:", e); }
+  try { if(window.renderResumenesView) window.renderResumenesView(); } catch(e) { console.error("Error Resúmenes:", e); }
+  try { if(window.renderAdminView) window.renderAdminView(); } catch(e) { console.error("Error Admin:", e); }
   
-  if(window.checkNotifications) window.checkNotifications();
+  try { if(window.checkNotifications) window.checkNotifications(); } catch(e) {}
   if(window.lucide) window.lucide.createIcons(); 
 };
 
 window.initSelects = () => { 
   const elCat = document.getElementById('caja-cat');
   if (elCat) {
-    elCat.innerHTML = window.state.categoriasGasto
+    elCat.innerHTML = (window.state.categoriasGasto || [])
       .slice()
-      .sort((a, b) => (a || '').localeCompare(b || ''))
-      .map(c => `
-        <option value="${c}">
-          ${c}
-        </option>
-      `)
+      .sort((a, b) => String(a || '').localeCompare(String(b || '')))
+      .map(c => `<option value="${c}">${c}</option>`)
       .join(''); 
   }
   
   const elSuc = document.getElementById('auto-sucursal');
   if (elSuc) {
-    elSuc.innerHTML = window.state.sucursales
+    elSuc.innerHTML = (window.state.sucursales || [])
       .slice()
-      .sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
-      .map(s => `
-        <option value="${s.id}">
-          ${s.nombre}
-        </option>
-      `)
+      .sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || '')))
+      .map(s => `<option value="${s.id}">${s.nombre}</option>`)
       .join(''); 
   }
   
   const elAuto = document.getElementById('caja-auto');
   if (elAuto) {
-    elAuto.innerHTML = `
-      <option value="">
-        -- Gasto General de Agencia --
-      </option>
-    ` + window.state.autos
+    elAuto.innerHTML = `<option value="">-- Gasto General de Agencia --</option>` + 
+      (window.state.autos || [])
       .slice()
-      .sort((a, b) => (a.marca || '').localeCompare(b.marca || '') || (a.modelo || '').localeCompare(b.modelo || ''))
+      .sort((a, b) => String(a.marca || '').localeCompare(String(b.marca || '')) || String(a.modelo || '').localeCompare(String(b.modelo || '')))
       .map(a => {
         const pFmt = a.moneda === 'USD' 
           ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() 
           : window.formatMoney(a.precio);
-        return `
-          <option value="${a.id}">
-            ${a.marca} ${a.modelo} (${a.patente}) - ${pFmt}
-          </option>
-        `;
+        return `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente}) - ${pFmt}</option>`;
       })
       .join(''); 
   }
@@ -88,7 +75,7 @@ window.checkNotifications = () => {
   const notifs = [];
   const today = new Date();
   
-  window.state.ventas.forEach(v => {
+  (window.state.ventas || []).forEach(v => {
     const metodos = v.metodoPago || '';
     if (metodos.includes('Crédito') || metodos.includes('Pagaré')) {
       const cuotasT = v.cuotasTotales || 0;
@@ -119,12 +106,8 @@ window.checkNotifications = () => {
     badge.classList.remove('hidden');
     list.innerHTML = notifs.map(n => `
       <div class="p-4 border-b border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
-        <p class="font-bold text-sm">
-          ${n.v.compradorNombre || 'Sin Nombre'}
-        </p>
-        <p class="text-xs text-neutral-500 mb-3">
-          ${n.v.autoDesc || '-'} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span>
-        </p>
+        <p class="font-bold text-sm">${n.v.compradorNombre || 'Sin Nombre'}</p>
+        <p class="text-xs text-neutral-500 mb-3">${n.v.autoDesc || '-'} • <span class="text-amber-600 dark:text-amber-400 font-bold">${n.msg}</span></p>
         <a href="${window.formatWhatsAppLink(n.v.compradorTelefono || '', '')}" target="_blank" class="text-[10px] font-bold uppercase text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded flex w-fit items-center hover:bg-green-100 transition">
           <i data-lucide="message-circle" class="w-3.5 h-3.5 mr-1.5"></i> Ofrecer Recompra
         </a>
@@ -165,9 +148,9 @@ window.renderAutosView = () => {
       : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
   }
   
-  const autosValidos = window.state.autos
+  const autosValidos = (window.state.autos || [])
     .filter(a => a.estado !== 'Vendido')
-    .sort((a, b) => (a.marca || '').localeCompare(b.marca || '') || (a.modelo || '').localeCompare(b.modelo || ''));
+    .sort((a, b) => String(a.marca || '').localeCompare(String(b.marca || '')) || String(a.modelo || '').localeCompare(String(b.modelo || '')));
   
   if (autosValidos.length === 0) { 
     container.innerHTML = `
@@ -461,7 +444,7 @@ window.renderDetalleAuto = () => {
       `;
     } else if(window.state.daActiveSection === 'crm') {
        
-       let leadsAuto = window.state.consultas.filter(c => c.autoId === a.id);
+       let leadsAuto = (window.state.consultas || []).filter(c => c.autoId === a.id);
        
        if(window.state.currentUser.rol === 'Vendedor') {
          leadsAuto = leadsAuto.filter(c => c.userId === window.state.currentUser.id);
@@ -673,12 +656,12 @@ window.renderDetalleAuto = () => {
 };
 
 window.renderCajaView = () => {
-  let myTrans = window.state.transacciones;
+  let myTrans = window.state.transacciones || [];
   
   if(window.state.currentUser.rol === 'Vendedor') { 
     myTrans = myTrans.filter(t => t.userId === window.state.currentUser.id); 
   } else if (window.state.currentUser.rol === 'Encargado') { 
-    const usuariosValidos = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+    const usuariosValidos = (window.state.usuarios || []).filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
     myTrans = myTrans.filter(t => usuariosValidos.includes(t.userId)); 
   }
 
@@ -686,7 +669,7 @@ window.renderCajaView = () => {
     const fc = document.getElementById('caja-filters-container'); 
     if(fc) fc.classList.remove('hidden');
     
-    let users = window.state.usuarios;
+    let users = window.state.usuarios || [];
     if (window.state.currentUser.rol === 'Encargado') {
        users = users.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin');
     }
@@ -751,8 +734,8 @@ window.renderCajaView = () => {
       tableContainer.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">Sin movimientos en la caja seleccionada.</td></tr>`; 
     } else {
       tableContainer.innerHTML = transWithSaldo.slice().reverse().map(t => {
-        const u = window.state.usuarios.find(x => x.id === t.userId); 
-        const s = window.state.sucursales.find(x => x.id === t.sucursalId);
+        const u = (window.state.usuarios || []).find(x => x.id === t.userId); 
+        const s = (window.state.sucursales || []).find(x => x.id === t.sucursalId);
         
         return `
           <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors ${t.estadoCobro === 'pendiente' ? 'opacity-50' : ''}">
@@ -792,14 +775,14 @@ window.renderCajaView = () => {
 };
 
 window.openModalPendientes = () => { 
-  let myTrans = window.state.transacciones;
-  let myVentas = window.state.ventas;
+  let myTrans = window.state.transacciones || [];
+  let myVentas = window.state.ventas || [];
   
   if(window.state.currentUser.rol === 'Vendedor') { 
     myTrans = myTrans.filter(t => t.userId === window.state.currentUser.id); 
     myVentas = myVentas.filter(v => v.userId === window.state.currentUser.id); 
   } else if (window.state.currentUser.rol === 'Encargado') { 
-    const validUsers = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+    const validUsers = (window.state.usuarios || []).filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
     myTrans = myTrans.filter(t => validUsers.includes(t.userId)); 
     myVentas = myVentas.filter(v => validUsers.includes(v.userId)); 
   }
@@ -914,7 +897,7 @@ window.renderFormulariosView = () => {
    const table = document.getElementById('formularios-table');
    if(!table) return;
    
-   if(window.state.formularios.length === 0) { 
+   if((window.state.formularios || []).length === 0) { 
      table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay formularios generados.</td></tr>`; 
    } else {
      table.innerHTML = window.state.formularios.slice().reverse().map(f => `
@@ -1182,7 +1165,7 @@ window.imprimirFlota = () => {
           </tr>
         </thead>
         <tbody>
-          ${window.state.autos.filter(a => a.estado !== 'Vendido').sort((a,b) => (a.marca || '').localeCompare(b.marca || '') || (a.modelo || '').localeCompare(b.modelo || '')).map(a => {
+          ${(window.state.autos || []).filter(a => a.estado !== 'Vendido').sort((a,b) => String(a.marca || '').localeCompare(String(b.marca || '')) || String(a.modelo || '').localeCompare(String(b.modelo || ''))).map(a => {
             const precioFmt = a.moneda === 'USD' ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(a.precio);
             return `
              <tr class="border-b border-black">
@@ -1218,18 +1201,18 @@ window.renderPersonalView = () => {
   const tableCierres = document.getElementById('cierres-table');
   const modalCierreList = document.getElementById('cierre-checkboxes-list');
   
-  const usuariosAgencia = window.state.usuarios.filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado').sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+  const usuariosAgencia = (window.state.usuarios || []).filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado').sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
   
   let totLiq = 0;
   let checkboxHtml = '';
   
   if (table) {
     const dataRows = usuariosAgencia.map(u => {
-      const pdtes = window.state.comisiones.filter(c => c.userId === u.id && c.estado === 'Pendiente');
+      const pdtes = (window.state.comisiones || []).filter(c => c.userId === u.id && c.estado === 'Pendiente');
       const totPdte = pdtes.reduce((a,c) => a + c.monto, 0);
       totLiq += totPdte;
       
-      const suc = window.state.sucursales.find(s => s.id == u.sucursalId)?.nombre || '-';
+      const suc = (window.state.sucursales || []).find(s => s.id == u.sucursalId)?.nombre || '-';
       
       if(totPdte > 0) {
         checkboxHtml += `
@@ -1315,15 +1298,15 @@ window.renderPersonalView = () => {
 };
 
 window.openDetallePersonal = (userId) => {
-  const u = window.state.usuarios.find(x => x.id === userId);
+  const u = (window.state.usuarios || []).find(x => x.id === userId);
   if(!u) return;
   
-  const comisionesUsuario = window.state.comisiones.filter(c => c.userId === userId).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+  const comisionesUsuario = (window.state.comisiones || []).filter(c => c.userId === userId).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
   
   let html = `
     <div class="mb-6 flex items-center space-x-4">
       <div class="w-14 h-14 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center font-black text-2xl">
-        ${(u.nombre || 'U').charAt(0).toUpperCase()}
+        ${String(u.nombre || 'U').charAt(0).toUpperCase()}
       </div>
       <div>
         <h4 class="text-2xl font-black">${u.nombre || 'Sin Nombre'}</h4>
@@ -1353,7 +1336,7 @@ window.openDetallePersonal = (userId) => {
           ${comisionesUsuario.map(c => {
             let autoDesc = c.descripcion || 'Manual / Bono';
             if (c.ventaId) {
-               const v = window.state.ventas.find(x => x.id === c.ventaId);
+               const v = (window.state.ventas || []).find(x => x.id === c.ventaId);
                if(v) autoDesc = `Venta: ${v.autoDesc}`;
             }
             return `
@@ -1417,7 +1400,7 @@ window.openDetalleCierre = (cierreId) => {
     html += `<div class="space-y-6">`;
     for(let userId in agrupado) {
       const u = window.state.usuarios.find(x => x.id === userId);
-      const nombre = u ? u.nombre : 'Usuario Eliminado';
+      const nombre = u ? (u.nombre || 'Sin Nombre') : 'Usuario Eliminado';
       const userGroup = agrupado[userId];
       
       html += `
@@ -1452,12 +1435,12 @@ window.openDetalleCierre = (cierreId) => {
 };
 
 window.renderVentasView = () => { 
-  let misVentas = window.state.ventas;
+  let misVentas = window.state.ventas || [];
   
   if(window.state.currentUser.rol === 'Vendedor') {
      misVentas = misVentas.filter(v => v.userId === window.state.currentUser.id);
   } else if (window.state.currentUser.rol === 'Encargado') {
-     const validUsers = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+     const validUsers = (window.state.usuarios || []).filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
      misVentas = misVentas.filter(v => validUsers.includes(v.userId));
   }
   
@@ -1614,7 +1597,7 @@ window.openDetalleVenta = (id) => {
 window.renderFacturasView = () => { 
   if(window.state.currentUser?.rol !== 'Admin') return; 
   
-  const facturas = window.state.transacciones.filter(t => ['A','B','C'].includes(t.tipoComprobante)); 
+  const facturas = (window.state.transacciones || []).filter(t => ['A','B','C'].includes(t.tipoComprobante)); 
   const totalEmitido = facturas.reduce((a,c) => a + c.valor, 0); 
   const totalIva = facturas.reduce((a,c) => a + (c.iva || 0), 0); 
   
@@ -1718,16 +1701,16 @@ window.renderResumenesView = () => {
   const dc = document.getElementById('dashboard-content');
   if(!dc) return;
   
-  const ing = window.state.transacciones.filter(t => t.tipo === 'ingreso').reduce((a,c) => a + c.valor, 0); 
-  let egr = window.state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => a + c.valor, 0); 
+  const ing = (window.state.transacciones || []).filter(t => t.tipo === 'ingreso').reduce((a,c) => a + c.valor, 0); 
+  let egr = (window.state.transacciones || []).filter(t => t.tipo === 'gasto').reduce((a,c) => a + c.valor, 0); 
   
-  const cats = window.state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => { 
+  const cats = (window.state.transacciones || []).filter(t => t.tipo === 'gasto').reduce((a,c) => { 
     a[c.categoria] = (a[c.categoria] || 0) + c.valor; 
     return a; 
   }, {}); 
   
-  window.state.autos.forEach(a => { 
-    a.gastos?.forEach(g => { 
+  (window.state.autos || []).forEach(a => { 
+    (a.gastos || []).forEach(g => { 
       cats[g.categoria] = (cats[g.categoria] || 0) + g.monto; 
       egr += g.monto; 
     }); 
@@ -1787,14 +1770,14 @@ window.renderAdminView = () => {
   
   const sucList = document.getElementById('admin-suc-list'); 
   if(sucList) {
-    if (window.state.sucursales.length === 0) { 
+    if ((window.state.sucursales || []).length === 0) { 
       sucList.innerHTML = `
         <p class="text-neutral-500 text-center py-4 font-bold">
           No hay sucursales.
         </p>
       `; 
     } else { 
-      sucList.innerHTML = window.state.sucursales.slice().sort((a,b) => (a.nombre||'').localeCompare(b.nombre||'')).map(s => `
+      sucList.innerHTML = window.state.sucursales.slice().sort((a,b) => String(a.nombre || '').localeCompare(String(b.nombre || ''))).map(s => `
         <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
           <span class="font-bold text-sm">${s.nombre}</span>
           <div class="flex space-x-1">
@@ -1812,21 +1795,21 @@ window.renderAdminView = () => {
   
   const elSuc = document.getElementById('new-user-suc');
   if(elSuc) {
-    elSuc.innerHTML = window.state.sucursales.slice().sort((a,b) => (a.nombre||'').localeCompare(b.nombre||'')).map(s => `
+    elSuc.innerHTML = (window.state.sucursales || []).slice().sort((a,b) => String(a.nombre || '').localeCompare(String(b.nombre || ''))).map(s => `
       <option value="${s.id}">${s.nombre}</option>
     `).join(''); 
   }
   
   const usrList = document.getElementById('admin-users-list'); 
   if(usrList) {
-    if (window.state.usuarios.length === 0) { 
+    if ((window.state.usuarios || []).length === 0) { 
       usrList.innerHTML = `
         <p class="text-neutral-500 text-center py-4 font-bold">
           No hay usuarios.
         </p>
       `; 
     } else { 
-      usrList.innerHTML = window.state.usuarios.slice().sort((a,b) => (a.nombre||'').localeCompare(b.nombre||'')).map(u => { 
+      usrList.innerHTML = window.state.usuarios.slice().sort((a,b) => String(a.nombre || '').localeCompare(String(b.nombre || ''))).map(u => { 
         const s = window.state.sucursales.find(x => x.id == u.sucursalId); 
         return `
           <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
@@ -1850,4 +1833,220 @@ window.renderAdminView = () => {
     } 
   }
   if(window.lucide) window.lucide.createIcons(); 
+};
+
+// --- DOLAR API WIDGET ---
+window.renderDolarWidget = async () => {
+  const widget = document.getElementById('dolar-widget-container');
+  if (!widget) return;
+  
+  const showDolar = localStorage.getItem('showDolarWidget') !== 'false'; 
+  if (!showDolar) {
+    widget.classList.add('hidden');
+    return;
+  }
+  
+  widget.classList.remove('hidden');
+  
+  try {
+    const res = await fetch('https://dolarapi.com/v1/dolares/blue');
+    if (!res.ok) throw new Error("Network response was not ok");
+    const data = await res.json();
+    
+    widget.innerHTML = `
+      <div class="flex flex-col items-end justify-center bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-xl border border-green-200 dark:border-green-800/50 cursor-help transition-all hover:bg-green-100" title="Actualizado: ${new Date(data.fechaActualizacion).toLocaleString('es-AR')}">
+        <span class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest leading-none">Dólar Blue</span>
+        <div class="flex space-x-2 text-xs font-black text-green-700 dark:text-green-500 mt-0.5">
+          <span>C: $${data.compra}</span>
+          <span>V: $${data.venta}</span>
+        </div>
+      </div>
+    `;
+  } catch (error) {
+    console.error("Error fetching Dolar:", error);
+    widget.innerHTML = `
+      <span class="text-[10px] text-rose-500 font-bold px-2">
+        Error Dólar
+      </span>
+    `;
+  }
+};
+
+window.toggleDolarWidget = () => {
+  const current = localStorage.getItem('showDolarWidget') !== 'false';
+  localStorage.setItem('showDolarWidget', !current);
+  window.renderDolarWidget();
+};
+
+window.openDetalleLead = (id) => {
+  const c = window.state.consultas.find(x => x.id === id);
+  if(!c) return;
+
+  const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null;
+  const autoInfo = a ? `${a.marca} ${a.modelo} (${a.patente})` : c.marcaInteres;
+
+  const today = new Date();
+  const leadDate = new Date(c.fecha + 'T00:00:00');
+  const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
+  
+  let dynamicState = 'Frío';
+  if (diffDays <= 7) dynamicState = 'Caliente'; 
+  else if (diffDays <= 20) dynamicState = 'Tibio'; 
+
+  let html = `
+    <form id="form-edit-lead" onsubmit="window.handleEditLeadSubmit(event, '${c.id}')">
+      <div class="flex justify-between items-center mb-6 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-2xl">
+         <div>
+           <p class="text-xs text-neutral-500 font-bold uppercase">Estado Actual</p>
+           <p class="font-black text-lg">${dynamicState} (${diffDays} días)</p>
+         </div>
+         <div class="text-right">
+           <p class="text-xs text-neutral-500 font-bold uppercase">Fecha Carga</p>
+           <p class="font-black">${window.formatDate(c.fecha)}</p>
+         </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Nombre y Apellido</label>
+          <input id="edit-lead-nombre" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.nombre || ''}" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Teléfono</label>
+          <input id="edit-lead-tel" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.telefono || ''}" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Vehículo / Interés</label>
+          <input id="edit-lead-interes" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${autoInfo || ''}" ${a ? 'readonly title="Viene de un auto en stock"' : ''} />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Notas y Seguimiento</label>
+          <textarea id="edit-lead-nota" rows="5" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold">${c.notas || ''}</textarea>
+        </div>
+      </div>
+      <div class="mt-8 flex space-x-3">
+         <button type="button" onclick="window.deleteLead('${c.id}')" class="w-1/3 py-3 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-bold rounded-xl hover:scale-[1.02] transition-transform flex items-center justify-center">
+           <i data-lucide="trash-2" class="w-5 h-5"></i>
+         </button>
+         <button type="submit" class="w-2/3 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:scale-[1.02] transition-transform flex justify-center items-center">
+           <span>Guardar Cambios</span>
+         </button>
+      </div>
+    </form>
+  `;
+
+  document.getElementById('lead-detail-content').innerHTML = html;
+  window.openModal('modal-detalle-lead');
+  if(window.lucide) window.lucide.createIcons();
+};
+
+window.renderClientesView = () => { 
+  const table = document.getElementById('crm-table'); 
+  if(!table) return;
+  
+  let misConsultas = window.state.consultas || [];
+  
+  if(window.state.currentUser.rol === 'Vendedor') {
+     misConsultas = misConsultas.filter(c => c.userId === window.state.currentUser.id);
+  } else if (window.state.currentUser.rol === 'Encargado') {
+     const validUsers = (window.state.usuarios || []).filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+     misConsultas = misConsultas.filter(c => validUsers.includes(c.userId));
+  }
+
+  const today = new Date();
+
+  if (misConsultas.length === 0) { 
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center py-8 text-neutral-500 font-bold">
+          No hay clientes en la base de datos.
+        </td>
+      </tr>
+    `; 
+  } else { 
+    let html = `
+      <thead>
+        <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+          <th class="px-6 py-4 font-bold">Cliente</th>
+          <th class="px-6 py-4 font-bold">Contacto</th>
+          <th class="px-6 py-4 font-bold">Interés</th>
+          <th class="px-6 py-4 font-bold">Registro</th>
+          <th class="px-6 py-4 font-bold text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
+    `;
+
+    html += misConsultas.slice().sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || ''))).map(c => { 
+      const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
+      
+      const leadDate = new Date(c.fecha + 'T00:00:00');
+      const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
+      
+      let dynamicState = 'Frío';
+      let lClass = 'bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'; 
+
+      if (diffDays <= 7) { 
+        dynamicState = 'Caliente'; 
+        lClass = 'bg-black text-white dark:bg-white dark:text-black'; 
+      } else if (diffDays <= 20) { 
+        dynamicState = 'Tibio'; 
+        lClass = 'bg-neutral-400 text-neutral-900 dark:bg-neutral-600 dark:text-white'; 
+      } 
+      
+      const autor = (window.state.usuarios || []).find(u => u.id === c.userId);
+      const nombreAutor = autor ? autor.nombre : 'Desconocido';
+      const txtAutor = window.state.currentUser.rol !== 'Vendedor' ? `<p class="text-[10px] text-neutral-400 font-bold mt-1 uppercase tracking-wider">Cargado por: ${nombreAutor}</p>` : '';
+
+      return `
+        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetalleLead('${c.id}')">
+          <td class="px-6 py-4">
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center mr-4 font-black text-lg">
+                ${String(c.nombre || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p class="font-bold">${c.nombre || 'Sin Nombre'}</p>
+                <span class="inline-flex px-2 py-0.5 mt-1 rounded-md text-[10px] font-black uppercase tracking-widest ${lClass}">
+                  ${dynamicState}
+                </span>
+                ${txtAutor}
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm font-bold">
+            ${c.telefono || '-'}
+          </td>
+          <td class="px-6 py-4">
+            ${a ? `
+              <span class="font-bold text-sm text-green-600 dark:text-green-500 hover:underline" onclick="event.stopPropagation(); window.openDetalleAuto('${a.id}')">
+                ${a.marca} ${a.modelo}
+              </span>
+            ` : `
+              <span class="font-bold text-sm">
+                ${c.marcaInteres || '-'}
+              </span>
+            `}
+            <p class="text-xs text-neutral-500 italic mt-1 max-w-[200px] truncate">"${c.notas || ''}"</p>
+          </td>
+          <td class="px-6 py-4 text-sm font-bold text-neutral-500">
+            Orig: ${window.formatDate(c.fecha)}
+          </td>
+          <td class="px-6 py-4 text-right">
+            <div class="flex justify-end items-center space-x-2">
+              <button onclick="event.stopPropagation(); window.openDetalleLead('${c.id}')" class="px-3 py-2 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-sm transition-transform hover:scale-105 flex items-center">
+                <i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Editar
+              </button>
+              <a href="${window.formatWhatsAppLink(c.telefono || '', '')}" onclick="event.stopPropagation()" target="_blank" class="px-3 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 flex items-center">
+                <i data-lucide="message-circle" class="w-3 h-3 mr-1"></i> Contactar
+              </a>
+            </div>
+          </td>
+        </tr>
+      `; 
+    }).join(''); 
+    
+    html += `</tbody>`;
+    table.innerHTML = html;
+  } 
 };
