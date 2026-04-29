@@ -21,14 +21,28 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Reglas para limpiar la impresión de la Flota */
+    @media print {
+      @page { margin: 0.5cm; } /* Reduce al máximo los márgenes blancos */
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      a[href]:after { content: none !important; } /* Oculta los links generados por el navegador */
+      
+      /* Si se está imprimiendo la tabla de la Flota, oculta Logo y Marca de Agua */
+      #print-section:has(table) #print-watermark,
+      #print-section:has(table) #print-logo {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
 <body class="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white font-sans transition-colors duration-300 overflow-hidden">
   
   <div id="print-section" class="hidden text-black bg-white min-h-screen">
-    <div class="watermark-bg">
+    <div id="print-watermark" class="watermark-bg">
       <span class="watermark-text">RIVAS AUTO</span>
     </div>
-    <div class="absolute top-8 right-8 w-24 h-24">
+    <div id="print-logo" class="absolute top-8 right-8 w-24 h-24">
       <img src="icon.png" class="w-full h-full object-contain" alt="Logo">
     </div>
     <div id="print-content" class="relative z-10 text-sm leading-relaxed"></div>
@@ -379,8 +393,8 @@
                 <div><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Tipo</label><select id="caja-comprobante" onchange="window.handleComprobanteChange(this.value)" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500"><option value="X">Recibo (X)</option><option value="A">Fac A</option><option value="B">Fac B</option><option value="C">Fac C</option></select></div>
                 <div><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Nº Comp.</label><input type="text" id="caja-comp-num" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" /></div>
               </div>
-              <div class="mb-4"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Total ($)</label><input type="number" id="caja-monto" required class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-green-500" /></div>
-              <div id="caja-iva-container" class="hidden"><label class="block text-xs font-bold uppercase mb-2">IVA Incluido ($)</label><input type="number" id="caja-iva" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" /></div>
+              <div class="mb-4"><label class="block text-xs font-bold text-neutral-500 uppercase mb-2">Total ($)</label><input type="text" oninput="window.formatInputMoney(this)" id="caja-monto" required class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-green-500" /></div>
+              <div id="caja-iva-container" class="hidden"><label class="block text-xs font-bold uppercase mb-2">IVA Incluido ($)</label><input type="text" oninput="window.formatInputMoney(this)" id="caja-iva" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-2.5 outline-none focus:border-green-500" /></div>
             </div>
             <button type="submit" class="w-full py-4 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center"><span>Guardar Movimiento</span></button>
           </form>
@@ -435,11 +449,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div>
                  <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Marca</label>
-                 <input id="auto-marca" required placeholder="Ej: Toyota" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+                 <input id="auto-marca" required placeholder="Ej: Toyota" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold uppercase" />
               </div>
               <div>
                  <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Modelo y Versión</label>
-                 <input id="auto-modelo" required placeholder="Ej: Hilux SRX 4x4" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+                 <input id="auto-modelo" required placeholder="Ej: Hilux SRX 4x4" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold uppercase" />
               </div>
               <div>
                  <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Año</label>
@@ -447,7 +461,7 @@
               </div>
               <div>
                  <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Color</label>
-                 <input id="auto-color" required placeholder="Ej: Blanco" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" />
+                 <input id="auto-color" required placeholder="Ej: Blanco" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold uppercase" />
               </div>
             </div>
 
@@ -471,17 +485,24 @@
             </div>
 
             <h4 class="font-bold text-sm uppercase text-neutral-500 tracking-wider mb-4">Finanzas y Ubicación</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               <div>
-                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Costo Original / Base ($)</label>
-                <input id="auto-costo" type="number" required placeholder="Costo de ingreso" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-rose-600 dark:text-rose-400" />
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Costo Base</label>
+                <input id="auto-costo" type="text" oninput="window.formatInputMoney(this)" required placeholder="Costo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-rose-600 dark:text-rose-400" />
               </div>
               <div>
-                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Precio de Venta Est. ($)</label>
-                <input id="auto-precio" type="number" required placeholder="Precio de publicación" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-green-600 dark:text-green-500" />
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Moneda</label>
+                <select id="auto-moneda" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold">
+                  <option value="ARS">Pesos ($)</option>
+                  <option value="USD">Dólares (U$S)</option>
+                </select>
               </div>
               <div>
-                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Ubicación Física</label>
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Precio Est.</label>
+                <input id="auto-precio" type="text" oninput="window.formatInputMoney(this)" required placeholder="Precio" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-green-600 dark:text-green-500" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Ubicación Físcia</label>
                 <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold"></select>
               </div>
             </div>
@@ -494,13 +515,27 @@
       </div>
     </div>
 
+    <div id="modal-señado" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-señado')"></div>
+      <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 text-center overflow-hidden">
+         <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="bookmark" class="w-8 h-8"></i></div>
+         <h3 class="text-2xl font-black mb-2">Señar Vehículo</h3>
+         <p class="text-sm text-neutral-500 mb-6">Ingresa los datos del cliente que realiza la seña:</p>
+         <form id="form-seña" onsubmit="window.confirmarSeñado(event)">
+           <input type="text" id="s-cliente-nombre" required placeholder="Nombre y Apellido del Cliente" class="w-full rounded-xl px-4 py-3 mb-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-purple-500 font-bold" />
+           <input type="text" id="s-cliente-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-purple-500 font-bold" />
+           <button type="submit" class="w-full py-4 bg-purple-600 text-white font-bold rounded-2xl shadow-lg hover:bg-purple-700 transition-colors flex items-center justify-center"><span>Confirmar Seña</span></button>
+         </form>
+      </div>
+    </div>
+
     <div id="modal-ingreso-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 fade-in hidden">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="window.closeModal('modal-ingreso-auto')"></div>
       <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[2.5rem] shadow-2xl w-full max-w-sm p-8 text-center overflow-hidden">
          <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8"></i></div>
          <h3 class="text-2xl font-black mb-2">Hacer Disponible</h3>
          <p class="text-sm text-neutral-500 mb-6">Establece el precio de venta final:</p>
-         <input type="number" id="ingreso-precio" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-4 text-lg font-bold mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 text-center" />
+         <input type="text" id="ingreso-precio" oninput="window.formatInputMoney(this)" required placeholder="Precio ($)" class="w-full rounded-xl px-4 py-4 text-lg font-bold mb-6 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 text-center" />
          <button onclick="window.confirmarIngresoAuto(event)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black font-bold rounded-2xl shadow-lg mb-4 hover:scale-105 transition-transform flex items-center justify-center"><span>Guardar y Habilitar</span></button>
          <p class="text-xs text-rose-500 font-bold hidden" id="ingreso-aviso-gastos">¡No olvides registrar gastos!</p>
          <button onclick="window.abrirCajaParaGastos()" id="btn-ingreso-gastos" class="hidden w-full py-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold mt-2 rounded-2xl hover:bg-neutral-200 transition-colors">Cargar Gastos Ahora</button>
