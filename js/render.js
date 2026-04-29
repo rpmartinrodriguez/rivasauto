@@ -484,8 +484,8 @@ window.renderDetalleAuto = () => {
            return `
              <div onclick="window.openDetalleLead('${c.id}')" class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors">
                <div>
-                 <p class="text-sm font-bold">${c.nombre}</p>
-                 <p class="text-xs text-neutral-500">${c.telefono} • ${window.formatDate(c.fecha)}${txtAutor}</p>
+                 <p class="text-sm font-bold">${c.nombre || 'Sin Nombre'}</p>
+                 <p class="text-xs text-neutral-500">${c.telefono || '-'} • ${window.formatDate(c.fecha)}${txtAutor}</p>
                </div>
                <p class="text-xs text-neutral-500 italic max-w-[120px] truncate text-right">"${c.notas || ''}"</p>
              </div>
@@ -1236,7 +1236,7 @@ window.renderPersonalView = () => {
           <label class="flex items-center justify-between p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl cursor-pointer hover:border-green-500">
             <div class="flex items-center">
               <input type="checkbox" checked value="${u.id}" class="cierre-user-checkbox w-5 h-5 text-green-600 rounded mr-3" onchange="window.calcularTotalPagos()">
-              <span class="font-bold text-sm">${u.nombre}</span>
+              <span class="font-bold text-sm">${u.nombre || 'Sin Nombre'}</span>
             </div>
             <span class="font-black text-rose-500" data-amount="${totPdte}">${window.formatMoney(totPdte)}</span>
           </label>
@@ -1247,7 +1247,7 @@ window.renderPersonalView = () => {
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetallePersonal('${u.id}')">
           <td class="px-6 py-4 font-bold flex items-center">
              <div class="w-2 h-2 rounded-full mr-2 ${totPdte > 0 ? 'bg-amber-500' : 'bg-transparent'}"></div>
-             ${u.nombre}
+             ${u.nombre || 'Sin Nombre'}
           </td>
           <td class="px-6 py-4 text-xs font-bold text-neutral-500 uppercase">${u.rol}</td>
           <td class="px-6 py-4 text-sm">${suc}</td>
@@ -1281,7 +1281,7 @@ window.renderPersonalView = () => {
     select.innerHTML = `
       <option value="">-- Seleccione Empleado --</option>
     ` + usuariosAgencia.map(u => `
-      <option value="${u.id}">${u.nombre} (${u.rol})</option>
+      <option value="${u.id}">${u.nombre || 'Sin Nombre'} (${u.rol})</option>
     `).join('');
   }
   
@@ -1311,6 +1311,7 @@ window.renderPersonalView = () => {
       `).join('');
     }
   }
+  if(window.lucide) window.lucide.createIcons();
 };
 
 window.openDetallePersonal = (userId) => {
@@ -1322,10 +1323,10 @@ window.openDetallePersonal = (userId) => {
   let html = `
     <div class="mb-6 flex items-center space-x-4">
       <div class="w-14 h-14 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center font-black text-2xl">
-        ${u.nombre.charAt(0).toUpperCase()}
+        ${(u.nombre || 'U').charAt(0).toUpperCase()}
       </div>
       <div>
-        <h4 class="text-2xl font-black">${u.nombre}</h4>
+        <h4 class="text-2xl font-black">${u.nombre || 'Sin Nombre'}</h4>
         <p class="text-sm text-neutral-500 font-bold uppercase tracking-wider">${u.rol}</p>
       </div>
     </div>
@@ -1712,107 +1713,141 @@ window.openDetalleFactura = (id) => {
   window.openModal('modal-detalle-factura'); 
 };
 
-// --- DOLAR API WIDGET ---
-window.renderDolarWidget = async () => {
-  const widget = document.getElementById('dolar-widget-container');
-  if (!widget) return;
+window.renderResumenesView = () => { 
+  if(window.state.currentUser?.rol !== 'Admin') return; 
+  const dc = document.getElementById('dashboard-content');
+  if(!dc) return;
   
-  const showDolar = localStorage.getItem('showDolarWidget') !== 'false'; 
-  if (!showDolar) {
-    widget.classList.add('hidden');
-    return;
-  }
+  const ing = window.state.transacciones.filter(t => t.tipo === 'ingreso').reduce((a,c) => a + c.valor, 0); 
+  let egr = window.state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => a + c.valor, 0); 
   
-  widget.classList.remove('hidden');
+  const cats = window.state.transacciones.filter(t => t.tipo === 'gasto').reduce((a,c) => { 
+    a[c.categoria] = (a[c.categoria] || 0) + c.valor; 
+    return a; 
+  }, {}); 
   
-  try {
-    const res = await fetch('https://dolarapi.com/v1/dolares/blue');
-    if (!res.ok) throw new Error("Network response was not ok");
-    const data = await res.json();
+  window.state.autos.forEach(a => { 
+    a.gastos?.forEach(g => { 
+      cats[g.categoria] = (cats[g.categoria] || 0) + g.monto; 
+      egr += g.monto; 
+    }); 
+  }); 
+  
+  const max = Math.max(...Object.values(cats), 1); 
+  
+  let catHTML = ''; 
+  if(Object.keys(cats).length === 0) { 
+    catHTML = `
+      <p class="text-neutral-500 py-4 font-bold">
+        Sin datos de gastos en el periodo.
+      </p>
+    `; 
+  } else { 
+    catHTML = Object.entries(cats).sort((a,b) => b[1] - a[1]).map(([c,v]) => `
+      <div class="mb-4">
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-neutral-600 dark:text-neutral-300 font-bold uppercase tracking-wider text-[10px]">${c}</span>
+          <span class="font-black">${window.formatMoney(v)}</span>
+        </div>
+        <div class="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-3">
+          <div class="bg-green-600 h-3 rounded-full" style="width: ${(v/max)*100}%"></div>
+        </div>
+      </div>
+    `).join(''); 
+  } 
+  
+  dc.innerHTML = `
+    <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2rem] shadow-sm">
+      <h3 class="font-black text-2xl mb-8">Flujo de Fondos Operativo</h3>
+      <div class="space-y-6">
+        <div class="flex justify-between items-center">
+          <span class="text-neutral-500 font-bold uppercase tracking-wider text-xs">Ingresos Totales</span>
+          <span class="font-black text-xl text-green-600 dark:text-green-500">${window.formatMoney(ing)}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-neutral-500 font-bold uppercase tracking-wider text-xs">Egresos (Caja + Taller)</span>
+          <span class="font-black text-xl text-rose-600 dark:text-rose-400">${window.formatMoney(egr)}</span>
+        </div>
+        <div class="pt-6 border-t border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
+          <span class="font-black text-xl uppercase">Balance Neto</span>
+          <span class="font-black text-3xl ${ing - egr >= 0 ? 'text-black dark:text-white' : 'text-rose-600'}">${window.formatMoney(ing - egr)}</span>
+        </div>
+      </div>
+    </div>
     
-    widget.innerHTML = `
-      <div class="flex flex-col items-end justify-center bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-xl border border-green-200 dark:border-green-800/50 cursor-help transition-all hover:bg-green-100" title="Actualizado: ${new Date(data.fechaActualizacion).toLocaleString('es-AR')}">
-        <span class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest leading-none">Dólar Blue</span>
-        <div class="flex space-x-2 text-xs font-black text-green-700 dark:text-green-500 mt-0.5">
-          <span>C: $${data.compra}</span>
-          <span>V: $${data.venta}</span>
-        </div>
-      </div>
-    `;
-  } catch (error) {
-    console.error("Error fetching Dolar:", error);
-    widget.innerHTML = `
-      <span class="text-[10px] text-rose-500 font-bold px-2">
-        Error Dólar
-      </span>
-    `;
-  }
+    <div class="bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 p-8 rounded-[2rem] shadow-sm">
+      <h3 class="font-black text-2xl mb-8">Distribución de Gastos</h3>
+      ${catHTML}
+    </div>
+  `; 
 };
 
-window.toggleDolarWidget = () => {
-  const current = localStorage.getItem('showDolarWidget') !== 'false';
-  localStorage.setItem('showDolarWidget', !current);
-  window.renderDolarWidget();
-};
-
-window.openDetalleLead = (id) => {
-  const c = window.state.consultas.find(x => x.id === id);
-  if(!c) return;
-
-  const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null;
-  const autoInfo = a ? `${a.marca} ${a.modelo} (${a.patente})` : c.marcaInteres;
-
-  const today = new Date();
-  const leadDate = new Date(c.fecha + 'T00:00:00');
-  const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
+window.renderAdminView = () => { 
+  if(window.state.currentUser?.rol !== 'Admin') return; 
   
-  let dynamicState = 'Frío';
-  if (diffDays <= 7) dynamicState = 'Caliente'; 
-  else if (diffDays <= 20) dynamicState = 'Tibio'; 
-
-  let html = `
-    <form id="form-edit-lead" onsubmit="window.handleEditLeadSubmit(event, '${c.id}')">
-      <div class="flex justify-between items-center mb-6 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-2xl">
-         <div>
-           <p class="text-xs text-neutral-500 font-bold uppercase">Estado Actual</p>
-           <p class="font-black text-lg">${dynamicState} (${diffDays} días)</p>
-         </div>
-         <div class="text-right">
-           <p class="text-xs text-neutral-500 font-bold uppercase">Fecha Carga</p>
-           <p class="font-black">${window.formatDate(c.fecha)}</p>
-         </div>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Nombre y Apellido</label>
-          <input id="edit-lead-nombre" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.nombre}" />
+  const sucList = document.getElementById('admin-suc-list'); 
+  if(sucList) {
+    if (window.state.sucursales.length === 0) { 
+      sucList.innerHTML = `
+        <p class="text-neutral-500 text-center py-4 font-bold">
+          No hay sucursales.
+        </p>
+      `; 
+    } else { 
+      sucList.innerHTML = window.state.sucursales.slice().sort((a,b) => (a.nombre||'').localeCompare(b.nombre||'')).map(s => `
+        <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+          <span class="font-bold text-sm">${s.nombre}</span>
+          <div class="flex space-x-1">
+            <button onclick="window.editSucursal('${s.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </button>
+            <button onclick="window.deleteSucursal('${s.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Teléfono</label>
-          <input id="edit-lead-tel" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.telefono}" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Vehículo / Interés</label>
-          <input id="edit-lead-interes" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${autoInfo}" ${a ? 'readonly title="Viene de un auto en stock"' : ''} />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Notas y Seguimiento</label>
-          <textarea id="edit-lead-nota" rows="5" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold">${c.notas || ''}</textarea>
-        </div>
-      </div>
-      <div class="mt-8 flex space-x-3">
-         <button type="button" onclick="window.deleteLead('${c.id}')" class="w-1/3 py-3 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-bold rounded-xl hover:scale-[1.02] transition-transform flex items-center justify-center">
-           <i data-lucide="trash-2" class="w-5 h-5"></i>
-         </button>
-         <button type="submit" class="w-2/3 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:scale-[1.02] transition-transform flex justify-center items-center">
-           <span>Guardar Cambios</span>
-         </button>
-      </div>
-    </form>
-  `;
-
-  document.getElementById('lead-detail-content').innerHTML = html;
-  window.openModal('modal-detalle-lead');
-  if(window.lucide) window.lucide.createIcons();
+      `).join(''); 
+    } 
+  }
+  
+  const elSuc = document.getElementById('new-user-suc');
+  if(elSuc) {
+    elSuc.innerHTML = window.state.sucursales.slice().sort((a,b) => (a.nombre||'').localeCompare(b.nombre||'')).map(s => `
+      <option value="${s.id}">${s.nombre}</option>
+    `).join(''); 
+  }
+  
+  const usrList = document.getElementById('admin-users-list'); 
+  if(usrList) {
+    if (window.state.usuarios.length === 0) { 
+      usrList.innerHTML = `
+        <p class="text-neutral-500 text-center py-4 font-bold">
+          No hay usuarios.
+        </p>
+      `; 
+    } else { 
+      usrList.innerHTML = window.state.usuarios.slice().sort((a,b) => (a.nombre||'').localeCompare(b.nombre||'')).map(u => { 
+        const s = window.state.sucursales.find(x => x.id == u.sucursalId); 
+        return `
+          <div class="flex justify-between items-center p-4 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+            <div>
+              <p class="font-bold text-sm">${u.nombre || 'Sin Nombre'}</p>
+              <p class="text-[10px] font-bold text-neutral-500 mt-1 uppercase tracking-wider">
+                ${u.rol} • ${s ? s.nombre : '-'} • ${u.email}
+              </p>
+            </div>
+            <div class="flex space-x-1">
+              <button onclick="window.editUser('${u.id}')" class="p-2 text-neutral-500 hover:text-green-600 transition-colors">
+                <i data-lucide="edit-2" class="w-4 h-4"></i>
+              </button>
+              <button onclick="window.deleteUser('${u.id}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-full transition-colors">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `; 
+      }).join(''); 
+    } 
+  }
+  if(window.lucide) window.lucide.createIcons(); 
 };
