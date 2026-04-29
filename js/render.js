@@ -5,18 +5,16 @@
 window.renderAllViews = () => { 
   if(!window.state.currentUser) return; 
   
-  // Usamos try-catch individuales para que si una vista falla, 
-  // no arrastre ni rompa a las demás
-  try { if(window.renderDolarWidget) window.renderDolarWidget(); } catch(e) { console.error("Error Dólar:", e); }
-  try { if(window.renderCajaView) window.renderCajaView(); } catch(e) { console.error("Error Caja:", e); }
-  try { if(window.renderVentasView) window.renderVentasView(); } catch(e) { console.error("Error Ventas:", e); }
-  try { if(window.renderFacturasView) window.renderFacturasView(); } catch(e) { console.error("Error Facturas:", e); }
-  try { if(window.renderAutosView) window.renderAutosView(); } catch(e) { console.error("Error Autos:", e); }
-  try { if(window.renderClientesView) window.renderClientesView(); } catch(e) { console.error("Error CRM:", e); }
-  try { if(window.renderFormulariosView) window.renderFormulariosView(); } catch(e) { console.error("Error Formularios:", e); }
-  try { if(window.renderPersonalView) window.renderPersonalView(); } catch(e) { console.error("Error Personal:", e); }
-  try { if(window.renderResumenesView) window.renderResumenesView(); } catch(e) { console.error("Error Resúmenes:", e); }
-  try { if(window.renderAdminView) window.renderAdminView(); } catch(e) { console.error("Error Admin:", e); }
+  try { if(window.renderDolarWidget) window.renderDolarWidget(); } catch(e) { console.error(e); }
+  try { if(window.renderCajaView) window.renderCajaView(); } catch(e) { console.error(e); }
+  try { if(window.renderVentasView) window.renderVentasView(); } catch(e) { console.error(e); }
+  try { if(window.renderFacturasView) window.renderFacturasView(); } catch(e) { console.error(e); }
+  try { if(window.renderAutosView) window.renderAutosView(); } catch(e) { console.error(e); }
+  try { if(window.renderClientesView) window.renderClientesView(); } catch(e) { console.error(e); }
+  try { if(window.renderFormulariosView) window.renderFormulariosView(); } catch(e) { console.error(e); }
+  try { if(window.renderPersonalView) window.renderPersonalView(); } catch(e) { console.error(e); }
+  try { if(window.renderResumenesView) window.renderResumenesView(); } catch(e) { console.error(e); }
+  try { if(window.renderAdminView) window.renderAdminView(); } catch(e) { console.error(e); }
   
   try { if(window.checkNotifications) window.checkNotifications(); } catch(e) {}
   if(window.lucide) window.lucide.createIcons(); 
@@ -900,7 +898,9 @@ window.renderFormulariosView = () => {
    if((window.state.formularios || []).length === 0) { 
      table.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-neutral-500 font-bold">No hay formularios generados.</td></tr>`; 
    } else {
-     table.innerHTML = window.state.formularios.slice().reverse().map(f => `
+     table.innerHTML = window.state.formularios.slice().reverse().map(f => {
+       const isPendiente = f.estado === 'Pendiente';
+       return `
        <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
          <td class="px-6 py-4 text-sm font-bold text-neutral-500">${window.formatDate(f.fecha)}</td>
          <td class="px-6 py-4 font-bold">
@@ -908,15 +908,16 @@ window.renderFormulariosView = () => {
          </td>
          <td class="px-6 py-4 font-bold text-sm">${f.comprador}</td>
          <td class="px-6 py-4 text-center space-x-2 flex justify-center">
-           <button onclick='window.openModalBoleto("${f.tipo === 'Boleto Compra Venta' ? 'simple' : 'permuta'}", ${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 ${f.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200'} text-xs font-bold rounded-lg hover:scale-105 transition-transform flex items-center">
-             <i data-lucide="edit-2" class="w-4 h-4 mr-1"></i> ${f.estado === 'Pendiente' ? 'Terminar' : 'Editar'}
+           <button onclick='window.openModalBoleto("${f.tipo === 'Boleto Compra Venta' ? 'simple' : 'permuta'}", ${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 ${isPendiente ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200'} text-xs font-bold rounded-lg hover:scale-105 transition-transform flex items-center">
+             <i data-lucide="${isPendiente ? 'edit-2' : 'eye'}" class="w-4 h-4 mr-1"></i> ${isPendiente ? 'Terminar' : 'Ver / Editar'}
            </button>
            <button onclick='window.imprimirBoletoHtml(${JSON.stringify(f).replace(/"/g, '&quot;')})' class="px-3 py-1.5 bg-black text-white dark:bg-neutral-700 dark:text-white text-xs font-bold rounded-lg hover:scale-105 transition-transform flex items-center">
              <i data-lucide="printer" class="w-4 h-4 mr-1"></i> Reimprimir
            </button>
          </td>
        </tr>
-     `).join('');
+       `;
+     }).join('');
    }
    if(window.lucide) window.lucide.createIcons();
 };
@@ -1061,7 +1062,16 @@ window.openModalBoleto = (tipo, prefillData = null) => {
 };
 
 window.imprimirBoletoHtml = (data) => {
-  let printHtml = ''; 
+  // Ocultamos el logo global de la web
+  const globalLogo = document.getElementById('print-logo');
+  if(globalLogo) globalLogo.classList.add('hidden');
+
+  let printHtml = `
+    <div class="absolute -top-4 right-0 w-32 h-32">
+      <img src="logo-form.png" class="w-full h-full object-contain" alt="Logo Formulario" onerror="this.style.display='none'">
+    </div>
+  `;
+
   const dateObj = new Date(data.fecha + 'T00:00:00');
   const dia = dateObj.getDate();
   const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -1069,7 +1079,7 @@ window.imprimirBoletoHtml = (data) => {
   const anio = dateObj.getFullYear();
   
   if(data.tipo === 'Boleto Compra Venta') {
-    printHtml = `
+    printHtml += `
       <h2 class="text-center text-xl font-black mb-4 underline uppercase">BOLETO COMPRA VENTA AUTOMOTOR</h2>
       
       <div class="text-[12px] leading-snug space-y-2">
@@ -1107,7 +1117,7 @@ window.imprimirBoletoHtml = (data) => {
       </div>
     `;
   } else {
-    printHtml = `
+    printHtml += `
       <h2 class="text-center text-xl font-black mb-4 underline uppercase">BOLETO DE VENTA CON PERMUTA</h2>
       
       <div class="text-[12px] leading-snug space-y-2">
@@ -1143,20 +1153,13 @@ window.imprimirBoletoHtml = (data) => {
   document.getElementById('app-wrapper').classList.add('hidden'); 
   document.getElementById('print-section').classList.remove('hidden');
   
-  // --- MAGIA DEL CAMBIO DE LOGO PARA FORMULARIOS ---
-  const printLogoImg = document.querySelector('#print-logo img');
-  if (printLogoImg) printLogoImg.src = 'logo-form.png';
-  
   setTimeout(() => { 
     window.print(); 
     document.getElementById('print-section').classList.add('hidden'); 
     document.getElementById('app-wrapper').classList.remove('hidden'); 
-    
-    // --- RESTAURAR EL LOGO ORIGINAL ---
-    if (printLogoImg) printLogoImg.src = 'icon.png';
-    
+    if(globalLogo) globalLogo.classList.remove('hidden'); // Restaura el logo global
     if(window.renderFormulariosView) window.renderFormulariosView(); 
-  }, 500);
+  }, 800); // 800ms da tiempo extra a que cargue la imagen nueva local
 };
 
 window.imprimirFlota = () => {
@@ -2057,4 +2060,5 @@ window.renderClientesView = () => {
     html += `</tbody>`;
     table.innerHTML = html;
   } 
+  if(window.lucide) window.lucide.createIcons();
 };
