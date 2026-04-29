@@ -820,6 +820,7 @@ window.handleGlobalLeadSubmit = async (e) => {
     }); 
     window.closeModal('modal-nuevo-lead'); 
     e.target.reset(); 
+    if(window.renderClientesView) window.renderClientesView();
   } finally {
     window.state.isSubmittingLead = false; 
     if(btn) window.setBtnLoader(btn, false);
@@ -840,7 +841,7 @@ window.handleDA_CRMSubmit = async (e, autoId) => {
     const a = window.state.autos.find(x => x.id === autoId);
     await window.fbAdd("consultas", { 
       autoId: autoId, 
-      marcaInteres: a.marca, 
+      marcaInteres: `${a.marca} ${a.modelo}`, 
       nombre: document.getElementById('dac-nombre').value, 
       telefono: document.getElementById('dac-tel').value, 
       notas: document.getElementById('dac-nota').value, 
