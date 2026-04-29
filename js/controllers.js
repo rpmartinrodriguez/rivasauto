@@ -608,6 +608,8 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
   if(btn) window.setBtnLoader(btn, true);
   
   try {
+    data.estado = 'Completado'; // FORZAR EL CAMBIO DE PENDIENTE A COMPLETADO SI O SI
+    
     if (autoIdAsociado) { 
       data.autoIdAsociado = autoIdAsociado; 
       await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' }); 
@@ -617,6 +619,12 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
       const copyData = {...data};
       delete copyData.id; 
       await window.fbUpdate("formularios", data.id, copyData);
+      
+      // Actualización optimista local inmediata
+      const idx = window.state.formularios.findIndex(f => f.id === data.id);
+      if (idx !== -1) {
+          window.state.formularios[idx] = { ...window.state.formularios[idx], ...copyData };
+      }
     } else {
       await window.fbAdd("formularios", data);
     }
@@ -630,6 +638,7 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
   } finally {
     window.state.isSubmittingBoleto = false; 
     if(btn) window.setBtnLoader(btn, false);
+    if(window.renderFormulariosView) window.renderFormulariosView();
   }
 };
 
