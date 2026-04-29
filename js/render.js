@@ -45,7 +45,10 @@ window.initSelects = () => {
     ` + window.state.autos
       .slice()
       .sort((a, b) => a.marca.localeCompare(b.marca) || a.modelo.localeCompare(b.modelo))
-      .map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`)
+      .map(a => {
+        const pFmt = a.moneda === 'USD' ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(a.precio);
+        return `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente}) - ${pFmt}</option>`;
+      })
       .join(''); 
   }
   
@@ -164,11 +167,14 @@ window.renderAutosView = () => {
           let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
           if(auto.estado === 'Disponible') {
             bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
-          }
-          if(auto.estado === 'A Ingresar') {
+          } else if(auto.estado === 'A Ingresar') {
             bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 border border-amber-300 dark:border-amber-700';
+          } else if(auto.estado === 'Señado') {
+            bClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-300 dark:border-purple-700';
           }
           
+          const precioFmt = auto.moneda === 'USD' ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(auto.precio);
+
           return `
             <div onclick="window.openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
               <div class="bg-neutral-50/50 dark:bg-neutral-800/50 rounded-[2rem] p-6 h-full flex flex-col relative">
@@ -184,21 +190,21 @@ window.renderAutosView = () => {
                     </span>
                   </div>
                   <div class="bg-white dark:bg-neutral-900 p-2 rounded-xl border border-neutral-200 dark:border-neutral-700">
-                    <span class="font-mono text-sm font-bold">${auto.patente}</span>
+                    <span class="font-mono text-sm font-bold uppercase">${auto.patente}</span>
                   </div>
                 </div>
                 <div class="mb-4">
-                  <h3 class="text-2xl font-black">${auto.marca} <br/>
+                  <h3 class="text-2xl font-black uppercase">${auto.marca} <br/>
                     <span class="text-neutral-500">${auto.modelo}</span>
                   </h3>
-                  <p class="text-sm text-neutral-400 mt-1 font-bold">
+                  <p class="text-sm text-neutral-400 mt-1 font-bold uppercase">
                     Año ${auto.año} • ${auto.color || ''} • ${auto.km || 0} km
                   </p>
                 </div>
                 <div class="mt-auto space-y-3">
                   <div class="flex justify-between items-center p-3 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700">
                     <span class="text-xs font-bold text-neutral-500 uppercase">Precio</span>
-                    <span class="text-lg font-black">${window.formatMoney(auto.precio)}</span>
+                    <span class="text-lg font-black whitespace-nowrap">${precioFmt}</span>
                   </div>
                   <div class="flex justify-between items-center px-2">
                     <span class="text-xs text-neutral-500 font-bold">
@@ -232,28 +238,31 @@ window.renderAutosView = () => {
                 let bClass = 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300'; 
                 if(auto.estado === 'Disponible') {
                   bClass = 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'; 
-                }
-                if(auto.estado === 'A Ingresar') {
+                } else if(auto.estado === 'A Ingresar') {
                   bClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500';
+                } else if(auto.estado === 'Señado') {
+                  bClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
                 }
                 
+                const precioFmt = auto.moneda === 'USD' ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(auto.precio);
+
                 return `
                   <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="window.openDetalleAuto('${auto.id}')">
                     <td class="px-6 py-4">
-                      <p class="font-bold">${auto.marca} ${auto.modelo}</p>
+                      <p class="font-bold uppercase">${auto.marca} ${auto.modelo}</p>
                       <p class="text-xs text-neutral-500 font-bold mt-1">Año ${auto.año}</p>
                     </td>
                     <td class="px-6 py-4 font-mono text-sm font-bold uppercase">${auto.patente}</td>
-                    <td class="px-6 py-4 text-xs text-neutral-600 dark:text-neutral-400 font-bold capitalize">
-                      ${auto.color || '-'} • ${auto.km || 0} km • <span class="uppercase">${auto.condicion || 'Propio'}</span>
+                    <td class="px-6 py-4 text-xs text-neutral-600 dark:text-neutral-400 font-bold uppercase">
+                      ${auto.color || '-'} • ${auto.km || 0} km • <span>${auto.condicion || 'Propio'}</span>
                     </td>
                     <td class="px-6 py-4">
                       <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${bClass}">
                         ${auto.estado}
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-right font-black text-lg">
-                      ${window.formatMoney(auto.precio)}
+                    <td class="px-6 py-4 text-right font-black text-lg whitespace-nowrap">
+                      ${precioFmt}
                     </td>
                   </tr>
                 `;
@@ -290,22 +299,29 @@ window.renderDetalleAuto = () => {
   
   if(!window.state.isVentaMode) {
     
+    let bClass = 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900';
+    if(a.estado === 'Señado') {
+      bClass = 'bg-purple-800 text-white dark:bg-purple-300 dark:text-purple-900';
+    }
+
+    const precioFmt = a.moneda === 'USD' ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(a.precio);
+    
     html += `
       <div class="bg-black text-white dark:bg-white dark:text-black rounded-[2rem] p-8 mb-6 relative overflow-hidden border border-neutral-800 dark:border-neutral-200">
         <div class="flex justify-between items-start relative z-10">
           <div>
-            <span class="bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 text-[10px] uppercase px-3 py-1 rounded-lg font-bold">
+            <span class="${bClass} text-[10px] uppercase px-3 py-1 rounded-lg font-bold">
               ${a.estado}
             </span>
             <span class="ml-2 bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900 text-[10px] uppercase px-3 py-1 rounded-lg font-bold">
               ${a.condicion || 'Propio'}
             </span>
-            <h2 class="text-3xl font-black mt-3">${a.marca} ${a.modelo}</h2>
-            <p class="text-sm mt-1 opacity-80 font-bold">Año ${a.año} • ${a.color||''} • ${a.km||0} km</p>
+            <h2 class="text-3xl font-black mt-3 uppercase">${a.marca} ${a.modelo}</h2>
+            <p class="text-sm mt-1 opacity-80 font-bold uppercase">Año ${a.año} • ${a.color||''} • ${a.km||0} km</p>
           </div>
           <div class="text-right">
             <p class="text-xs uppercase font-bold opacity-60">Precio Venta</p>
-            <p class="text-3xl font-black mt-1">${window.formatMoney(a.precio)}</p>
+            <p class="text-3xl font-black mt-1 whitespace-nowrap">${precioFmt}</p>
             ${tg > 0 ? `
               <p class="text-[10px] font-bold mt-2 text-rose-400 dark:text-rose-600 uppercase tracking-widest">
                 + Gastos Aplicados: ${window.formatMoney(tg)}
@@ -314,11 +330,22 @@ window.renderDetalleAuto = () => {
           </div>
         </div>
     `;
+
+    if (a.estado === 'Señado') {
+      html += `
+        <div class="mt-6 p-4 bg-purple-900/30 border border-purple-500/30 rounded-2xl">
+          <p class="text-xs text-purple-200 dark:text-purple-600 font-bold uppercase mb-1">Vehículo Reservado</p>
+          <p class="text-sm font-bold">Señado por: <span class="font-black">${a.señadoPorNombre || 'Vendedor'}</span></p>
+          <p class="text-sm">Cliente: <span class="font-black">${a.señadoClienteNombre || '-'}</span> (${a.señadoClienteTel || '-'})</p>
+        </div>
+      `;
+    }
     
     if (window.state.currentUser.rol === 'Admin' && a.costo > 0) { 
+      const costoFmt = a.moneda === 'USD' ? 'U$S ' + window.formatMoney(a.costo).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(a.costo);
       html += `
         <p class="mt-4 text-xs font-bold text-neutral-400">
-          Costo Base Original: ${window.formatMoney(a.costo)}
+          Costo Base Original: ${costoFmt}
         </p>
       `; 
     }
@@ -333,13 +360,29 @@ window.renderDetalleAuto = () => {
       `;
     } else if (a.estado !== 'Vendido') { 
       if (window.state.currentUser.rol === 'Admin' || window.state.currentUser.rol === 'Vendedor' || window.state.currentUser.rol === 'Encargado') { 
-        html += `
-          <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10">
-            <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="w-full py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all">
-              Cerrar Venta con Cliente
-            </button>
-          </div>
-        `; 
+        if (a.estado === 'Disponible') {
+          html += `
+            <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10 flex space-x-3">
+              <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="flex-1 py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all text-sm md:text-base">
+                Cerrar Venta
+              </button>
+              <button onclick="window.openModalSeñado('${a.id}')" class="flex-1 py-4 bg-purple-600 text-white dark:bg-purple-500 dark:text-black font-black rounded-2xl shadow hover:bg-purple-700 transition-all text-sm md:text-base">
+                Señar
+              </button>
+            </div>
+          `; 
+        } else if (a.estado === 'Señado') {
+          html += `
+            <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10 flex space-x-3">
+              <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="flex-1 py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all text-sm md:text-base">
+                Cerrar Venta
+              </button>
+              <button onclick="window.quitarSeña('${a.id}')" class="flex-1 py-4 bg-rose-600 text-white dark:bg-rose-500 dark:text-black font-black rounded-2xl shadow hover:bg-rose-700 transition-all text-sm md:text-base">
+                Cancelar Seña
+              </button>
+            </div>
+          `; 
+        }
       } 
     }
     
@@ -388,15 +431,21 @@ window.renderDetalleAuto = () => {
        
        let listHtml = '';
        if (leadsAuto.length > 0) {
-         listHtml = leadsAuto.map(c => `
-           <div onclick="window.openDetalleLead('${c.id}')" class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors">
-             <div>
-               <p class="text-sm font-bold">${c.nombre}</p>
-               <p class="text-xs text-neutral-500">${c.telefono} • ${window.formatDate(c.fecha)}</p>
+         listHtml = leadsAuto.map(c => {
+           const autor = window.state.usuarios.find(u => u.id === c.userId);
+           const nombreAutor = autor ? autor.nombre : 'Desconocido';
+           const txtAutor = window.state.currentUser.rol !== 'Vendedor' ? ` • <span class="text-amber-600 dark:text-amber-400 font-bold">Por: ${nombreAutor}</span>` : '';
+           
+           return `
+             <div onclick="window.openDetalleLead('${c.id}')" class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors">
+               <div>
+                 <p class="text-sm font-bold">${c.nombre}</p>
+                 <p class="text-xs text-neutral-500">${c.telefono} • ${window.formatDate(c.fecha)}${txtAutor}</p>
+               </div>
+               <p class="text-xs text-neutral-500 italic max-w-[120px] truncate text-right">"${c.notas}"</p>
              </div>
-             <p class="text-xs text-neutral-500 italic max-w-[120px] truncate text-right">"${c.notas}"</p>
-           </div>
-         `).join('');
+           `;
+         }).join('');
        } else {
          listHtml = `
            <p class="text-xs text-neutral-500 py-2 p-4">
@@ -459,15 +508,19 @@ window.renderDetalleAuto = () => {
     `;
     
     if (window.state.currentUser.rol === 'Admin') {
+      const gananciaFmt = a.moneda === 'USD' 
+        ? 'U$S ' + window.formatMoney(a.precio - ((a.costo||0) + tg)).replace(/[^0-9.,]/g, '').trim()
+        : window.formatMoney(a.precio - ((a.costo||0) + tg));
+        
       html += `
         <div class="bg-black dark:bg-white text-white dark:text-black rounded-[2rem] p-6 mb-6 flex justify-between shadow-xl border border-neutral-800 dark:border-neutral-200">
           <div>
             <p class="text-xs uppercase opacity-70 mb-1 font-bold">Costo Inversión Total</p>
-            <p class="text-xl font-bold">${window.formatMoney((a.costo||0) + tg)}</p>
+            <p class="text-xl font-bold">${a.moneda === 'USD' ? 'U$S ' : ''}${window.formatMoney((a.costo||0) + tg).replace('$', '').trim()}</p>
           </div>
           <div class="text-right">
             <p class="text-xs uppercase opacity-70 mb-1 font-bold">Ganancia Bruta Est.</p>
-            <p class="text-xl font-black text-green-400 dark:text-green-600">${window.formatMoney(a.precio - ((a.costo||0) + tg))}</p>
+            <p class="text-xl font-black text-green-400 dark:text-green-600">${gananciaFmt}</p>
           </div>
         </div>
       `;
@@ -536,9 +589,9 @@ window.renderDetalleAuto = () => {
           </div>
           
           <div id="permuta-fields" class="${window.state.ventaData.tienePermuta ? '' : 'hidden'} grid grid-cols-2 md:grid-cols-3 gap-4 fade-in">
-            <input id="p-marca" placeholder="Marca" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-            <input id="p-modelo" placeholder="Modelo" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-            <input id="p-color" placeholder="Color" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="p-marca" placeholder="Marca" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
+            <input id="p-modelo" placeholder="Modelo" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
+            <input id="p-color" placeholder="Color" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
             <input id="p-km" type="number" placeholder="Km" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
             <input id="p-anio" type="number" placeholder="Año" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
             <input id="p-pat" placeholder="Patente" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 uppercase outline-none font-bold focus:border-green-500" />
@@ -550,7 +603,7 @@ window.renderDetalleAuto = () => {
             
             <div class="col-span-2 mt-2">
               <label class="block text-xs font-bold uppercase mb-2 text-neutral-500">Valor Real de Toma / Costo ($)</label>
-              <input id="p-valor" type="number" placeholder="Ingresará a la flota con este costo base" class="w-full rounded-xl px-4 py-4 text-lg font-black bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
+              <input id="p-valor" type="text" oninput="window.formatInputMoney(this)" placeholder="Ingresará a la flota con este costo base" class="w-full rounded-xl px-4 py-4 text-lg font-black bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
             </div>
           </div>
         </div>
@@ -1252,6 +1305,7 @@ window.openDetalleVenta = (id) => {
   lucide.createIcons();
 };
 
+// --- MODAL DE FACTURAS ---
 window.renderFacturasView = () => { 
   if(window.state.currentUser?.rol !== 'Admin') return; 
   
@@ -1354,68 +1408,74 @@ window.openDetalleFactura = (id) => {
   window.openModal('modal-detalle-factura'); 
 };
 
-window.openDetalleLead = (id) => {
-  const c = window.state.consultas.find(x => x.id === id);
-  if(!c) return;
-
-  const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null;
-  const autoInfo = a ? `${a.marca} ${a.modelo} (${a.patente})` : c.marcaInteres;
-
-  const today = new Date();
-  const leadDate = new Date(c.fecha + 'T00:00:00');
-  const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
-  
-  let dynamicState = 'Frío';
-  if (diffDays <= 7) dynamicState = 'Caliente'; 
-  else if (diffDays <= 20) dynamicState = 'Tibio'; 
-
-  let html = `
-    <form id="form-edit-lead" onsubmit="window.handleEditLeadSubmit(event, '${c.id}')">
-      <div class="flex justify-between items-center mb-6 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-2xl">
-         <div>
-           <p class="text-xs text-neutral-500 font-bold uppercase">Estado Actual</p>
-           <p class="font-black text-lg">${dynamicState} (${diffDays} días)</p>
-         </div>
-         <div class="text-right">
-           <p class="text-xs text-neutral-500 font-bold uppercase">Fecha Carga</p>
-           <p class="font-black">${window.formatDate(c.fecha)}</p>
-         </div>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Nombre y Apellido</label>
-          <input id="edit-lead-nombre" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.nombre}" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Teléfono</label>
-          <input id="edit-lead-tel" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${c.telefono}" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Vehículo / Interés</label>
-          <input id="edit-lead-interes" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold" value="${autoInfo}" ${a ? 'readonly title="Viene de un auto en stock"' : ''} />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase mb-1">Notas y Seguimiento</label>
-          <textarea id="edit-lead-nota" rows="5" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-700 outline-none resize-none focus:border-green-500 font-bold">${c.notas || ''}</textarea>
-        </div>
-      </div>
-      <div class="mt-8 flex space-x-3">
-         <button type="button" onclick="window.deleteLead('${c.id}')" class="w-1/3 py-3 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 font-bold rounded-xl hover:scale-[1.02] transition-transform flex items-center justify-center">
-           <i data-lucide="trash-2" class="w-5 h-5"></i>
-         </button>
-         <button type="submit" class="w-2/3 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:scale-[1.02] transition-transform flex justify-center items-center">
-           <span>Guardar Cambios</span>
-         </button>
-      </div>
-    </form>
-  `;
-
-  document.getElementById('lead-detail-content').innerHTML = html;
-  window.openModal('modal-detalle-lead');
-  lucide.createIcons();
+// --- CONTROLADORES DE FORMATOS Y SEÑAS (NUEVOS) ---
+window.formatInputMoney = (input) => {
+  let val = input.value.replace(/[^0-9]/g, '');
+  if(val) {
+    val = parseInt(val, 10);
+    input.value = new Intl.NumberFormat('es-AR').format(val);
+  }
 };
 
+window.openModalSeñado = (autoId) => {
+  window.state.señaAutoId = autoId;
+  document.getElementById('form-seña').reset();
+  window.closeModal('modal-detalle-auto');
+  window.openModal('modal-señado');
+};
+
+window.confirmarSeñado = async (e) => {
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  
+  if(window.state.isSubmittingSeña) return;
+  window.state.isSubmittingSeña = true;
+
+  const btn = document.querySelector('#form-seña button');
+  if(btn) window.setBtnLoader(btn, true);
+
+  try {
+    const autoId = window.state.señaAutoId;
+    const clNombre = document.getElementById('s-cliente-nombre').value;
+    const clTel = document.getElementById('s-cliente-tel').value;
+    
+    await window.fbUpdate("autos", autoId, {
+      estado: 'Señado',
+      señadoPorNombre: window.state.currentUser.nombre,
+      señadoPorUserId: window.state.currentUser.id,
+      señadoClienteNombre: clNombre,
+      señadoClienteTel: clTel
+    });
+
+    window.closeModal('modal-señado');
+    if(window.renderAutosView) window.renderAutosView();
+  } catch(err) {
+    console.error(err);
+  } finally {
+    window.state.isSubmittingSeña = false;
+    if(btn) window.setBtnLoader(btn, false);
+  }
+};
+
+window.quitarSeña = async (autoId) => {
+  if(confirm("¿Estás seguro de cancelar la seña? El auto volverá a estar 'Disponible'.")) {
+    try {
+      await window.fbUpdate("autos", autoId, {
+        estado: 'Disponible',
+        señadoPorNombre: null,
+        señadoPorUserId: null,
+        señadoClienteNombre: null,
+        señadoClienteTel: null
+      });
+      window.closeModal('modal-detalle-auto');
+      if(window.renderAutosView) window.renderAutosView();
+    } catch(err) {
+      console.error(err);
+    }
+  }
+};
+
+// --- CONTROLADORES DE RENDERIZADO GLOBAL (DASHBOARD Y CRM) ---
 window.renderClientesView = () => { 
   const table = document.getElementById('crm-table'); 
   if(!table) return;
@@ -1440,7 +1500,20 @@ window.renderClientesView = () => {
       </tr>
     `; 
   } else { 
-    table.innerHTML = misConsultas.slice().sort((a, b) => a.nombre.localeCompare(b.nombre)).map(c => { 
+    let html = `
+      <thead>
+        <tr class="text-xs uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+          <th class="px-6 py-4 font-bold">Cliente</th>
+          <th class="px-6 py-4 font-bold">Contacto</th>
+          <th class="px-6 py-4 font-bold">Interés</th>
+          <th class="px-6 py-4 font-bold">Registro</th>
+          <th class="px-6 py-4 font-bold text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
+    `;
+
+    html += misConsultas.slice().sort((a, b) => a.nombre.localeCompare(b.nombre)).map(c => { 
       const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
       
       const leadDate = new Date(c.fecha + 'T00:00:00');
@@ -1457,6 +1530,10 @@ window.renderClientesView = () => {
         lClass = 'bg-neutral-400 text-neutral-900 dark:bg-neutral-600 dark:text-white'; 
       } 
       
+      const autor = window.state.usuarios.find(u => u.id === c.userId);
+      const nombreAutor = autor ? autor.nombre : 'Desconocido';
+      const txtAutor = window.state.currentUser.rol !== 'Vendedor' ? `<p class="text-[10px] text-neutral-400 font-bold mt-1 uppercase tracking-wider">Cargado por: ${nombreAutor}</p>` : '';
+
       return `
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetalleLead('${c.id}')">
           <td class="px-6 py-4">
@@ -1469,6 +1546,7 @@ window.renderClientesView = () => {
                 <span class="inline-flex px-2 py-0.5 mt-1 rounded-md text-[10px] font-black uppercase tracking-widest ${lClass}">
                   ${dynamicState}
                 </span>
+                ${txtAutor}
               </div>
             </div>
           </td>
@@ -1490,14 +1568,22 @@ window.renderClientesView = () => {
           <td class="px-6 py-4 text-sm font-bold text-neutral-500">
             Orig: ${window.formatDate(c.fecha)}
           </td>
-          <td class="px-6 py-4">
-            <a href="${window.formatWhatsAppLink(c.telefono, '')}" onclick="event.stopPropagation()" target="_blank" class="px-4 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 inline-block">
-              Contactar
-            </a>
+          <td class="px-6 py-4 text-right">
+            <div class="flex justify-end items-center space-x-2">
+              <button onclick="event.stopPropagation(); window.openDetalleLead('${c.id}')" class="px-3 py-2 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-sm transition-transform hover:scale-105 flex items-center">
+                <i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Editar
+              </button>
+              <a href="${window.formatWhatsAppLink(c.telefono, '')}" onclick="event.stopPropagation()" target="_blank" class="px-3 py-2 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md transition-transform hover:scale-105 hover:bg-green-700 flex items-center">
+                <i data-lucide="message-circle" class="w-3 h-3 mr-1"></i> Contactar
+              </a>
+            </div>
           </td>
         </tr>
       `; 
     }).join(''); 
+    
+    html += `</tbody>`;
+    table.innerHTML = html;
   } 
 };
 
