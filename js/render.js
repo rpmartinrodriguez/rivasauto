@@ -6,7 +6,7 @@ window.renderAllViews = () => {
   if(!window.state.currentUser) return; 
   
   // Usamos try-catch individuales para que si una vista falla, 
-  // no arrastre ni rompa a las demás (como pasó con el Dólar y el CRM)
+  // no arrastre ni rompa a las demás
   try { if(window.renderDolarWidget) window.renderDolarWidget(); } catch(e) { console.error("Error Dólar:", e); }
   try { if(window.renderCajaView) window.renderCajaView(); } catch(e) { console.error("Error Caja:", e); }
   try { if(window.renderVentasView) window.renderVentasView(); } catch(e) { console.error("Error Ventas:", e); }
@@ -449,7 +449,7 @@ window.renderDetalleAuto = () => {
        if(window.state.currentUser.rol === 'Vendedor') {
          leadsAuto = leadsAuto.filter(c => c.userId === window.state.currentUser.id);
        } else if (window.state.currentUser.rol === 'Encargado') {
-         const validUsers = window.state.usuarios.filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
+         const validUsers = (window.state.usuarios || []).filter(u => u.sucursalId === window.state.currentUser.sucursalId && u.rol !== 'Admin').map(u => u.id);
          leadsAuto = leadsAuto.filter(c => validUsers.includes(c.userId));
        }
        
@@ -458,7 +458,7 @@ window.renderDetalleAuto = () => {
        let listHtml = '';
        if (leadsAuto.length > 0) {
          listHtml = leadsAuto.map(c => {
-           const autor = window.state.usuarios.find(u => u.id === c.userId);
+           const autor = (window.state.usuarios || []).find(u => u.id === c.userId);
            const nombreAutor = autor ? autor.nombre : 'Desconocido';
            const txtAutor = window.state.currentUser.rol !== 'Vendedor' 
              ? ` • <span class="text-amber-600 dark:text-amber-400 font-bold">Por: ${nombreAutor}</span>` 
@@ -1143,10 +1143,18 @@ window.imprimirBoletoHtml = (data) => {
   document.getElementById('app-wrapper').classList.add('hidden'); 
   document.getElementById('print-section').classList.remove('hidden');
   
+  // --- MAGIA DEL CAMBIO DE LOGO PARA FORMULARIOS ---
+  const printLogoImg = document.querySelector('#print-logo img');
+  if (printLogoImg) printLogoImg.src = 'logo-form.png';
+  
   setTimeout(() => { 
     window.print(); 
     document.getElementById('print-section').classList.add('hidden'); 
     document.getElementById('app-wrapper').classList.remove('hidden'); 
+    
+    // --- RESTAURAR EL LOGO ORIGINAL ---
+    if (printLogoImg) printLogoImg.src = 'icon.png';
+    
     if(window.renderFormulariosView) window.renderFormulariosView(); 
   }, 500);
 };
