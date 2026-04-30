@@ -5,16 +5,18 @@
 window.renderAllViews = () => { 
   if(!window.state.currentUser) return; 
   
-  try { if(window.renderDolarWidget) window.renderDolarWidget(); } catch(e) { console.error(e); }
-  try { if(window.renderCajaView) window.renderCajaView(); } catch(e) { console.error(e); }
-  try { if(window.renderVentasView) window.renderVentasView(); } catch(e) { console.error(e); }
-  try { if(window.renderFacturasView) window.renderFacturasView(); } catch(e) { console.error(e); }
-  try { if(window.renderAutosView) window.renderAutosView(); } catch(e) { console.error(e); }
-  try { if(window.renderClientesView) window.renderClientesView(); } catch(e) { console.error(e); }
-  try { if(window.renderFormulariosView) window.renderFormulariosView(); } catch(e) { console.error(e); }
-  try { if(window.renderPersonalView) window.renderPersonalView(); } catch(e) { console.error(e); }
-  try { if(window.renderResumenesView) window.renderResumenesView(); } catch(e) { console.error(e); }
-  try { if(window.renderAdminView) window.renderAdminView(); } catch(e) { console.error(e); }
+  // Usamos try-catch individuales para que si una vista falla, 
+  // no arrastre ni rompa a las demás
+  try { if(window.renderDolarWidget) window.renderDolarWidget(); } catch(e) { console.error("Error Dólar:", e); }
+  try { if(window.renderCajaView) window.renderCajaView(); } catch(e) { console.error("Error Caja:", e); }
+  try { if(window.renderVentasView) window.renderVentasView(); } catch(e) { console.error("Error Ventas:", e); }
+  try { if(window.renderFacturasView) window.renderFacturasView(); } catch(e) { console.error("Error Facturas:", e); }
+  try { if(window.renderAutosView) window.renderAutosView(); } catch(e) { console.error("Error Autos:", e); }
+  try { if(window.renderClientesView) window.renderClientesView(); } catch(e) { console.error("Error CRM:", e); }
+  try { if(window.renderFormulariosView) window.renderFormulariosView(); } catch(e) { console.error("Error Formularios:", e); }
+  try { if(window.renderPersonalView) window.renderPersonalView(); } catch(e) { console.error("Error Personal:", e); }
+  try { if(window.renderResumenesView) window.renderResumenesView(); } catch(e) { console.error("Error Resúmenes:", e); }
+  try { if(window.renderAdminView) window.renderAdminView(); } catch(e) { console.error("Error Admin:", e); }
   
   try { if(window.checkNotifications) window.checkNotifications(); } catch(e) {}
   if(window.lucide) window.lucide.createIcons(); 
@@ -1062,7 +1064,6 @@ window.openModalBoleto = (tipo, prefillData = null) => {
 };
 
 window.imprimirBoletoHtml = (data) => {
-  // Ocultamos el logo global de la web
   const globalLogo = document.getElementById('print-logo');
   if(globalLogo) globalLogo.classList.add('hidden');
 
@@ -1157,9 +1158,9 @@ window.imprimirBoletoHtml = (data) => {
     window.print(); 
     document.getElementById('print-section').classList.add('hidden'); 
     document.getElementById('app-wrapper').classList.remove('hidden'); 
-    if(globalLogo) globalLogo.classList.remove('hidden'); // Restaura el logo global
+    if(globalLogo) globalLogo.classList.remove('hidden');
     if(window.renderFormulariosView) window.renderFormulariosView(); 
-  }, 800); // 800ms da tiempo extra a que cargue la imagen nueva local
+  }, 800);
 };
 
 window.imprimirFlota = () => {
@@ -1889,11 +1890,110 @@ window.toggleDolarWidget = () => {
   window.renderDolarWidget();
 };
 
+window.imprimirHistorialVentas = () => {
+  const currentUser = window.state.currentUser;
+  const isAdmin = currentUser.rol === 'Admin';
+  const today = new Date().toLocaleDateString('es-AR');
+
+  let ventasReporte = [];
+  let usuariosReporte = [];
+
+  if (isAdmin) {
+     ventasReporte = window.state.ventas || [];
+     usuariosReporte = (window.state.usuarios || []).filter(u => ventasReporte.some(v => v.userId === u.id));
+  } else {
+     ventasReporte = (window.state.ventas || []).filter(v => v.userId === currentUser.id);
+     usuariosReporte = [currentUser];
+  }
+
+  let printHtml = `
+    <h2 class="text-center text-2xl font-black mb-4 uppercase">Reporte de Ventas y Comisiones</h2>
+    <p class="mb-6 font-bold text-right text-sm">Fecha: ${today}</p>
+  `;
+
+  let granTotalUnidades = 0;
+  let granTotalMonto = 0;
+  let granTotalComisiones = 0;
+
+  usuariosReporte.forEach(u => {
+     const userVentas = ventasReporte.filter(v => v.userId === u.id);
+     if(userVentas.length === 0) return;
+
+     const unidades = userVentas.length;
+     const montoTotal = userVentas.reduce((acc, v) => acc + (v.montoTotal || 0), 0);
+     
+     const userComisiones = (window.state.comisiones || []).filter(c => c.userId === u.id && c.ventaId && userVentas.some(v => v.id === c.ventaId));
+     const comisionesTotal = userComisiones.reduce((acc, c) => acc + (c.monto || 0), 0);
+
+     granTotalUnidades += unidades;
+     granTotalMonto += montoTotal;
+     granTotalComisiones += comisionesTotal;
+
+     printHtml += `
+        <div class="mb-6 border border-black p-4 rounded-lg">
+           <h3 class="text-lg font-black uppercase mb-2">Vendedor: ${u.nombre || 'Desconocido'}</h3>
+           <div class="grid grid-cols-3 gap-4 text-sm mb-4">
+             <div><strong>Unidades Vendidas:</strong> ${unidades}</div>
+             <div><strong>Volumen de Venta:</strong> ${window.formatMoney(montoTotal)}</div>
+             <div><strong>Comisiones Asignadas:</strong> ${window.formatMoney(comisionesTotal)}</div>
+           </div>
+           <table class="w-full text-left border-collapse border border-gray-300 text-[11px]">
+             <thead>
+               <tr class="bg-gray-100 border-b border-gray-300 uppercase">
+                 <th class="p-1 border-r border-gray-300">Fecha</th>
+                 <th class="p-1 border-r border-gray-300">Cliente</th>
+                 <th class="p-1 border-r border-gray-300">Vehículo</th>
+                 <th class="p-1 text-right">Monto</th>
+               </tr>
+             </thead>
+             <tbody>
+               ${userVentas.slice().sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).map(v => `
+                 <tr class="border-b border-gray-200">
+                   <td class="p-1 border-r border-gray-300">${window.formatDate(v.fecha)}</td>
+                   <td class="p-1 border-r border-gray-300">${v.compradorNombre}</td>
+                   <td class="p-1 border-r border-gray-300">${v.autoDesc}</td>
+                   <td class="p-1 text-right">${window.formatMoney(v.montoTotal || 0)}</td>
+                 </tr>
+               `).join('')}
+             </tbody>
+           </table>
+        </div>
+     `;
+  });
+
+  if (isAdmin && usuariosReporte.length > 1) {
+     printHtml += `
+        <div class="mt-8 border-t-2 border-black pt-4">
+           <h3 class="text-xl font-black uppercase mb-2">Resumen General (Todos los Vendedores)</h3>
+           <div class="grid grid-cols-3 gap-4 text-sm">
+             <div><strong>Unidades Totales:</strong> ${granTotalUnidades}</div>
+             <div><strong>Volumen Total:</strong> ${window.formatMoney(granTotalMonto)}</div>
+             <div><strong>Comisiones Totales:</strong> ${window.formatMoney(granTotalComisiones)}</div>
+           </div>
+        </div>
+     `;
+  }
+
+  document.getElementById('print-content').innerHTML = printHtml;
+  document.getElementById('app-wrapper').classList.add('hidden'); 
+  document.getElementById('print-section').classList.remove('hidden');
+  
+  const globalLogo = document.getElementById('print-logo');
+  if(globalLogo) globalLogo.classList.add('hidden');
+
+  setTimeout(() => { 
+    window.print(); 
+    document.getElementById('print-section').classList.add('hidden'); 
+    document.getElementById('app-wrapper').classList.remove('hidden'); 
+    if(globalLogo) globalLogo.classList.remove('hidden');
+  }, 500);
+};
+
 window.openDetalleLead = (id) => {
-  const c = window.state.consultas.find(x => x.id === id);
+  const c = (window.state.consultas || []).find(x => x.id === id);
   if(!c) return;
 
-  const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null;
+  const a = c.autoId ? (window.state.autos || []).find(x => x.id === c.autoId) : null;
   const autoInfo = a ? `${a.marca} ${a.modelo} (${a.patente})` : c.marcaInteres;
 
   const today = new Date();
@@ -1989,7 +2089,7 @@ window.renderClientesView = () => {
     `;
 
     html += misConsultas.slice().sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || ''))).map(c => { 
-      const a = c.autoId ? window.state.autos.find(x => x.id === c.autoId) : null; 
+      const a = c.autoId ? (window.state.autos || []).find(x => x.id === c.autoId) : null; 
       
       const leadDate = new Date(c.fecha + 'T00:00:00');
       const diffDays = Math.floor((today - leadDate) / (1000 * 60 * 60 * 24));
