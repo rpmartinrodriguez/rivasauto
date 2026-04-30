@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RIVAS AUTO | </title>
+  <title>RIVAS AUTO | ERP</title>
   <meta name="theme-color" content="#000000">
   
   <link rel="icon" href="icon.png" type="image/png">
@@ -22,13 +22,13 @@
 
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* Reglas para limpiar la impresión de la Flota y Formularios */
+    /* Reglas para limpiar la impresión de la Flota, Reportes y Formularios */
     @media print {
       @page { margin: 0; } /* Elimina márgenes superior e inferior y textos del navegador */
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0.5cm; }
       a[href]:after { content: none !important; }
       
-      /* Oculta la Marca de Agua y el Logo al imprimir la tabla de la Flota */
+      /* Oculta la Marca de Agua y el Logo al imprimir tablas (Flota/Reportes) */
       #print-section:has(table) #print-watermark,
       #print-section:has(table) #print-logo {
         display: none !important;
@@ -151,7 +151,6 @@
               <h2 id="header-title" class="text-xl font-bold hidden sm:block">Panel de Control</h2>
             </div>
             <div class="flex items-center space-x-3">
-              
               <div id="dolar-widget-container"></div>
               
               <button onclick="window.toggleDolarWidget()" class="p-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors" title="Mostrar/Ocultar Dólar">
@@ -289,7 +288,12 @@
         </div>
 
         <div id="view-ventas" class="view-section slide-up hidden space-y-8">
-          <h2 class="text-4xl font-black">Historial Ventas</h2>
+          <div class="flex justify-between items-end gap-6 mb-6">
+            <h2 class="text-4xl font-black">Historial Ventas</h2>
+            <button onclick="window.imprimirHistorialVentas()" class="flex items-center px-6 py-3 font-bold text-white bg-black dark:bg-white dark:text-black rounded-2xl hover:scale-[1.02] shadow-lg transition-transform">
+              <i data-lucide="download" class="w-5 h-5 mr-2"></i> Descargar Reporte
+            </button>
+          </div>
           <div class="bg-white/60 dark:bg-neutral-900/60 rounded-[2rem] overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm">
             <table class="w-full text-left">
               <thead><tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30"><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Comprador</th><th class="px-6 py-4">Auto</th><th class="px-6 py-4 text-right">Valor</th><th class="px-6 py-4 text-center">Detalle</th></tr></thead>
