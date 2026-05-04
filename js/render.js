@@ -5,8 +5,6 @@
 window.renderAllViews = () => { 
   if(!window.state.currentUser) return; 
   
-  // Usamos try-catch individuales para que si una vista falla, 
-  // no arrastre ni rompa a las demás
   try { if(window.renderDolarWidget) window.renderDolarWidget(); } catch(e) { console.error("Error Dólar:", e); }
   try { if(window.renderCajaView) window.renderCajaView(); } catch(e) { console.error("Error Caja:", e); }
   try { if(window.renderVentasView) window.renderVentasView(); } catch(e) { console.error("Error Ventas:", e); }
@@ -1518,6 +1516,7 @@ window.openDetalleVenta = (id) => {
   if(!v) return; 
   
   const metodos = v.metodoPago || ''; 
+  const valorOriginal = v.precioAutoLista || v.montoTotal; // Fallback por si es una venta vieja
   
   let html = `
     <div class="space-y-4 text-sm">
@@ -1530,28 +1529,43 @@ window.openDetalleVenta = (id) => {
         <span class="font-bold text-right">${v.compradorNombre || '-'} <br><span class="text-xs text-neutral-400">DNI: ${v.compradorDNI || '-'}</span></span>
       </div>
       <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-        <span class="text-neutral-500">Teléfono</span>
-        <a href="${window.formatWhatsAppLink(v.compradorTelefono || '', '')}" target="_blank" class="font-bold text-green-500 hover:underline">${v.compradorTelefono || '-'}</a>
-      </div>
-      <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-        <span class="text-neutral-500">Domicilio</span>
-        <span class="font-bold text-right">${v.compradorDomicilio || '-'}</span>
-      </div>
-      <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
         <span class="text-neutral-500">Vehículo</span>
         <span class="font-bold text-right">${v.autoDesc || '-'}</span>
       </div>
       <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-        <span class="text-neutral-500">Monto Operación</span>
-        <span class="font-black text-lg">${window.formatMoney(v.montoTotal || 0)}</span>
+        <span class="text-neutral-500">Valor de Lista (Auto)</span>
+        <span class="font-bold text-right">${window.formatMoney(valorOriginal)}</span>
       </div>
       <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-        <span class="text-neutral-500">Métodos Aplicados</span>
-        <span class="font-bold uppercase">${metodos}</span>
+        <span class="text-neutral-500 font-bold uppercase">Monto Operación Cerrada</span>
+        <span class="font-black text-lg text-green-600 dark:text-green-500">${window.formatMoney(v.montoTotal || 0)}</span>
       </div>
+      
+      <div class="pt-2 pb-4 border-b border-neutral-100 dark:border-neutral-800">
+        <p class="text-xs text-neutral-500 font-bold uppercase mb-3"><i data-lucide="pie-chart" class="w-4 h-4 inline mr-1"></i> Desglose de Pago:</p>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="bg-neutral-50 dark:bg-neutral-800 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700">
+            <span class="text-neutral-500 block mb-1">Efectivo / Transf.</span>
+            <span class="font-black text-sm">${window.formatMoney(v.desglose?.efectivo || 0)}</span>
+          </div>
+          <div class="bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50">
+            <span class="text-amber-700 dark:text-amber-500 block mb-1">Permuta</span>
+            <span class="font-black text-sm text-amber-700 dark:text-amber-500">${window.formatMoney(v.desglose?.permuta || 0)}</span>
+          </div>
+          <div class="bg-neutral-50 dark:bg-neutral-800 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700">
+            <span class="text-neutral-500 block mb-1">Crédito</span>
+            <span class="font-black text-sm">${window.formatMoney(v.desglose?.credito || 0)}</span>
+          </div>
+          <div class="bg-neutral-50 dark:bg-neutral-800 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700">
+            <span class="text-neutral-500 block mb-1">Pagaré</span>
+            <span class="font-black text-sm">${window.formatMoney(v.desglose?.pagare || 0)}</span>
+          </div>
+        </div>
+      </div>
+      
       ${v.tienePermuta ? `
-        <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-          <span class="text-neutral-500">Permuta Entregada</span>
+        <div class="flex justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3 mt-4">
+          <span class="text-neutral-500">Permuta Detalle</span>
           <span class="font-bold text-right">${v.detallePermuta || '-'}</span>
         </div>
       ` : ''}
