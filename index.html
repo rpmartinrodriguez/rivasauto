@@ -24,15 +24,17 @@
   <style>
     /* Reglas para limpiar la impresión de la Flota, Reportes y Formularios */
     @media print {
-      @page { margin: 0; } /* Elimina márgenes superior e inferior y textos del navegador */
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0.5cm; }
+      @page { margin: 0; size: auto; } /* Elimina márgenes del navegador (URL, fecha) */
+      html, body { padding: 0 !important; margin: 0 !important; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0.5cm !important; }
       a[href]:after { content: none !important; }
       
-      /* Oculta la Marca de Agua y el Logo al imprimir tablas (Flota/Reportes) */
+      /* Oculta la Marca de Agua y el Logo al imprimir tablas para aprovechar 100% el papel */
       #print-section:has(table) #print-watermark,
       #print-section:has(table) #print-logo {
         display: none !important;
       }
+      #print-section:has(table) { padding-top: 0 !important; }
     }
   </style>
 </head>
