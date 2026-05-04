@@ -608,7 +608,7 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
   if(btn) window.setBtnLoader(btn, true);
   
   try {
-    data.estado = 'Completado'; // FORZAR EL CAMBIO DE PENDIENTE A COMPLETADO SI O SI
+    data.estado = 'Completado'; // FORZAR COMPLETADO
     
     if (autoIdAsociado) { 
       data.autoIdAsociado = autoIdAsociado; 
@@ -620,7 +620,7 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
       delete copyData.id; 
       await window.fbUpdate("formularios", data.id, copyData);
       
-      // Actualización optimista local inmediata
+      // Actualización optimista local para que cambie el botón de "Terminar" a "Ver/Editar" al instante
       const idx = window.state.formularios.findIndex(f => f.id === data.id);
       if (idx !== -1) {
           window.state.formularios[idx] = { ...window.state.formularios[idx], ...copyData };
@@ -724,6 +724,13 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       compradorDNI: document.getElementById('vent-comp-dni').value,
       compradorDomicilio: document.getElementById('vent-comp-domicilio').value,
       montoTotal: tVenta, 
+      precioAutoLista: auto.precio, // Guardamos el valor original del auto
+      desglose: {
+        efectivo: vEf,
+        credito: vCr,
+        pagare: vPa,
+        permuta: vPe
+      },
       metodoPago: metodos.join(' + '), 
       credito: objCredito,
       pagare: objPagare,
