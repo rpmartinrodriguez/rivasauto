@@ -1313,132 +1313,14 @@ window.handleComisionSubmit = async (e) => {
     window.closeModal('modal-comision'); 
     alert("La carga fue registrada y asignada correctamente a la cuenta del empleado.");
     
+    if (window.renderPersonalView) {
+      window.renderPersonalView();
+    }
+    
   } catch(err) {
     console.error("Error asignando comisión:", err);
   } finally {
     window.state.isSubmittingComision = false; 
-    if (btn) {
-      window.setBtnLoader(btn, false);
-    }
-  }
-};
-
-// AQUI ESTÁ LA MODIFICACIÓN EXCLUSIVA PARA GENERAR LOS CHECKBOXES DINÁMICAMENTE
-window.openModalCerrarPagos = () => { 
-  const modalCierreList = document.getElementById('cierre-checkboxes-list');
-  if (modalCierreList) {
-    const usuariosAgencia = (window.state.usuarios || []).filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado').sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
-    let checkboxHtml = '';
-    
-    usuariosAgencia.forEach(u => {
-      const pdtes = (window.state.comisiones || []).filter(c => c.userId === u.id && c.estado === 'Pendiente');
-      const totPdte = pdtes.reduce((acc, curr) => acc + curr.monto, 0);
-      
-      if (totPdte > 0) {
-        checkboxHtml += `
-          <label class="flex items-center justify-between p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl cursor-pointer hover:border-green-500 transition-colors shadow-sm mb-2">
-            <div class="flex items-center">
-              <input type="checkbox" checked value="${u.id}" class="cierre-user-checkbox w-6 h-6 text-green-600 rounded mr-4" onchange="window.calcularTotalPagos()">
-              <span class="font-black text-base">${u.nombre || 'Sin Nombre'}</span>
-            </div>
-            <span class="font-black text-rose-500 text-lg" data-amount="${totPdte}">${window.formatMoney(totPdte)}</span>
-          </label>
-        `;
-      }
-    });
-    
-    if(checkboxHtml === '') {
-      modalCierreList.innerHTML = `<p class="text-sm text-neutral-500 text-center font-bold py-6">No hay comisiones pendientes de pago.</p>`;
-    } else {
-      modalCierreList.innerHTML = checkboxHtml;
-    }
-  }
-
-  window.calcularTotalPagos();
-  window.openModal('modal-cerrar-pagos'); 
-};
-
-window.calcularTotalPagos = () => {
-  const checkboxes = document.querySelectorAll('.cierre-user-checkbox:checked');
-  const userIdsSelected = Array.from(checkboxes).map(cb => cb.value);
-  
-  const pendientes = window.state.comisiones.filter(c => c.estado === 'Pendiente' && userIdsSelected.includes(c.userId));
-  const montoTotal = pendientes.reduce((acc, curr) => acc + curr.monto, 0);
-  
-  const spanTotal = document.getElementById('monto-total-liquidar');
-  if (spanTotal) {
-    spanTotal.innerText = window.formatMoney(montoTotal);
-  }
-};
-
-window.confirmarCierrePagos = async (event) => {
-  if (window.state.isCerrandoPagos) {
-    return;
-  }
-  
-  window.state.isCerrandoPagos = true;
-
-  const checkboxes = document.querySelectorAll('.cierre-user-checkbox:checked');
-  const userIdsSelected = Array.from(checkboxes).map(cb => cb.value);
-
-  const pendientes = window.state.comisiones.filter(c => c.estado === 'Pendiente' && userIdsSelected.includes(c.userId));
-  const montoLiquidacion = pendientes.reduce((acc, curr) => acc + curr.monto, 0);
-  
-  if (montoLiquidacion <= 0) { 
-    window.closeModal('modal-cerrar-pagos'); 
-    window.state.isCerrandoPagos = false; 
-    return alert("No hay comisiones válidas seleccionadas que estén pendientes de pago."); 
-  }
-  
-  const btn = event ? event.target : document.querySelector('#modal-cerrar-pagos button.bg-rose-600');
-  
-  if (btn) {
-    window.setBtnLoader(btn, true);
-  }
-
-  try {
-    const fechaHoy = new Date().toISOString().split('T')[0];
-    const adminUser = window.state.usuarios.find(u => u.rol === 'Admin') || window.state.currentUser;
-    
-    const dataCierre = {
-      fecha: fechaHoy,
-      cantidadMovimientos: pendientes.length,
-      total: montoLiquidacion,
-      userId: adminUser.id
-    };
-    
-    const docRef = await window.fbAdd("cierres_personal", dataCierre);
-    const cierreOficialId = docRef ? docRef.id : window.generateId();
-    
-    await window.fbAdd("transacciones", { 
-      fecha: fechaHoy, 
-      descripcion: `Liquidación de Personal (Cierre de Pagos)`, 
-      tipo: 'gasto', 
-      categoria: 'Liquidación Personal', 
-      valor: montoLiquidacion, 
-      userId: adminUser.id, 
-      sucursalId: adminUser.sucursalId, 
-      tipoComprobante: 'X', 
-      numComprobante: '', 
-      iva: 0, 
-      estadoCobro: 'disponible' 
-    });
-    
-    for (let comision of pendientes) { 
-      await window.fbUpdate("comisiones", comision.id, { 
-        estado: 'Pagada', 
-        fechaPago: fechaHoy,
-        cierreId: cierreOficialId
-      }); 
-    }
-    
-    window.closeModal('modal-cerrar-pagos'); 
-    alert("Los pagos fueron liquidados con éxito. Se ha generado un comprobante de cierre.");
-    
-  } catch(err) {
-    console.error("Error al realizar el cierre:", err);
-  } finally {
-    window.state.isCerrandoPagos = false; 
     if (btn) {
       window.setBtnLoader(btn, false);
     }
@@ -1457,4 +1339,73 @@ window.openModalComisionPorVenta = (ventaId) => {
   
   window.closeModal('modal-detalle-venta');
   window.openModal('modal-comision'); 
+};
+
+window.liquidarPersonal = async (userId) => {
+  if (window.state.isCerrandoPagos) return;
+
+  const empleado = window.state.usuarios.find(x => x.id === userId);
+  if(!empleado) return;
+
+  const pendientes = window.state.comisiones.filter(c => c.estado === 'Pendiente' && c.userId === userId);
+  const montoLiquidacion = pendientes.reduce((acc, curr) => acc + curr.monto, 0);
+
+  if (montoLiquidacion <= 0) {
+    return alert("Este empleado no tiene comisiones pendientes de cobro.");
+  }
+
+  if (!confirm(`¿Estás seguro de liquidar ${window.formatMoney(montoLiquidacion)} a ${empleado.nombre}?\n\nAl confirmar, este monto se descontará automáticamente como 'Gasto' en la Caja Chica.`)) {
+    return;
+  }
+
+  window.state.isCerrandoPagos = true;
+
+  try {
+    const fechaHoy = new Date().toISOString().split('T')[0];
+    const adminUser = window.state.usuarios.find(user => user.rol === 'Admin') || window.state.currentUser;
+
+    const dataCierre = {
+      fecha: fechaHoy,
+      cantidadMovimientos: pendientes.length,
+      total: montoLiquidacion,
+      userId: adminUser.id,
+      empleadoLiquidado: empleado.nombre 
+    };
+
+    const docRef = await window.fbAdd("cierres_personal", dataCierre);
+    const cierreOficialId = docRef ? docRef.id : window.generateId();
+
+    await window.fbAdd("transacciones", {
+      fecha: fechaHoy,
+      descripcion: `Liquidación de Personal: ${empleado.nombre}`,
+      tipo: 'gasto',
+      categoria: 'Liquidación Personal',
+      valor: montoLiquidacion,
+      userId: adminUser.id,
+      sucursalId: adminUser.sucursalId,
+      tipoComprobante: 'X',
+      numComprobante: '',
+      iva: 0,
+      estadoCobro: 'disponible'
+    });
+
+    for (let comision of pendientes) {
+      await window.fbUpdate("comisiones", comision.id, {
+        estado: 'Pagada',
+        fechaPago: fechaHoy,
+        cierreId: cierreOficialId
+      });
+    }
+
+    window.closeModal('modal-detalle-personal');
+    alert(`¡Éxito! El pago de ${window.formatMoney(montoLiquidacion)} a ${empleado.nombre} fue registrado y descontado de la caja.`);
+
+    if (window.renderPersonalView) window.renderPersonalView();
+
+  } catch(err) {
+    console.error("Error al realizar el pago individual:", err);
+    alert("Hubo un error al procesar el pago. Revisa tu conexión.");
+  } finally {
+    window.state.isCerrandoPagos = false;
+  }
 };
