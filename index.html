@@ -1,801 +1,818 @@
 <!DOCTYPE html>
 <html lang="es" class="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Rivas Auto</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-          colors: {
-            green: { 50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d', 950: '#052e16' }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rivas Auto - Sistema de Gestión</title>
+    
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        green: { 50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac', 400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d', 950: '#052e16' }
+                    }
+                }
+            }
         }
-      }
-    }
-  </script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .fade-in { animation: fadeIn 0.3s ease-in-out; }
-    .slide-up { animation: slideUp 0.4s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .toggle-checkbox:checked { right: 0; border-color: #16a34a; }
-    .toggle-checkbox:checked + .toggle-label { background-color: #16a34a; }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    #app-loader { transition: opacity 0.5s ease; }
-    @media print {
-      @page { margin: 0.5cm; }
-      body { background: white !important; color: black !important; }
-      .no-print { display: none !important; }
-      #app-wrapper { display: none !important; }
-      #print-section { display: block !important; }
-    }
-  </style>
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        .slide-up { animation: slideUp 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .toggle-checkbox:checked { right: 0; border-color: #16a34a; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #16a34a; }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        #app-loader { transition: opacity 0.5s ease; }
+
+        @media print {
+            @page { margin: 0.5cm; }
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #app-wrapper { display: none !important; }
+            #print-section { display: block !important; }
+        }
+    </style>
 </head>
 <body class="bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 overflow-hidden selection:bg-green-500 selection:text-white transition-colors duration-300">
 
-  <div id="app-loader" class="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-white dark:bg-neutral-950">
-    <i data-lucide="loader-2" class="w-12 h-12 text-green-600 animate-spin mb-4"></i>
-    <h1 class="text-xl font-black tracking-widest uppercase">Rivas Auto</h1>
-    <p class="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-2">Conectando con servidores...</p>
-  </div>
-
-  <div id="print-section" class="hidden bg-white text-black p-4 w-full min-h-screen">
-    <div id="print-logo" class="w-48 h-auto mb-6 mx-auto">
-      <img src="logo-form.png" alt="Logo" class="w-full h-auto object-contain" onerror="this.style.display='none'">
+    <div id="app-loader" class="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-white dark:bg-neutral-950">
+        <i data-lucide="loader-2" class="w-12 h-12 text-green-600 animate-spin mb-4"></i>
+        <h1 class="text-xl font-black tracking-widest uppercase">Rivas Auto</h1>
+        <p class="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-2">Conectando con servidores...</p>
     </div>
-    <div id="print-content" class="w-full"></div>
-  </div>
 
-  <div id="auth-view" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-100 dark:bg-neutral-950 hidden slide-up">
-    <div class="w-full max-w-md bg-white dark:bg-neutral-900 rounded-[2rem] p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800">
-      <div class="text-center mb-8">
-        <div class="w-20 h-20 bg-black dark:bg-white text-white dark:text-black rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-          <i data-lucide="car-front" class="w-10 h-10"></i>
+    <div id="print-section" class="hidden bg-white text-black p-4 w-full min-h-screen">
+        <div id="print-logo" class="w-48 h-auto mb-6 mx-auto">
+            <img src="logo-form.png" alt="Logo" class="w-full h-auto object-contain" onerror="this.style.display='none'">
         </div>
-        <h1 class="text-3xl font-black uppercase tracking-tight">Rivas Auto</h1>
-        <p class="text-sm font-bold text-neutral-500 mt-2 uppercase tracking-widest">Portal de Gestión</p>
-      </div>
-      
-      <form id="login-form" class="space-y-5">
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Correo Electrónico</label>
-          <div class="relative">
-            <i data-lucide="mail" class="absolute left-4 top-3.5 w-5 h-5 text-neutral-400"></i>
-            <input type="email" id="login-email" required class="w-full pl-12 pr-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none focus:border-green-500 font-bold transition-colors" placeholder="usuario@rivas.com">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Contraseña</label>
-          <div class="relative">
-            <i data-lucide="lock" class="absolute left-4 top-3.5 w-5 h-5 text-neutral-400"></i>
-            <input type="password" id="login-pwd" required class="w-full pl-12 pr-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none focus:border-green-500 font-bold transition-colors" placeholder="••••••••">
-          </div>
-        </div>
-        <button type="submit" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-green-600/20 transition-all flex justify-center items-center">
-          <span id="login-btn-text">Ingresar al Sistema</span>
-        </button>
-        <p id="login-error" class="text-rose-500 text-xs font-bold text-center mt-4 hidden bg-rose-50 dark:bg-rose-900/30 py-2 rounded-lg"></p>
-      </form>
+        <div id="print-content" class="w-full"></div>
     </div>
-  </div>
 
-  <div id="app-wrapper" class="flex h-screen hidden w-full bg-neutral-100 dark:bg-neutral-950">
-    
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl lg:shadow-none lg:static">
-      <div class="p-6 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-black dark:bg-white text-white dark:text-black rounded-xl flex items-center justify-center">
-            <i data-lucide="car-front" class="w-6 h-6"></i>
-          </div>
-          <span class="text-xl font-black tracking-tight uppercase">Rivas Auto</span>
-        </div>
-        <button onclick="window.toggleSidebar()" class="lg:hidden p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="px-6 pb-6 border-b border-neutral-100 dark:border-neutral-800">
-        <div class="flex items-center space-x-3 bg-neutral-50 dark:bg-neutral-950 p-3 rounded-2xl border border-neutral-200 dark:border-neutral-800">
-          <div class="w-10 h-10 rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400 flex items-center justify-center font-black text-lg">
-            <span id="user-initial">U</span>
-          </div>
-          <div class="flex-1 overflow-hidden">
-            <p id="user-name-display" class="text-sm font-bold truncate">Usuario</p>
-            <p id="user-role-display" class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Rol</p>
-          </div>
-          <button onclick="window.handleLogout()" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition-colors" title="Cerrar Sesión">
-            <i data-lucide="log-out" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-
-      <nav class="flex-1 overflow-y-auto py-4 px-4 space-y-1 no-scrollbar">
-        <button onclick="window.switchTab('flota')" id="nav-flota" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-          <i data-lucide="car" class="w-5 h-5"></i><span>Flota y Stock</span>
-        </button>
-        <button onclick="window.switchTab('crm')" id="nav-crm" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-          <i data-lucide="users" class="w-5 h-5"></i><span>Clientes CRM</span>
-        </button>
-        <button onclick="window.switchTab('ventas')" id="nav-ventas" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-          <i data-lucide="badge-dollar-sign" class="w-5 h-5"></i><span>Historial Ventas</span>
-        </button>
-        <button onclick="window.switchTab('formularios')" id="nav-formularios" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-          <i data-lucide="file-text" class="w-5 h-5"></i><span>Boletos / Formularios</span>
-        </button>
-        <button onclick="window.switchTab('caja')" id="nav-caja" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-          <i data-lucide="wallet" class="w-5 h-5"></i><span>Caja Chica Operativa</span>
-        </button>
-
-        <div id="admin-menu" class="hidden pt-4 mt-4 border-t border-neutral-200 dark:border-neutral-800 space-y-1">
-          <p class="px-4 text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-2">Administración</p>
-          <button onclick="window.switchTab('facturas')" id="nav-facturas" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-            <i data-lucide="receipt" class="w-5 h-5"></i><span>Facturación B/C</span>
-          </button>
-          <button onclick="window.switchTab('personal')" id="nav-personal" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-            <i data-lucide="user-cog" class="w-5 h-5"></i><span>Personal y Comisiones</span>
-          </button>
-          <button onclick="window.switchTab('resumenes')" id="nav-resumenes" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-            <i data-lucide="pie-chart" class="w-5 h-5"></i><span>Reportes Finanzas</span>
-          </button>
-          <button onclick="window.switchTab('admin')" id="nav-admin" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-            <i data-lucide="settings" class="w-5 h-5"></i><span>Configuración / Usuarios</span>
-          </button>
-        </div>
-      </nav>
-
-      <div class="p-4 border-t border-neutral-200 dark:border-neutral-800">
-        <button onclick="window.toggleTheme()" class="w-full flex items-center justify-center space-x-2 p-3 bg-neutral-100 dark:bg-neutral-800 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors">
-          <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
-          <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
-          <span>Cambiar Tema</span>
-        </button>
-      </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
-      
-      <header class="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 px-4 md:px-8 py-4 flex items-center justify-between z-30">
-        <div class="flex items-center space-x-4">
-          <button onclick="window.toggleSidebar()" class="lg:hidden p-2 bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300">
-            <i data-lucide="menu" class="w-5 h-5"></i>
-          </button>
-          <h2 id="topbar-title" class="text-xl md:text-2xl font-black tracking-tight capitalize">Panel Principal</h2>
-        </div>
-        <div class="flex items-center space-x-3 md:space-x-4">
-          <div id="dolar-widget-container" onclick="window.toggleDolarWidget()" class="hidden"></div>
-          
-          <div class="relative" id="notif-container" class="hidden">
-            <button onclick="document.getElementById('notif-dropdown').classList.toggle('hidden')" class="p-2.5 bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-green-600 transition-colors relative">
-              <i data-lucide="bell" class="w-5 h-5"></i>
-              <span id="notif-badge" class="absolute -top-1 -right-1 flex h-3 w-3 hidden">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border-2 border-white dark:border-neutral-900"></span>
-              </span>
-            </button>
-            <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-900 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden z-50 slide-up">
-              <div class="p-4 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 flex justify-between items-center">
-                <h3 class="font-black text-sm uppercase tracking-wider">Oportunidades de Recompra</h3>
-              </div>
-              <div id="notif-list" class="max-h-96 overflow-y-auto no-scrollbar"></div>
+    <div id="auth-view" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-100 dark:bg-neutral-950 hidden slide-up">
+        <div class="w-full max-w-md bg-white dark:bg-neutral-900 rounded-[2rem] p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-black dark:bg-white text-white dark:text-black rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <i data-lucide="car-front" class="w-10 h-10"></i>
+                </div>
+                <h1 class="text-3xl font-black uppercase tracking-tight">Rivas Auto</h1>
+                <p class="text-sm font-bold text-neutral-500 mt-2 uppercase tracking-widest">Portal de Gestión</p>
             </div>
-          </div>
-
-          <div id="topbar-actions"></div>
+            
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Correo Electrónico</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="absolute left-4 top-3.5 w-5 h-5 text-neutral-400"></i>
+                        <input type="email" id="login-email" required class="w-full pl-12 pr-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none focus:border-green-500 font-bold transition-colors" placeholder="usuario@rivas.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Contraseña</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-4 top-3.5 w-5 h-5 text-neutral-400"></i>
+                        <input type="password" id="login-pwd" required class="w-full pl-12 pr-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none focus:border-green-500 font-bold transition-colors" placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-green-600/20 transition-all flex justify-center items-center">
+                    <span id="login-btn-text">Ingresar al Sistema</span>
+                </button>
+                <p id="login-error" class="text-rose-500 text-xs font-bold text-center mt-4 hidden bg-rose-50 dark:bg-rose-900/30 py-2 rounded-lg"></p>
+            </form>
         </div>
-      </header>
+    </div>
 
-      <div id="main-scroll-area" class="flex-1 overflow-y-auto p-4 md:p-8 relative no-scrollbar">
+    <div id="app-wrapper" class="flex h-screen hidden w-full bg-neutral-100 dark:bg-neutral-950">
         
-        <div id="view-flota" class="view-section hidden fade-in max-w-7xl mx-auto">
-          <div class="flex justify-between items-center mb-6">
-            <div class="flex space-x-2">
-              <button onclick="window.openModalCreateAuto()" class="bg-black text-white dark:bg-white dark:text-black px-4 md:px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center">
-                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Alta Vehículo
-              </button>
-              <button onclick="window.imprimirFlota()" class="bg-white dark:bg-neutral-800 px-4 md:px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors flex items-center">
-                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> PDF
-              </button>
-            </div>
-            <div class="flex bg-neutral-200/50 dark:bg-neutral-800/50 p-1 rounded-xl">
-              <button id="btn-view-grid" onclick="window.toggleAutosViewMode('grid')" class="p-2 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors" title="Ver como Tarjetas"><i data-lucide="grid" class="w-4 h-4"></i></button>
-              <button id="btn-view-list" onclick="window.toggleAutosViewMode('list')" class="p-2 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors" title="Ver como Lista"><i data-lucide="list" class="w-4 h-4"></i></button>
-            </div>
-          </div>
-          <div id="autos-container"></div>
-        </div>
-
-        <div id="view-caja" class="view-section hidden fade-in max-w-7xl mx-auto">
-          <div class="flex flex-wrap gap-4 justify-between items-end mb-6">
-            <div class="flex space-x-2">
-              <button onclick="window.openModal('modal-caja')" class="bg-black text-white dark:bg-white dark:text-black px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center">
-                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Nuevo Movimiento
-              </button>
-              <button id="btn-ver-pendientes" onclick="window.openModalPendientes()" class="hidden bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors flex items-center">
-                <i data-lucide="clock" class="w-4 h-4 mr-2"></i> Cobros Pendientes
-              </button>
-            </div>
-            <div id="caja-filters-container" class="hidden flex items-center space-x-3 w-full md:w-auto"></div>
-          </div>
-          <div id="caja-stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"></div>
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                    <th class="px-6 py-4 font-bold">Fecha</th>
-                    <th class="px-6 py-4 font-bold">Detalle / Comprobante</th>
-                    <th class="px-6 py-4 font-bold">Usuario</th>
-                    <th class="px-6 py-4 font-bold text-right">Monto</th>
-                    <th class="px-6 py-4 font-bold text-right">Saldo Caja</th>
-                  </tr>
-                </thead>
-                <tbody id="caja-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div id="view-crm" class="view-section hidden fade-in max-w-7xl mx-auto">
-          <div class="flex justify-between items-center mb-6">
-            <button onclick="window.openModal('modal-nuevo-lead')" class="bg-black text-white dark:bg-white dark:text-black px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center">
-              <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> Nuevo Lead
-            </button>
-          </div>
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table id="crm-table" class="w-full text-left border-collapse"></table>
-            </div>
-          </div>
-        </div>
-
-        <div id="view-ventas" class="view-section hidden fade-in max-w-7xl mx-auto">
-          <div class="flex justify-between items-center mb-6">
-            <p class="text-sm font-bold text-neutral-500">Historial de operaciones concretadas.</p>
-            <button onclick="window.imprimirHistorialVentas()" class="bg-white dark:bg-neutral-800 px-4 md:px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors flex items-center">
-              <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Imprimir Reporte
-            </button>
-          </div>
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                    <th class="px-6 py-4 font-bold">Fecha</th>
-                    <th class="px-6 py-4 font-bold">Comprador</th>
-                    <th class="px-6 py-4 font-bold">Vehículo / Patente</th>
-                    <th class="px-6 py-4 font-bold text-right">Monto Cierre</th>
-                    <th class="px-6 py-4 font-bold text-center">Método Pago</th>
-                  </tr>
-                </thead>
-                <tbody id="ventas-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div id="view-formularios" class="view-section hidden fade-in max-w-7xl mx-auto">
-          <div class="flex justify-between items-center mb-6">
-            <p class="text-sm font-bold text-neutral-500">Boletos y formularios autogenerados.</p>
-            <button onclick="window.openModalBoleto('simple')" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center">
-              <i data-lucide="file-plus" class="w-4 h-4 mr-2"></i> Crear Manual
-            </button>
-          </div>
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                    <th class="px-6 py-4 font-bold">Fecha</th>
-                    <th class="px-6 py-4 font-bold">Tipo de Boleto</th>
-                    <th class="px-6 py-4 font-bold">Comprador</th>
-                    <th class="px-6 py-4 font-bold text-center">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="formularios-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div id="view-personal" class="view-section hidden fade-in max-w-7xl mx-auto">
-          <div class="flex justify-between items-center mb-6">
-            <p class="text-sm font-bold text-neutral-500">Comisiones y liquidación de empleados.</p>
-            <div class="space-x-2 flex">
-              <button onclick="window.openModalAsignarBono()" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Asignar Bono</button>
-              <button onclick="window.openModalCerrarPagos()" class="bg-green-600 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-md hover:bg-green-700 transition-colors">Pagar / Liquidar</button>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
-              <h3 class="font-black text-lg mb-4 uppercase tracking-wider text-neutral-400">Saldos Pendientes</h3>
-              <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                      <th class="px-6 py-4 font-bold">Empleado</th>
-                      <th class="px-6 py-4 font-bold">Rol</th>
-                      <th class="px-6 py-4 font-bold">Sucursal</th>
-                      <th class="px-6 py-4 font-bold text-right">Por Pagar</th>
-                    </tr>
-                  </thead>
-                  <tbody id="personal-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
-                </table>
-              </div>
-            </div>
-            <div>
-              <h3 class="font-black text-lg mb-4 uppercase tracking-wider text-neutral-400">Historial de Cierres</h3>
-              <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                      <th class="px-6 py-4 font-bold">Fecha Cierre</th>
-                      <th class="px-6 py-4 font-bold">Movimientos</th>
-                      <th class="px-6 py-4 font-bold text-right">Total Liquidado</th>
-                      <th class="px-6 py-4 font-bold text-center">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody id="cierres-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="view-facturas" class="view-section hidden fade-in max-w-7xl mx-auto">
-          <div id="facturas-summary" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
-          <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                  <th class="px-6 py-4 font-bold">Comprobante</th>
-                  <th class="px-6 py-4 font-bold">Fecha</th>
-                  <th class="px-6 py-4 font-bold">Concepto</th>
-                  <th class="px-6 py-4 font-bold text-right">Monto Total</th>
-                  <th class="px-6 py-4 font-bold text-center">Desglose</th>
-                </tr>
-              </thead>
-              <tbody id="facturas-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="view-resumenes" class="view-section hidden fade-in max-w-7xl mx-auto">
-          <div id="dashboard-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8"></div>
-        </div>
-
-        <div id="view-admin" class="view-section hidden fade-in max-w-7xl mx-auto">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm">
-              <h3 class="font-black text-xl mb-6">Gestión de Usuarios</h3>
-              <form onsubmit="window.handleSaveUser(event)" class="mb-6 space-y-4 bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700">
-                <input id="new-user-name" required placeholder="Nombre Completo" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm" />
-                <input id="new-user-email" type="email" required placeholder="Email (Login)" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm" />
-                <div class="grid grid-cols-2 gap-4">
-                  <select id="new-user-rol" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm">
-                    <option value="Vendedor">Vendedor</option>
-                    <option value="Encargado">Encargado de Sucursal</option>
-                    <option value="Admin">Administrador Total</option>
-                  </select>
-                  <select id="new-user-suc" required class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm"></select>
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl lg:shadow-none lg:static">
+            
+            <div class="p-6 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-black dark:bg-white text-white dark:text-black rounded-xl flex items-center justify-center">
+                        <i data-lucide="car-front" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xl font-black tracking-tight uppercase">Rivas Auto</span>
                 </div>
-                <input id="new-user-pwd" type="password" required placeholder="Contraseña Inicial" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm" />
-                <div class="flex space-x-2 pt-2">
-                  <button type="submit" id="new-user-submit" class="flex-1 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-md hover:scale-[1.02] transition-transform">Guardar Usuario</button>
-                  <button type="button" id="new-user-cancel" onclick="window.resetUserForm()" class="hidden px-4 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-bold rounded-xl">Cancelar</button>
+                <div class="flex items-center space-x-1">
+                    <button onclick="window.toggleSidebarPin()" class="hidden lg:block p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors" title="Fijar o soltar menú">
+                        <i id="pin-icon" data-lucide="pin-off" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="window.toggleSidebar()" class="lg:hidden p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
                 </div>
-              </form>
-              <div id="admin-users-list" class="space-y-3 max-h-96 overflow-y-auto no-scrollbar pr-2"></div>
             </div>
 
-            <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm">
-              <h3 class="font-black text-xl mb-6">Gestión de Sucursales</h3>
-              <form onsubmit="window.handleSaveSucursal(event)" class="mb-6 flex space-x-2">
-                <input id="new-suc-name" required placeholder="Nombre de Sucursal" class="flex-1 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm" />
-                <button type="submit" id="new-suc-submit" class="px-5 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-md hover:scale-[1.02] transition-transform">Guardar</button>
-                <button type="button" id="new-suc-cancel" onclick="window.resetSucForm()" class="hidden px-4 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-bold rounded-xl">X</button>
-              </form>
-              <div id="admin-suc-list" class="space-y-3 max-h-96 overflow-y-auto no-scrollbar pr-2"></div>
+            <div class="px-6 pb-6 border-b border-neutral-100 dark:border-neutral-800">
+                <div class="flex items-center space-x-3 bg-neutral-50 dark:bg-neutral-950 p-3 rounded-2xl border border-neutral-200 dark:border-neutral-800">
+                    <div class="w-10 h-10 rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400 flex items-center justify-center font-black text-lg">
+                        <span id="user-initial">U</span>
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <p id="user-name-display" class="text-sm font-bold truncate">Usuario</p>
+                        <p id="user-role-display" class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Rol</p>
+                    </div>
+                    <button onclick="window.handleLogout()" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition-colors" title="Cerrar Sesión">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </div>
             </div>
-          </div>
+
+            <nav class="flex-1 overflow-y-auto py-4 px-4 space-y-1 no-scrollbar">
+                <button onclick="window.switchTab('flota')" id="nav-flota" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                    <i data-lucide="car" class="w-5 h-5"></i><span>Flota y Stock</span>
+                </button>
+                <button onclick="window.switchTab('crm')" id="nav-crm" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i><span>Clientes CRM</span>
+                </button>
+                <button onclick="window.switchTab('ventas')" id="nav-ventas" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                    <i data-lucide="badge-dollar-sign" class="w-5 h-5"></i><span>Historial Ventas</span>
+                </button>
+                <button onclick="window.switchTab('formularios')" id="nav-formularios" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                    <i data-lucide="file-text" class="w-5 h-5"></i><span>Boletos / Formularios</span>
+                </button>
+                <button onclick="window.switchTab('caja')" id="nav-caja" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                    <i data-lucide="wallet" class="w-5 h-5"></i><span>Caja Chica Operativa</span>
+                </button>
+
+                <div id="admin-menu" class="hidden pt-4 mt-4 border-t border-neutral-200 dark:border-neutral-800 space-y-1">
+                    <p class="px-4 text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-2">Administración</p>
+                    <button onclick="window.switchTab('facturas')" id="nav-facturas" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                        <i data-lucide="receipt" class="w-5 h-5"></i><span>Facturación B/C</span>
+                    </button>
+                    <button onclick="window.switchTab('personal')" id="nav-personal" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                        <i data-lucide="user-cog" class="w-5 h-5"></i><span>Personal y Comisiones</span>
+                    </button>
+                    <button onclick="window.switchTab('resumenes')" id="nav-resumenes" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                        <i data-lucide="pie-chart" class="w-5 h-5"></i><span>Reportes Finanzas</span>
+                    </button>
+                    <button onclick="window.switchTab('admin')" id="nav-admin" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                        <i data-lucide="settings" class="w-5 h-5"></i><span>Configuración / Usuarios</span>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="p-4 border-t border-neutral-200 dark:border-neutral-800">
+                <button onclick="window.toggleTheme()" class="w-full flex items-center justify-center space-x-2 p-3 bg-neutral-100 dark:bg-neutral-800 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors">
+                    <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+                    <span>Cambiar Tema</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+            
+            <header class="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 px-4 md:px-8 py-4 flex items-center justify-between z-30">
+                <div class="flex items-center space-x-4">
+                    <button id="btn-hamburger" onclick="window.toggleSidebar()" class="lg:hidden p-2 bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <h2 id="topbar-title" class="text-xl md:text-2xl font-black tracking-tight capitalize">Panel Principal</h2>
+                </div>
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <div id="dolar-widget-container" onclick="window.toggleDolarWidget()" class="hidden"></div>
+                    
+                    <div class="relative" id="notif-container" class="hidden">
+                        <button onclick="document.getElementById('notif-dropdown').classList.toggle('hidden')" class="p-2.5 bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-green-600 transition-colors relative">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span id="notif-badge" class="absolute -top-1 -right-1 flex h-3 w-3 hidden">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border-2 border-white dark:border-neutral-900"></span>
+                            </span>
+                        </button>
+                        <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-900 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden z-50 slide-up">
+                            <div class="p-4 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 flex justify-between items-center">
+                                <h3 class="font-black text-sm uppercase tracking-wider">Oportunidades de Recompra</h3>
+                            </div>
+                            <div id="notif-list" class="max-h-96 overflow-y-auto no-scrollbar"></div>
+                        </div>
+                    </div>
+
+                    <div id="topbar-actions"></div>
+                </div>
+            </header>
+
+            <div id="main-scroll-area" class="flex-1 overflow-y-auto p-4 md:p-8 relative no-scrollbar">
+                
+                <div id="view-flota" class="view-section hidden fade-in max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex space-x-2">
+                            <button onclick="window.openModalCreateAuto()" class="bg-black text-white dark:bg-white dark:text-black px-4 md:px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center">
+                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Alta Vehículo
+                            </button>
+                            <button onclick="window.imprimirFlota()" class="bg-white dark:bg-neutral-800 px-4 md:px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors flex items-center">
+                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> PDF
+                            </button>
+                        </div>
+                        <div class="flex bg-neutral-200/50 dark:bg-neutral-800/50 p-1 rounded-xl">
+                            <button id="btn-view-grid" onclick="window.toggleAutosViewMode('grid')" class="p-2 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors" title="Ver como Tarjetas"><i data-lucide="grid" class="w-4 h-4"></i></button>
+                            <button id="btn-view-list" onclick="window.toggleAutosViewMode('list')" class="p-2 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors" title="Ver como Lista"><i data-lucide="list" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <div id="autos-container"></div>
+                </div>
+
+                <div id="view-caja" class="view-section hidden fade-in max-w-7xl mx-auto">
+                    <div class="flex flex-wrap gap-4 justify-between items-end mb-6">
+                        <div class="flex space-x-2">
+                            <button onclick="window.openModal('modal-caja')" class="bg-black text-white dark:bg-white dark:text-black px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center">
+                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Nuevo Movimiento
+                            </button>
+                            <button id="btn-ver-pendientes" onclick="window.openModalPendientes()" class="hidden bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors flex items-center">
+                                <i data-lucide="clock" class="w-4 h-4 mr-2"></i> Cobros Pendientes
+                            </button>
+                        </div>
+                        <div id="caja-filters-container" class="hidden flex items-center space-x-3 w-full md:w-auto"></div>
+                    </div>
+                    <div id="caja-stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"></div>
+                    <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                                        <th class="px-6 py-4 font-bold">Fecha</th>
+                                        <th class="px-6 py-4 font-bold">Detalle / Comprobante</th>
+                                        <th class="px-6 py-4 font-bold">Usuario</th>
+                                        <th class="px-6 py-4 font-bold text-right">Monto</th>
+                                        <th class="px-6 py-4 font-bold text-right">Saldo Caja</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="caja-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-crm" class="view-section hidden fade-in max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <button onclick="window.openModal('modal-nuevo-lead')" class="bg-black text-white dark:bg-white dark:text-black px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center">
+                            <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> Nuevo Lead
+                        </button>
+                    </div>
+                    <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table id="crm-table" class="w-full text-left border-collapse"></table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-ventas" class="view-section hidden fade-in max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <p class="text-sm font-bold text-neutral-500">Historial de operaciones concretadas.</p>
+                        <button onclick="window.imprimirHistorialVentas()" class="bg-white dark:bg-neutral-800 px-4 md:px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors flex items-center">
+                            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Imprimir Reporte
+                        </button>
+                    </div>
+                    <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                                        <th class="px-6 py-4 font-bold">Fecha</th>
+                                        <th class="px-6 py-4 font-bold">Comprador</th>
+                                        <th class="px-6 py-4 font-bold">Vehículo / Patente</th>
+                                        <th class="px-6 py-4 font-bold text-right">Monto Cierre</th>
+                                        <th class="px-6 py-4 font-bold text-center">Método Pago</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ventas-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-formularios" class="view-section hidden fade-in max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <p class="text-sm font-bold text-neutral-500">Boletos y formularios autogenerados.</p>
+                        <button onclick="window.openModalBoleto('simple')" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-transform flex items-center">
+                            <i data-lucide="file-plus" class="w-4 h-4 mr-2"></i> Crear Manual
+                        </button>
+                    </div>
+                    <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                                        <th class="px-6 py-4 font-bold">Fecha</th>
+                                        <th class="px-6 py-4 font-bold">Tipo de Boleto</th>
+                                        <th class="px-6 py-4 font-bold">Comprador</th>
+                                        <th class="px-6 py-4 font-bold text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="formularios-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-personal" class="view-section hidden fade-in max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <p class="text-sm font-bold text-neutral-500">Comisiones y liquidación de empleados.</p>
+                        <div class="space-x-2 flex">
+                            <button onclick="window.openModalAsignarBono()" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform">Asignar Bono</button>
+                            <button onclick="window.openModalCerrarPagos()" class="bg-green-600 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-md hover:bg-green-700 transition-colors">Pagar / Liquidar</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="font-black text-lg mb-4 uppercase tracking-wider text-neutral-400">Saldos Pendientes</h3>
+                            <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                                            <th class="px-6 py-4 font-bold">Empleado</th>
+                                            <th class="px-6 py-4 font-bold">Rol</th>
+                                            <th class="px-6 py-4 font-bold">Sucursal</th>
+                                            <th class="px-6 py-4 font-bold text-right">Por Pagar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="personal-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-lg mb-4 uppercase tracking-wider text-neutral-400">Historial de Cierres</h3>
+                            <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                                            <th class="px-6 py-4 font-bold">Fecha Cierre</th>
+                                            <th class="px-6 py-4 font-bold">Movimientos</th>
+                                            <th class="px-6 py-4 font-bold text-right">Total Liquidado</th>
+                                            <th class="px-6 py-4 font-bold text-center">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cierres-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-facturas" class="view-section hidden fade-in max-w-7xl mx-auto">
+                    <div id="facturas-summary" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
+                    <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
+                                    <th class="px-6 py-4 font-bold">Comprobante</th>
+                                    <th class="px-6 py-4 font-bold">Fecha</th>
+                                    <th class="px-6 py-4 font-bold">Concepto</th>
+                                    <th class="px-6 py-4 font-bold text-right">Monto Total</th>
+                                    <th class="px-6 py-4 font-bold text-center">Desglose</th>
+                                </tr>
+                            </thead>
+                            <tbody id="facturas-table" class="divide-y divide-neutral-100 dark:divide-neutral-800/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="view-resumenes" class="view-section hidden fade-in max-w-7xl mx-auto">
+                    <div id="dashboard-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8"></div>
+                </div>
+
+                <div id="view-admin" class="view-section hidden fade-in max-w-7xl mx-auto">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm">
+                            <h3 class="font-black text-xl mb-6">Gestión de Usuarios</h3>
+                            <form onsubmit="window.handleSaveUser(event)" class="mb-6 space-y-4 bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700">
+                                <input id="new-user-name" required placeholder="Nombre Completo" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm" />
+                                <input id="new-user-email" type="email" required placeholder="Email (Login)" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm" />
+                                <div class="grid grid-cols-2 gap-4">
+                                    <select id="new-user-rol" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm">
+                                        <option value="Vendedor">Vendedor</option>
+                                        <option value="Encargado">Encargado de Sucursal</option>
+                                        <option value="Admin">Administrador Total</option>
+                                    </select>
+                                    <select id="new-user-suc" required class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm"></select>
+                                </div>
+                                <input id="new-user-pwd" type="password" required placeholder="Contraseña Inicial" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm" />
+                                <div class="flex space-x-2 pt-2">
+                                    <button type="submit" id="new-user-submit" class="flex-1 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-md hover:scale-[1.02] transition-transform">Guardar Usuario</button>
+                                    <button type="button" id="new-user-cancel" onclick="window.resetUserForm()" class="hidden px-4 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-bold rounded-xl">Cancelar</button>
+                                </div>
+                            </form>
+                            <div id="admin-users-list" class="space-y-3 max-h-96 overflow-y-auto no-scrollbar pr-2"></div>
+                        </div>
+
+                        <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-sm">
+                            <h3 class="font-black text-xl mb-6">Gestión de Sucursales</h3>
+                            <form onsubmit="window.handleSaveSucursal(event)" class="mb-6 flex space-x-2">
+                                <input id="new-suc-name" required placeholder="Nombre de Sucursal" class="flex-1 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm" />
+                                <button type="submit" id="new-suc-submit" class="px-5 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-md hover:scale-[1.02] transition-transform">Guardar</button>
+                                <button type="button" id="new-suc-cancel" onclick="window.resetSucForm()" class="hidden px-4 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-bold rounded-xl">X</button>
+                            </form>
+                            <div id="admin-suc-list" class="space-y-3 max-h-96 overflow-y-auto no-scrollbar pr-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="sidebar-overlay" onclick="window.toggleSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden backdrop-blur-sm transition-opacity"></div>
+
+    <div id="modal-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800">
+            <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
+                <h3 id="modal-auto-title" class="text-xl font-black uppercase tracking-tight">Alta de Vehículo</h3>
+                <button onclick="window.closeModal('modal-auto')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-auto" onsubmit="window.handleAutoSubmit(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Marca</label>
+                            <input id="auto-marca" required placeholder="EJ: FORD" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold uppercase" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Modelo y Versión</label>
+                            <input id="auto-modelo" required placeholder="EJ: FOCUS TITANIUM" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold uppercase" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Color</label>
+                            <input id="auto-color" placeholder="Color" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold uppercase" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Kilómetros</label>
+                            <input id="auto-km" type="text" oninput="window.formatInputMoney(this)" required placeholder="Kilómetros" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Año</label>
+                            <input id="auto-anio" type="number" required placeholder="2020" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Dominio (Patente)</label>
+                            <input id="auto-patente" required placeholder="AA123BB" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold uppercase" />
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-neutral-100 dark:border-neutral-800 pt-6">
+                        <h4 class="font-bold text-sm mb-4 uppercase tracking-wider text-neutral-400">Valores y Ubicación</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1 flex justify-between">Precio Base Venta 
+                                    <select id="auto-moneda" class="bg-transparent font-black text-green-600 outline-none">
+                                        <option value="ARS">ARS</option>
+                                        <option value="USD">USD</option>
+                                    </select>
+                                </label>
+                                <input id="auto-precio" type="text" oninput="window.formatInputMoney(this)" required placeholder="Precio de Lista" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-lg" />
+                            </div>
+                            <div class="admin-only hidden">
+                                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Costo de Inversión (Oculto)</label>
+                                <input id="auto-costo" type="text" oninput="window.formatInputMoney(this)" placeholder="Costo Compra/Toma" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-rose-500" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Tipo de Ingreso</label>
+                                <select id="auto-condicion" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold">
+                                    <option value="Propio">Capital Propio</option>
+                                    <option value="Consignación">Consignación de Tercero</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Sucursal Base</label>
+                                <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" id="modal-auto-submit" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-green-600/20 transition-all">Guardar Vehículo</button>
+                </form>
+            </div>
         </div>
+    </div>
 
-      </div>
-    </main>
+    <div id="modal-detalle-auto" class="fixed inset-0 z-40 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="p-4 sm:p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
+                <h3 class="text-lg sm:text-xl font-black tracking-tight uppercase">Ficha Técnica</h3>
+                <div id="da-header-actions" class="flex items-center space-x-1 sm:space-x-2"></div>
+            </div>
+            <div id="da-content" class="p-4 sm:p-6 overflow-y-auto no-scrollbar flex-1 relative"></div>
+        </div>
+    </div>
 
-    <div id="sidebar-overlay" onclick="window.toggleSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden backdrop-blur-sm transition-opacity"></div>
-  </div>
+    <div id="modal-ingreso-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="check-circle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-2xl font-black uppercase">Ingreso a Salón</h3>
+                <p class="text-sm text-neutral-500 mt-2 font-bold">Fija el precio de venta público para habilitar el vehículo comercialmente.</p>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Precio Final de Venta ($)</label>
+                    <input id="ingreso-precio" type="text" oninput="window.formatInputMoney(this)" class="w-full rounded-xl px-4 py-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-2xl text-center" placeholder="$0" />
+                </div>
+                <button onclick="window.confirmarIngresoAuto(event)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase tracking-wider shadow-lg hover:scale-105 transition-transform">Confirmar y Publicar</button>
+                <div id="ingreso-aviso-gastos" class="hidden text-center mt-6 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700">
+                    <p class="text-sm font-bold text-neutral-600 dark:text-neutral-400 mb-4">Vehículo activo. ¿Deseas asentar los gastos iniciales (taller/gestoría)?</p>
+                    <div class="flex space-x-3">
+                        <button onclick="window.closeModal('modal-ingreso-auto')" class="flex-1 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors">Omitir</button>
+                        <button id="btn-ingreso-gastos" onclick="window.abrirCajaParaGastos()" class="hidden flex-1 py-3 bg-amber-500 text-black font-bold rounded-xl shadow-md hover:bg-amber-400 transition-colors">Cargar Gastos</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <div id="modal-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800">
-      <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
-        <h3 id="modal-auto-title" class="text-xl font-black uppercase tracking-tight">Alta de Vehículo</h3>
-        <button onclick="window.closeModal('modal-auto')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div class="p-6 overflow-y-auto no-scrollbar">
-        <form id="form-auto" onsubmit="window.handleAutoSubmit(event)" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Marca</label>
-              <input id="auto-marca" required placeholder="EJ: FORD" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold uppercase" />
+    <div id="modal-señado" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black uppercase">Registrar Seña</h3>
+                <button onclick="window.closeModal('modal-señado')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Modelo y Versión</label>
-              <input id="auto-modelo" required placeholder="EJ: FOCUS TITANIUM" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold uppercase" />
+            <p class="text-sm text-neutral-500 mb-6 font-bold">El vehículo quedará bloqueado para otros vendedores. (El dinero de la seña debes ingresarlo manualmente en Caja Chica).</p>
+            <form id="form-seña" onsubmit="window.confirmarSeñado(event)" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Nombre del Cliente</label>
+                    <input id="s-cliente-nombre" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Teléfono</label>
+                    <input id="s-cliente-tel" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+                </div>
+                <button type="submit" class="w-full py-4 bg-purple-600 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:bg-purple-700 transition-colors">Bloquear Vehículo</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-caja" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up max-h-[90vh] overflow-y-auto no-scrollbar">
+            <div class="flex justify-between items-center mb-8 border-b border-neutral-100 dark:border-neutral-800 pb-4">
+                <h3 class="text-2xl font-black uppercase tracking-tight">Movimiento de Caja</h3>
+                <button onclick="window.closeModal('modal-caja')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Color</label>
-              <input id="auto-color" placeholder="Color" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold uppercase" />
+            <form id="form-caja" onsubmit="window.handleCajaSubmit(event)" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Tipo de Operación</label>
+                        <select id="caja-tipo" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-lg">
+                            <option value="ingreso">INGRESAR DINERO</option>
+                            <option value="gasto">REGISTRAR GASTO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Monto Exacto</label>
+                        <input id="caja-monto" type="text" oninput="window.formatInputMoney(this)" required placeholder="$0" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-2xl" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Descripción Breve</label>
+                    <input id="caja-desc" required placeholder="Ej: Seña Juan Perez / Arreglo frenos" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1 flex justify-between items-center">
+                            Categoría Contable
+                            <button type="button" onclick="window.agregarCategoria()" class="text-green-600 hover:text-green-700" title="Añadir nueva categoría"><i data-lucide="plus-circle" class="w-4 h-4"></i></button>
+                        </label>
+                        <select id="caja-cat" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Fecha Efectiva</label>
+                        <input id="caja-fecha" type="date" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm" />
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700">
+                    <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1 flex items-center"><i data-lucide="link" class="w-4 h-4 mr-1"></i>Vincular a Vehículo (Opcional)</label>
+                    <select id="caja-auto" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm"></select>
+                    <p class="text-[10px] font-bold text-neutral-400 mt-2 ml-1">Si es un gasto de taller/papeles, vincúlalo para calcular la rentabilidad real luego.</p>
+                </div>
+
+                <div class="admin-only hidden border-t border-neutral-100 dark:border-neutral-800 pt-6">
+                    <h4 class="font-bold text-sm mb-4 uppercase tracking-wider text-neutral-400 flex items-center"><i data-lucide="receipt" class="w-4 h-4 mr-2"></i>Facturación Oficial</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Comprobante</label>
+                            <select id="caja-comprobante" onchange="window.handleComprobanteChange(this.value)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm">
+                                <option value="X">Comprobante Interno (X)</option>
+                                <option value="A">Factura A</option>
+                                <option value="B">Factura B</option>
+                                <option value="C">Factura C</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Nº Comprobante</label>
+                            <input id="caja-comp-num" placeholder="0001-00001234" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm" />
+                        </div>
+                        <div id="caja-iva-container" class="md:col-span-3 hidden fade-in">
+                            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Monto de IVA discriminado ($)</label>
+                            <input id="caja-iva" type="text" oninput="window.formatInputMoney(this)" placeholder="$0" class="w-full rounded-xl px-4 py-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 outline-none focus:border-green-500 font-bold text-sm" />
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase tracking-wider shadow-lg hover:scale-[1.02] transition-transform">Procesar Movimiento</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-pendientes" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
+                <h3 class="text-xl font-black uppercase tracking-tight flex items-center"><i data-lucide="clock" class="w-6 h-6 mr-2 text-amber-500"></i> Gestión de Cobros</h3>
+                <button onclick="window.closeModal('modal-pendientes')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Kilómetros</label>
-              <input id="auto-km" type="text" oninput="window.formatInputMoney(this)" required placeholder="Kilómetros" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+            <div id="pendientes-list-content" class="p-6 overflow-y-auto no-scrollbar flex-1 bg-neutral-50/50 dark:bg-neutral-950/50"></div>
+        </div>
+    </div>
+
+    <div id="modal-nuevo-lead" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black uppercase">Alta Rápida CRM</h3>
+                <button onclick="window.closeModal('modal-nuevo-lead')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Año</label>
-              <input id="auto-anio" type="number" required placeholder="2020" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Dominio (Patente)</label>
-              <input id="auto-patente" required placeholder="AA123BB" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold uppercase" />
-            </div>
-          </div>
-          
-          <div class="border-t border-neutral-100 dark:border-neutral-800 pt-6">
-            <h4 class="font-bold text-sm mb-4 uppercase tracking-wider text-neutral-400">Valores y Ubicación</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1 flex justify-between">Precio Base Venta 
-                  <select id="auto-moneda" class="bg-transparent font-black text-green-600 outline-none">
-                    <option value="ARS">ARS</option>
-                    <option value="USD">USD</option>
-                  </select>
-                </label>
-                <input id="auto-precio" type="text" oninput="window.formatInputMoney(this)" required placeholder="Precio de Lista" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-lg" />
-              </div>
-              <div class="admin-only hidden">
-                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Costo de Inversión (Oculto)</label>
-                <input id="auto-costo" type="text" oninput="window.formatInputMoney(this)" placeholder="Costo Compra/Toma" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-rose-500" />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Tipo de Ingreso</label>
-                <select id="auto-condicion" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold">
-                  <option value="Propio">Capital Propio</option>
-                  <option value="Consignación">Consignación de Tercero</option>
+            <form onsubmit="window.handleGlobalLeadSubmit(event)" class="space-y-4">
+                <input id="gl-nombre" required placeholder="Nombre Completo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+                <input id="gl-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+                <input id="gl-interes" required placeholder="Vehículo Buscado / Interés" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+                <select id="gl-estado" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold">
+                    <option value="Caliente">Alta Prioridad (Caliente)</option>
+                    <option value="Tibio" selected>Seguimiento Normal (Tibio)</option>
+                    <option value="Frío">Baja Prioridad (Frío)</option>
                 </select>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Sucursal Base</label>
-                <select id="auto-sucursal" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold"></select>
-              </div>
+                <textarea id="gl-nota" rows="3" placeholder="Notas adicionales..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none resize-none focus:border-green-500 font-bold"></textarea>
+                <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase tracking-wider shadow-lg hover:scale-105 transition-transform">Guardar Lead</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-detalle-lead" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="flex justify-between items-center mb-6 border-b border-neutral-100 dark:border-neutral-800 pb-4">
+                <h3 class="text-xl font-black uppercase flex items-center"><i data-lucide="user-check" class="w-5 h-5 mr-2"></i> Perfil CRM</h3>
+                <button onclick="window.closeModal('modal-detalle-lead')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-          </div>
-          <button type="submit" id="modal-auto-submit" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:shadow-green-600/20 transition-all">Guardar Vehículo</button>
-        </form>
-      </div>
+            <div id="lead-detail-content"></div>
+        </div>
     </div>
-  </div>
 
-  <div id="modal-detalle-auto" class="fixed inset-0 z-40 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="p-4 sm:p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
-        <h3 class="text-lg sm:text-xl font-black tracking-tight uppercase">Ficha Técnica</h3>
-        <div id="da-header-actions" class="flex items-center space-x-1 sm:space-x-2"></div>
-      </div>
-      <div id="da-content" class="p-4 sm:p-6 overflow-y-auto no-scrollbar flex-1 relative"></div>
+    <div id="modal-boleto" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-5xl max-h-[95vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up overflow-hidden">
+            <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
+                <h3 id="boleto-title" class="text-xl font-black uppercase tracking-tight">Formulario</h3>
+                <button onclick="window.closeModal('modal-boleto')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="boleto-form-content" class="p-6 overflow-y-auto no-scrollbar flex-1 bg-neutral-100/50 dark:bg-neutral-900/50"></div>
+        </div>
     </div>
-  </div>
 
-  <div id="modal-ingreso-auto" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i data-lucide="check-circle" class="w-8 h-8"></i>
+    <div id="modal-asociar-form" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up text-center">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="link" class="w-8 h-8"></i></div>
+            <h3 class="text-2xl font-black uppercase mb-2">Vincular Vehículo</h3>
+            <p class="text-sm text-neutral-500 mb-6 font-bold">¿Deseas descontar de tu stock el vehículo vendido en este boleto de forma automática?</p>
+            <div id="asoc-select-container" class="mb-6">
+                <select id="asoc-auto-select" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold focus:border-green-500"></select>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="window.guardarYImprimirFormulario(null)" class="flex-1 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors">Ignorar</button>
+                <button onclick="const v = document.getElementById('asoc-auto-select').value; if(v) window.guardarYImprimirFormulario(v); else alert('Seleccione un auto');" class="flex-1 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">Vincular y Cerrar</button>
+            </div>
         </div>
-        <h3 class="text-2xl font-black uppercase">Ingreso a Salón</h3>
-        <p class="text-sm text-neutral-500 mt-2 font-bold">Fija el precio de venta público para habilitar el vehículo comercialmente.</p>
-      </div>
-      <div class="space-y-6">
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Precio Final de Venta ($)</label>
-          <input id="ingreso-precio" type="text" oninput="window.formatInputMoney(this)" class="w-full rounded-xl px-4 py-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-2xl text-center" placeholder="$0" />
-        </div>
-        <button onclick="window.confirmarIngresoAuto(event)" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase tracking-wider shadow-lg hover:scale-105 transition-transform">Confirmar y Publicar</button>
-        <div id="ingreso-aviso-gastos" class="hidden text-center mt-6 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700">
-          <p class="text-sm font-bold text-neutral-600 dark:text-neutral-400 mb-4">Vehículo activo. ¿Deseas asentar los gastos iniciales (taller/gestoría)?</p>
-          <div class="flex space-x-3">
-            <button onclick="window.closeModal('modal-ingreso-auto')" class="flex-1 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors">Omitir</button>
-            <button id="btn-ingreso-gastos" onclick="window.abrirCajaParaGastos()" class="hidden flex-1 py-3 bg-amber-500 text-black font-bold rounded-xl shadow-md hover:bg-amber-400 transition-colors">Cargar Gastos</button>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <div id="modal-señado" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-black uppercase">Registrar Seña</h3>
-        <button onclick="window.closeModal('modal-señado')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <p class="text-sm text-neutral-500 mb-6 font-bold">El vehículo quedará bloqueado para otros vendedores. (El dinero de la seña debes ingresarlo manualmente en Caja Chica).</p>
-      <form id="form-seña" onsubmit="window.confirmarSeñado(event)" class="space-y-5">
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Nombre del Cliente</label>
-          <input id="s-cliente-nombre" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+    <div id="modal-comision" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black uppercase tracking-tight flex items-center"><i data-lucide="award" class="w-5 h-5 mr-2 text-amber-500"></i> Asignar Comisión</h3>
+                <button onclick="window.closeModal('modal-comision')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <form id="form-comision" onsubmit="window.handleComisionSubmit(event)" class="space-y-4">
+                <input type="hidden" id="comision-venta-id">
+                <select id="comision-user" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm"></select>
+                <input id="comision-monto" type="text" oninput="window.formatInputMoney(this)" required placeholder="Monto Premio ($)" class="w-full rounded-xl px-4 py-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-xl text-center" />
+                <input id="comision-desc" required placeholder="Concepto (Ej. Venta Gol Trend)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm" />
+                <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase tracking-wider shadow-lg hover:scale-[1.02] transition-transform">Cargar a Cuenta</button>
+            </form>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Teléfono</label>
-          <input id="s-cliente-tel" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
-        </div>
-        <button type="submit" class="w-full py-4 bg-purple-600 text-white rounded-xl font-black uppercase tracking-wider shadow-lg hover:bg-purple-700 transition-colors">Bloquear Vehículo</button>
-      </form>
     </div>
-  </div>
 
-  <div id="modal-caja" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up max-h-[90vh] overflow-y-auto no-scrollbar">
-      <div class="flex justify-between items-center mb-8 border-b border-neutral-100 dark:border-neutral-800 pb-4">
-        <h3 class="text-2xl font-black uppercase tracking-tight">Movimiento de Caja</h3>
-        <button onclick="window.closeModal('modal-caja')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <form id="form-caja" onsubmit="window.handleCajaSubmit(event)" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Tipo de Operación</label>
-            <select id="caja-tipo" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-lg">
-              <option value="ingreso">INGRESAR DINERO</option>
-              <option value="gasto">REGISTRAR GASTO</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Monto Exacto</label>
-            <input id="caja-monto" type="text" oninput="window.formatInputMoney(this)" required placeholder="$0" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-2xl" />
-          </div>
+    <div id="modal-cerrar-pagos" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up text-center">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
+            <h3 class="text-2xl font-black uppercase mb-2">Liquidar Periodo</h3>
+            <p class="text-sm text-neutral-500 mb-6 font-bold">Selecciona a quiénes vas a pagar. Se descontará el total de la Caja Operativa.</p>
+            
+            <div id="cierre-checkboxes-list" class="mb-6 space-y-2 text-left max-h-48 overflow-y-auto pr-2 no-scrollbar"></div>
+            
+            <div class="p-4 bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-800 rounded-2xl mb-6">
+                <p class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-1">Monto de Salida de Caja</p>
+                <p class="text-3xl font-black text-rose-600 dark:text-rose-500" id="monto-total-liquidar">$0</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="window.closeModal('modal-cerrar-pagos')" class="flex-1 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors">Cancelar</button>
+                <button onclick="window.confirmarCierrePagos(event)" class="flex-1 py-3 bg-rose-600 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition-transform flex justify-center items-center">Confirmar Salida</button>
+            </div>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Descripción Breve</label>
-          <input id="caja-desc" required placeholder="Ej: Seña Juan Perez / Arreglo frenos" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
+    </div>
+
+    <div id="modal-detalle-personal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
+                <h3 class="text-xl font-black uppercase tracking-tight">Cuenta Corriente</h3>
+                <button onclick="window.closeModal('modal-detalle-personal')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="dp-content" class="p-6 overflow-y-auto no-scrollbar flex-1 bg-neutral-50/50 dark:bg-neutral-950/50"></div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1 flex justify-between items-center">
-              Categoría Contable
-              <button type="button" onclick="window.agregarCategoria()" class="text-green-600 hover:text-green-700" title="Añadir nueva categoría"><i data-lucide="plus-circle" class="w-4 h-4"></i></button>
-            </label>
-            <select id="caja-cat" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Fecha Efectiva</label>
-            <input id="caja-fecha" type="date" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm" />
-          </div>
+    </div>
+
+    <div id="modal-detalle-cierre" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
+                <h3 class="text-xl font-black uppercase tracking-tight">Ticket de Liquidación</h3>
+                <button onclick="window.closeModal('modal-detalle-cierre')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="dc-content" class="p-6 overflow-y-auto no-scrollbar flex-1"></div>
         </div>
+    </div>
+
+    <div id="modal-detalle-venta" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
+                <h3 class="text-xl font-black uppercase tracking-tight flex items-center"><i data-lucide="check-circle" class="w-5 h-5 mr-2 text-green-500"></i> Operación Cerrada</h3>
+                <button onclick="window.closeModal('modal-detalle-venta')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="venta-detail-content" class="p-6 overflow-y-auto no-scrollbar flex-1"></div>
+        </div>
+    </div>
+
+    <div id="modal-detalle-factura" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
+        <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-sm max-h-[85vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
+            <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
+                <h3 class="text-xl font-black uppercase tracking-tight">Comprobante Fiscal</h3>
+                <button onclick="window.closeModal('modal-detalle-factura')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="factura-detail-content" class="p-6 overflow-y-auto no-scrollbar flex-1"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
-        <div class="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700">
-          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1 flex items-center"><i data-lucide="link" class="w-4 h-4 mr-1"></i>Vincular a Vehículo (Opcional)</label>
-          <select id="caja-auto" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500 font-bold text-sm"></select>
-          <p class="text-[10px] font-bold text-neutral-400 mt-2 ml-1">Si es un gasto de taller/papeles, vincúlalo para calcular la rentabilidad real luego.</p>
-        </div>
+        // Configuración Firebase (Reemplaza con tus datos si es necesario)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD...TU_API_KEY",
+            authDomain: "rivas-auto.firebaseapp.com",
+            projectId: "rivas-auto",
+            storageBucket: "rivas-auto.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
 
-        <div class="admin-only hidden border-t border-neutral-100 dark:border-neutral-800 pt-6">
-          <h4 class="font-bold text-sm mb-4 uppercase tracking-wider text-neutral-400 flex items-center"><i data-lucide="receipt" class="w-4 h-4 mr-2"></i>Facturación Oficial</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Comprobante</label>
-              <select id="caja-comprobante" onchange="window.handleComprobanteChange(this.value)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm">
-                <option value="X">Comprobante Interno (X)</option>
-                <option value="A">Factura A</option>
-                <option value="B">Factura B</option>
-                <option value="C">Factura C</option>
-              </select>
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Nº Comprobante</label>
-              <input id="caja-comp-num" placeholder="0001-00001234" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm" />
-            </div>
-            <div id="caja-iva-container" class="md:col-span-3 hidden fade-in">
-              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2 ml-1">Monto de IVA discriminado ($)</label>
-              <input id="caja-iva" type="text" oninput="window.formatInputMoney(this)" placeholder="$0" class="w-full rounded-xl px-4 py-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 outline-none focus:border-green-500 font-bold text-sm" />
-            </div>
-          </div>
-        </div>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+    </script>
 
-        <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase tracking-wider shadow-lg hover:scale-[1.02] transition-transform">Procesar Movimiento</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="modal-pendientes" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
-        <h3 class="text-xl font-black uppercase tracking-tight flex items-center"><i data-lucide="clock" class="w-6 h-6 mr-2 text-amber-500"></i> Gestión de Cobros</h3>
-        <button onclick="window.closeModal('modal-pendientes')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="pendientes-list-content" class="p-6 overflow-y-auto no-scrollbar flex-1 bg-neutral-50/50 dark:bg-neutral-950/50"></div>
-    </div>
-  </div>
-
-  <div id="modal-nuevo-lead" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-2xl font-black uppercase">Alta Rápida CRM</h3>
-        <button onclick="window.closeModal('modal-nuevo-lead')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <form onsubmit="window.handleGlobalLeadSubmit(event)" class="space-y-4">
-        <input id="gl-nombre" required placeholder="Nombre Completo" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
-        <input id="gl-tel" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
-        <input id="gl-interes" required placeholder="Vehículo Buscado / Interés" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
-        <select id="gl-estado" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold">
-          <option value="Caliente">Alta Prioridad (Caliente)</option>
-          <option value="Tibio" selected>Seguimiento Normal (Tibio)</option>
-          <option value="Frío">Baja Prioridad (Frío)</option>
-        </select>
-        <textarea id="gl-nota" rows="3" placeholder="Notas adicionales..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none resize-none focus:border-green-500 font-bold"></textarea>
-        <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase tracking-wider shadow-lg hover:scale-105 transition-transform">Guardar Lead</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="modal-detalle-lead" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="flex justify-between items-center mb-6 border-b border-neutral-100 dark:border-neutral-800 pb-4">
-        <h3 class="text-xl font-black uppercase flex items-center"><i data-lucide="user-check" class="w-5 h-5 mr-2"></i> Perfil CRM</h3>
-        <button onclick="window.closeModal('modal-detalle-lead')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="lead-detail-content"></div>
-    </div>
-  </div>
-
-  <div id="modal-boleto" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-5xl max-h-[95vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up overflow-hidden">
-      <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
-        <h3 id="boleto-title" class="text-xl font-black uppercase tracking-tight">Formulario</h3>
-        <button onclick="window.closeModal('modal-boleto')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="boleto-form-content" class="p-6 overflow-y-auto no-scrollbar flex-1 bg-neutral-100/50 dark:bg-neutral-900/50"></div>
-    </div>
-  </div>
-
-  <div id="modal-asociar-form" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up text-center">
-      <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="link" class="w-8 h-8"></i></div>
-      <h3 class="text-2xl font-black uppercase mb-2">Vincular Vehículo</h3>
-      <p class="text-sm text-neutral-500 mb-6 font-bold">¿Deseas descontar de tu stock el vehículo vendido en este boleto de forma automática?</p>
-      <div id="asoc-select-container" class="mb-6">
-        <select id="asoc-auto-select" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold focus:border-green-500"></select>
-      </div>
-      <div class="flex space-x-3">
-        <button onclick="window.guardarYImprimirFormulario(null)" class="flex-1 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors">Ignorar</button>
-        <button onclick="const v = document.getElementById('asoc-auto-select').value; if(v) window.guardarYImprimirFormulario(v); else alert('Seleccione un auto');" class="flex-1 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">Vincular y Cerrar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-comision" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-black uppercase tracking-tight flex items-center"><i data-lucide="award" class="w-5 h-5 mr-2 text-amber-500"></i> Asignar Comisión</h3>
-        <button onclick="window.closeModal('modal-comision')" class="p-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-      <form id="form-comision" onsubmit="window.handleComisionSubmit(event)" class="space-y-4">
-        <input type="hidden" id="comision-venta-id">
-        <select id="comision-user" required class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm"></select>
-        <input id="comision-monto" type="text" oninput="window.formatInputMoney(this)" required placeholder="Monto Premio ($)" class="w-full rounded-xl px-4 py-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-black text-xl text-center" />
-        <input id="comision-desc" required placeholder="Concepto (Ej. Venta Gol Trend)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold text-sm" />
-        <button type="submit" class="w-full py-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase tracking-wider shadow-lg hover:scale-[1.02] transition-transform">Cargar a Cuenta</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="modal-cerrar-pagos" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-3xl w-full max-w-md p-8 shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up text-center">
-      <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
-      <h3 class="text-2xl font-black uppercase mb-2">Liquidar Periodo</h3>
-      <p class="text-sm text-neutral-500 mb-6 font-bold">Selecciona a quiénes vas a pagar. Se descontará el total de la Caja Operativa.</p>
-      
-      <div id="cierre-checkboxes-list" class="mb-6 space-y-2 text-left max-h-48 overflow-y-auto pr-2 no-scrollbar"></div>
-      
-      <div class="p-4 bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-800 rounded-2xl mb-6">
-        <p class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-1">Monto de Salida de Caja</p>
-        <p class="text-3xl font-black text-rose-600 dark:text-rose-500" id="monto-total-liquidar">$0</p>
-      </div>
-      <div class="flex space-x-3">
-        <button onclick="window.closeModal('modal-cerrar-pagos')" class="flex-1 py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 font-bold rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors">Cancelar</button>
-        <button onclick="window.confirmarCierrePagos(event)" class="flex-1 py-3 bg-rose-600 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition-transform flex justify-center items-center">Confirmar Salida</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-detalle-personal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
-        <h3 class="text-xl font-black uppercase tracking-tight">Cuenta Corriente</h3>
-        <button onclick="window.closeModal('modal-detalle-personal')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="dp-content" class="p-6 overflow-y-auto no-scrollbar flex-1 bg-neutral-50/50 dark:bg-neutral-950/50"></div>
-    </div>
-  </div>
-
-  <div id="modal-detalle-cierre" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
-        <h3 class="text-xl font-black uppercase tracking-tight">Ticket de Liquidación</h3>
-        <button onclick="window.closeModal('modal-detalle-cierre')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="dc-content" class="p-6 overflow-y-auto no-scrollbar flex-1"></div>
-    </div>
-  </div>
-
-  <div id="modal-detalle-venta" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
-        <h3 class="text-xl font-black uppercase tracking-tight flex items-center"><i data-lucide="check-circle" class="w-5 h-5 mr-2 text-green-500"></i> Operación Cerrada</h3>
-        <button onclick="window.closeModal('modal-detalle-venta')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="venta-detail-content" class="p-6 overflow-y-auto no-scrollbar flex-1"></div>
-    </div>
-  </div>
-
-  <div id="modal-detalle-factura" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden fade-in">
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] w-full max-w-sm max-h-[85vh] flex flex-col shadow-2xl border border-neutral-200 dark:border-neutral-800 slide-up">
-      <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-neutral-50 dark:bg-neutral-950">
-        <h3 class="text-xl font-black uppercase tracking-tight">Comprobante Fiscal</h3>
-        <button onclick="window.closeModal('modal-detalle-factura')" class="p-2 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="factura-detail-content" class="p-6 overflow-y-auto no-scrollbar flex-1"></div>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <script src="js/state.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
     
-    // Configuración Firebase (Reemplaza con tus datos si es necesario)
-    const firebaseConfig = {
-      apiKey: "AIzaSyD...TU_API_KEY",
-      authDomain: "rivas-auto.firebaseapp.com",
-      projectId: "rivas-auto",
-      storageBucket: "rivas-auto.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef123456"
-    };
+    <script src="js/render/renderCore.js"></script>
+    <script src="js/render/renderAutos.js"></script>
+    <script src="js/render/renderCaja.js"></script>
+    <script src="js/render/renderVentas.js"></script>
+    <script src="js/render/renderCRM.js"></script>
+    <script src="js/render/renderFormularios.js"></script>
+    <script src="js/render/renderPersonal.js"></script>
+    <script src="js/render/renderAdmin.js"></script>
+    <script src="js/render/renderFacturas.js"></script>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    window.db = db;
-    window.collection = collection;
-    window.addDoc = addDoc;
-    window.getDocs = getDocs;
-    window.updateDoc = updateDoc;
-    window.deleteDoc = deleteDoc;
-    window.doc = doc;
-  </script>
-
-  <script src="js/state.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/auth.js"></script>
-  
-  <script src="js/render/renderCore.js"></script>
-  <script src="js/render/renderAutos.js"></script>
-  <script src="js/render/renderCaja.js"></script>
-  <script src="js/render/renderVentas.js"></script>
-  <script src="js/render/renderCRM.js"></script>
-  <script src="js/render/renderFormularios.js"></script>
-  <script src="js/render/renderPersonal.js"></script>
-  <script src="js/render/renderAdmin.js"></script>
-  <script src="js/render/renderFacturas.js"></script>
-
-  <script src="js/controllers.js"></script>
-  <script type="module" src="js/app.js"></script>
+    <script src="js/controllers.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
