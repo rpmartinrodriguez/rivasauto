@@ -3,7 +3,7 @@
 // ==========================================
 
 window.renderPersonalView = () => {
-  if(window.state.currentUser?.rol !== 'Admin') return;
+  if (window.state.currentUser?.rol !== 'Admin') return;
   
   const table = document.getElementById('personal-table');
   const select = document.getElementById('comision-user');
@@ -23,6 +23,7 @@ window.renderPersonalView = () => {
       
       const suc = (window.state.sucursales || []).find(s => s.id == u.sucursalId)?.nombre || '-';
       
+      // Armamos los checkboxes para el modal de Cierre de Pagos
       if(totPdte > 0) {
         checkboxHtml += `
           <label class="flex items-center justify-between p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl cursor-pointer hover:border-green-500">
@@ -132,38 +133,40 @@ window.openDetallePersonal = (userId) => {
     `;
   } else {
     html += `
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800">
-            <th class="py-3">Fecha</th>
-            <th class="py-3">Contexto Venta</th>
-            <th class="py-3">Estado</th>
-            <th class="py-3 text-right">Monto</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
-          ${comisionesUsuario.map(c => {
-            let autoDesc = c.descripcion || 'Manual / Bono';
-            if (c.ventaId) {
-               const v = (window.state.ventas || []).find(x => x.id === c.ventaId);
-               if(v) autoDesc = `Venta: ${v.autoDesc}`;
-            }
-            return `
-            <tr>
-              <td class="py-4 text-sm font-bold text-neutral-600 dark:text-neutral-400">${window.formatDate(c.fecha)}</td>
-              <td class="py-4 text-sm font-bold truncate max-w-[150px]" title="${autoDesc}">${autoDesc}</td>
-              <td class="py-4">
-                <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${c.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'}">
-                  ${c.estado}
-                </span>
-              </td>
-              <td class="py-4 text-right font-black ${c.estado === 'Pendiente' ? 'text-neutral-900 dark:text-white' : 'text-neutral-400 dark:text-neutral-500 line-through'}">
-                ${window.formatMoney(c.monto)}
-              </td>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[500px]">
+          <thead>
+            <tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800">
+              <th class="py-3">Fecha</th>
+              <th class="py-3">Contexto Venta</th>
+              <th class="py-3">Estado</th>
+              <th class="py-3 text-right">Monto</th>
             </tr>
-          `}).join('')}
-        </tbody>
-      </table>
+          </thead>
+          <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
+            ${comisionesUsuario.map(c => {
+              let autoDesc = c.descripcion || 'Manual / Bono';
+              if (c.ventaId) {
+                 const v = (window.state.ventas || []).find(x => x.id === c.ventaId);
+                 if(v) autoDesc = `Venta: ${v.autoDesc}`;
+              }
+              return `
+              <tr>
+                <td class="py-4 text-sm font-bold text-neutral-600 dark:text-neutral-400">${window.formatDate(c.fecha)}</td>
+                <td class="py-4 text-sm font-bold truncate max-w-[200px]" title="${autoDesc}">${autoDesc}</td>
+                <td class="py-4">
+                  <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${c.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'}">
+                    ${c.estado}
+                  </span>
+                </td>
+                <td class="py-4 text-right font-black ${c.estado === 'Pendiente' ? 'text-neutral-900 dark:text-white' : 'text-neutral-400 dark:text-neutral-500 line-through'}">
+                  ${window.formatMoney(c.monto)}
+                </td>
+              </tr>
+            `}).join('')}
+          </tbody>
+        </table>
+      </div>
     `;
   }
   
