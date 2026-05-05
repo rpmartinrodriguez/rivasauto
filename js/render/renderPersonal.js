@@ -8,34 +8,15 @@ window.renderPersonalView = () => {
   const table = document.getElementById('personal-table');
   const select = document.getElementById('comision-user');
   const tableCierres = document.getElementById('cierres-table');
-  const modalCierreList = document.getElementById('cierre-checkboxes-list');
   
   const usuariosAgencia = (window.state.usuarios || []).filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado').sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
-  
-  let totLiq = 0;
-  let checkboxHtml = '';
   
   if (table) {
     const dataRows = usuariosAgencia.map(u => {
       const pdtes = (window.state.comisiones || []).filter(c => c.userId === u.id && c.estado === 'Pendiente');
       const totPdte = pdtes.reduce((a,c) => a + c.monto, 0);
-      totLiq += totPdte;
-      
       const suc = (window.state.sucursales || []).find(s => s.id == u.sucursalId)?.nombre || '-';
       
-      // Armamos los checkboxes para el modal de Cierre de Pagos
-      if(totPdte > 0) {
-        checkboxHtml += `
-          <label class="flex items-center justify-between p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl cursor-pointer hover:border-green-500">
-            <div class="flex items-center">
-              <input type="checkbox" checked value="${u.id}" class="cierre-user-checkbox w-5 h-5 text-green-600 rounded mr-3" onchange="window.calcularTotalPagos()">
-              <span class="font-bold text-sm">${u.nombre || 'Sin Nombre'}</span>
-            </div>
-            <span class="font-black text-rose-500" data-amount="${totPdte}">${window.formatMoney(totPdte)}</span>
-          </label>
-        `;
-      }
-
       return `
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetallePersonal('${u.id}')">
           <td class="px-6 py-4 font-bold flex items-center">
@@ -56,18 +37,6 @@ window.renderPersonalView = () => {
         </td>
       </tr>
     `;
-  }
-  
-  if(modalCierreList) {
-    if(checkboxHtml === '') {
-      modalCierreList.innerHTML = `<p class="text-sm text-neutral-500 text-center italic">No hay comisiones pendientes.</p>`;
-    } else {
-      modalCierreList.innerHTML = checkboxHtml;
-    }
-  }
-
-  if (document.getElementById('monto-total-liquidar')) {
-    document.getElementById('monto-total-liquidar').innerText = window.formatMoney(totLiq);
   }
   
   if (select) {
@@ -115,11 +84,11 @@ window.openDetallePersonal = (userId) => {
   
   let html = `
     <div class="mb-6 flex items-center space-x-4">
-      <div class="w-14 h-14 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center font-black text-2xl">
+      <div class="w-14 h-14 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center font-black text-2xl flex-shrink-0">
         ${String(u.nombre || 'U').charAt(0).toUpperCase()}
       </div>
-      <div>
-        <h4 class="text-2xl font-black">${u.nombre || 'Sin Nombre'}</h4>
+      <div class="overflow-hidden">
+        <h4 class="text-xl md:text-2xl font-black truncate">${u.nombre || 'Sin Nombre'}</h4>
         <p class="text-sm text-neutral-500 font-bold uppercase tracking-wider">${u.rol}</p>
       </div>
     </div>
@@ -132,42 +101,30 @@ window.openDetallePersonal = (userId) => {
       </p>
     `;
   } else {
-    html += `
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[500px]">
-          <thead>
-            <tr class="text-xs uppercase text-neutral-500 border-b border-neutral-200 dark:border-neutral-800">
-              <th class="py-3">Fecha</th>
-              <th class="py-3">Contexto Venta</th>
-              <th class="py-3">Estado</th>
-              <th class="py-3 text-right">Monto</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
-            ${comisionesUsuario.map(c => {
-              let autoDesc = c.descripcion || 'Manual / Bono';
-              if (c.ventaId) {
-                 const v = (window.state.ventas || []).find(x => x.id === c.ventaId);
-                 if(v) autoDesc = `Venta: ${v.autoDesc}`;
-              }
-              return `
-              <tr>
-                <td class="py-4 text-sm font-bold text-neutral-600 dark:text-neutral-400">${window.formatDate(c.fecha)}</td>
-                <td class="py-4 text-sm font-bold truncate max-w-[200px]" title="${autoDesc}">${autoDesc}</td>
-                <td class="py-4">
-                  <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${c.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'}">
-                    ${c.estado}
-                  </span>
-                </td>
-                <td class="py-4 text-right font-black ${c.estado === 'Pendiente' ? 'text-neutral-900 dark:text-white' : 'text-neutral-400 dark:text-neutral-500 line-through'}">
-                  ${window.formatMoney(c.monto)}
-                </td>
-              </tr>
-            `}).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
+    // DISEÑO DE TARJETAS APILADAS UNA ABAJO DE OTRA
+    html += `<div class="space-y-3 pb-4">`;
+    comisionesUsuario.forEach(c => {
+      let autoDesc = c.descripcion || 'Manual / Bono';
+      if (c.ventaId) {
+         const v = (window.state.ventas || []).find(x => x.id === c.ventaId);
+         if(v) autoDesc = `Venta: ${v.autoDesc}`;
+      }
+      html += `
+        <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 p-4 rounded-2xl flex flex-col shadow-sm">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-bold text-neutral-500">${window.formatDate(c.fecha)}</span>
+            <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${c.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500'}">
+              ${c.estado}
+            </span>
+          </div>
+          <p class="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3 leading-tight">${autoDesc}</p>
+          <div class="mt-auto border-t border-neutral-100 dark:border-neutral-800 pt-3 text-right">
+            <span class="font-black text-xl ${c.estado === 'Pendiente' ? 'text-green-600 dark:text-green-500' : 'text-neutral-400 dark:text-neutral-500 line-through'}">${window.formatMoney(c.monto)}</span>
+          </div>
+        </div>
+      `;
+    });
+    html += `</div>`;
   }
   
   document.getElementById('dp-content').innerHTML = html;
@@ -191,16 +148,11 @@ window.openDetalleCierre = (cierreId) => {
         <p class="text-3xl font-black text-rose-600 dark:text-rose-400">${window.formatMoney(cierre.total)}</p>
       </div>
     </div>
-    
     <h5 class="font-bold text-lg mb-4">Desglose del Ticket</h5>
   `;
   
   if(comisionesPagadas.length === 0) {
-    html += `
-      <p class="text-neutral-500">
-        Detalle no disponible o vacío.
-      </p>
-    `;
+    html += `<p class="text-neutral-500">Detalle no disponible o vacío.</p>`;
   } else {
     const agrupado = {};
     comisionesPagadas.forEach(c => {
@@ -209,19 +161,19 @@ window.openDetalleCierre = (cierreId) => {
       agrupado[c.userId].items.push(c);
     });
     
-    html += `<div class="space-y-6">`;
+    html += `<div class="space-y-6 pb-4">`;
     for(let userId in agrupado) {
       const u = window.state.usuarios.find(x => x.id === userId);
       const nombre = u ? (u.nombre || 'Sin Nombre') : 'Usuario Eliminado';
       const userGroup = agrupado[userId];
       
       html += `
-        <div class="bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700">
+        <div class="bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
           <div class="flex justify-between items-center mb-3 border-b border-neutral-200 dark:border-neutral-700 pb-2">
             <span class="font-black text-lg">${nombre}</span>
             <span class="font-black text-green-600 dark:text-green-500">${window.formatMoney(userGroup.total)}</span>
           </div>
-          <ul class="space-y-2 pl-2">
+          <div class="space-y-2">
             ${userGroup.items.map(item => {
               let autoDesc = item.descripcion || 'Carga Manual';
               if (item.ventaId) {
@@ -229,13 +181,13 @@ window.openDetalleCierre = (cierreId) => {
                  if(v) autoDesc = `Venta: ${v.autoDesc}`;
               }
               return `
-              <li class="flex justify-between text-sm">
-                <span class="text-neutral-600 dark:text-neutral-400 font-bold">• ${autoDesc} <span class="text-[10px] text-neutral-400 font-normal ml-2">(Orig: ${window.formatDate(item.fecha)})</span></span>
+              <div class="flex justify-between items-start text-sm">
+                <span class="text-neutral-600 dark:text-neutral-400 font-bold flex-1 pr-4">• ${autoDesc} <span class="block text-[10px] text-neutral-400 font-normal mt-0.5">(Orig: ${window.formatDate(item.fecha)})</span></span>
                 <span class="font-black text-neutral-800 dark:text-neutral-200">${window.formatMoney(item.monto)}</span>
-              </li>
+              </div>
               `;
             }).join('')}
-          </ul>
+          </div>
         </div>
       `;
     }
