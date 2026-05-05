@@ -73,6 +73,17 @@ window.renderPersonalView = () => {
       `).join('');
     }
   }
+  
+  // Eliminamos el botón de pagar global si existía en el header
+  const headerActions = document.querySelector('#view-personal .flex.justify-between.items-center .space-x-2.flex');
+  if (headerActions) {
+    headerActions.innerHTML = `
+      <button onclick="window.openModalAsignarBono()" class="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform flex items-center">
+        <i data-lucide="award" class="w-4 h-4 mr-2"></i> Asignar Bono
+      </button>
+    `;
+  }
+
   if(window.lucide) window.lucide.createIcons();
 };
 
@@ -82,15 +93,29 @@ window.openDetallePersonal = (userId) => {
   
   const comisionesUsuario = (window.state.comisiones || []).filter(c => c.userId === userId).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
   
+  // Calculamos lo pendiente para mostrar el botón de pago
+  const pendientes = comisionesUsuario.filter(c => c.estado === 'Pendiente');
+  const totalPendiente = pendientes.reduce((acc, curr) => acc + curr.monto, 0);
+  
   let html = `
-    <div class="mb-6 flex items-center space-x-4">
-      <div class="w-14 h-14 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center font-black text-2xl flex-shrink-0">
-        ${String(u.nombre || 'U').charAt(0).toUpperCase()}
+    <div class="mb-6 flex justify-between items-center border-b border-neutral-200 dark:border-neutral-800 pb-4">
+      <div class="flex items-center space-x-4">
+        <div class="w-14 h-14 rounded-full bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center font-black text-2xl flex-shrink-0">
+          ${String(u.nombre || 'U').charAt(0).toUpperCase()}
+        </div>
+        <div class="overflow-hidden">
+          <h4 class="text-xl md:text-2xl font-black truncate">${u.nombre || 'Sin Nombre'}</h4>
+          <p class="text-sm text-neutral-500 font-bold uppercase tracking-wider">${u.rol}</p>
+        </div>
       </div>
-      <div class="overflow-hidden">
-        <h4 class="text-xl md:text-2xl font-black truncate">${u.nombre || 'Sin Nombre'}</h4>
-        <p class="text-sm text-neutral-500 font-bold uppercase tracking-wider">${u.rol}</p>
-      </div>
+      ${totalPendiente > 0 ? `
+        <div class="text-right">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1">Saldo a Pagar</p>
+          <button onclick="window.liquidarPersonal('${userId}')" class="px-4 py-2 bg-green-600 text-white font-bold rounded-xl shadow-md hover:bg-green-700 hover:scale-105 transition-all flex items-center">
+            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Liquidar ${window.formatMoney(totalPendiente)}
+          </button>
+        </div>
+      ` : ''}
     </div>
   `;
   
@@ -101,7 +126,6 @@ window.openDetallePersonal = (userId) => {
       </p>
     `;
   } else {
-    // DISEÑO DE TARJETAS APILADAS UNA ABAJO DE OTRA
     html += `<div class="space-y-3 pb-4">`;
     comisionesUsuario.forEach(c => {
       let autoDesc = c.descripcion || 'Manual / Bono';
@@ -128,6 +152,7 @@ window.openDetallePersonal = (userId) => {
   }
   
   document.getElementById('dp-content').innerHTML = html;
+  if(window.lucide) window.lucide.createIcons();
   window.openModal('modal-detalle-personal');
 };
 
