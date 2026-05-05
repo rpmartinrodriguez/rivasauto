@@ -2,96 +2,114 @@
 // js/app.js
 // ==========================================
 
-import { db, collection, addDoc, onSnapshot, getDocs } from "./firebase-config.js";
+// Generador de IDs simples
+window.generateId = () => {
+    return Math.random().toString(36).substr(2, 9);
+};
 
-function setupRealtimeSync() {
-  // Se agregó 'cierres_personal' a las colecciones sincronizadas
-  const collections = ['sucursales', 'usuarios', 'autos', 'transacciones', 'ventas', 'consultas', 'formularios', 'comisiones', 'cierres_personal'];
-  
-  collections.forEach(collName => {
-    onSnapshot(collection(db, collName), (snapshot) => {
-      const arr = []; 
-      snapshot.forEach((doc) => { 
-        arr.push({ id: doc.id, ...doc.data() }); 
-      });
-      
-      if(collName === 'sucursales') window.state.sucursales = arr;
-      if(collName === 'usuarios') window.state.usuarios = arr;
-      if(collName === 'autos') window.state.autos = arr;
-      if(collName === 'transacciones') window.state.transacciones = arr;
-      if(collName === 'ventas') window.state.ventas = arr;
-      if(collName === 'consultas') window.state.consultas = arr;
-      if(collName === 'formularios') window.state.formularios = arr;
-      if(collName === 'comisiones') window.state.comisiones = arr;
-      if(collName === 'cierres_personal') window.state.cierres_personal = arr;
-      
-      if (window.state.currentUser) { 
-        const updatedUser = window.state.usuarios.find(u => u.id === window.state.currentUser.id); 
-        if(updatedUser) window.state.currentUser = updatedUser; 
+// --- FUNCIONES FIREBASE CRUD ---
+window.fbAdd = async (coleccion, data) => {
+    try {
+        const docRef = await window.addDoc(window.collection(window.db, coleccion), data);
+        data.id = docRef.id;
+        if(window.state[coleccion]) window.state[coleccion].push(data);
+        return docRef;
+    } catch (e) {
+        console.error("Error añadiendo documento: ", e);
+        throw e;
+    }
+};
+
+window.fbUpdate = async (coleccion, id, data) => {
+    try {
+        const docRef = window.doc(window.db, coleccion, id);
+        await window.updateDoc(docRef, data);
         
-        if (window.initSelects) window.initSelects(); 
-        if (window.renderAllViews) window.renderAllViews(); 
-      }
-    });
-  });
-}
-
-function checkSessionAndReady() {
-  const savedSession = localStorage.getItem('erp_session');
-  
-  if (savedSession) { 
-    const user = window.state.usuarios.find(u => u.id === savedSession); 
-    if (user && !user.isFirstLogin) { 
-      window.state.currentUser = user; 
-      if (window.launchApp) window.launchApp(); 
-    } 
-  }
-  
-  const loader = document.getElementById('loader-screen'); 
-  loader.style.opacity = '0';
-  
-  setTimeout(() => { 
-    loader.style.display = 'none'; 
-    if (!window.state.currentUser) { 
-      document.getElementById('auth-wrapper').classList.remove('hidden'); 
-    } 
-  }, 500);
-}
-
-async function bootApp() {
-  setupRealtimeSync();
-  
-  setTimeout(async () => {
-     const usersSnap = await getDocs(collection(db, "usuarios"));
-     
-     if(usersSnap.empty) {
-        try {
-          const sucRef = await addDoc(collection(db, "sucursales"), { nombre: 'Casa Central' });
-          await addDoc(collection(db, "usuarios"), { 
-            nombre: 'Admin Principal', 
-            email: 'admin@rivasauto.com', 
-            password: '12345rivasauto', 
-            rol: 'Admin', 
-            sucursalId: sucRef.id, 
-            isFirstLogin: false 
-          });
-        } catch (err) {
-          console.error("Error al crear admin", err);
+        if(window.state[coleccion]) {
+            const index = window.state[coleccion].findIndex(item => item.id === id);
+            if(index !== -1) {
+                window.state[coleccion][index] = { ...window.state[coleccion][index], ...data };
+            }
         }
-     }
-     
-     checkSessionAndReady();
-  }, 1500);
-}
+    } catch (e) {
+        console.error("Error actualizando documento: ", e);
+        throw e;
+    }
+};
 
-// Event Listeners Fijos
+window.fbDelete = async (coleccion, id) => {
+    try {
+        const docRef = window.doc(window.db, coleccion, id);
+        await window.deleteDoc(docRef);
+        
+        if(window.state[coleccion]) {
+            window.state[coleccion] = window.state[coleccion].filter(item => item.id !== id);
+        }
+    } catch (e) {
+        console.error("Error eliminando documento: ", e);
+        throw e;
+    }
+};
+
+// --- INICIALIZACIÓN DE LA APP ---
+window.checkSessionAndReady = () => {
+    // AQUÍ ESTÁ LA CORRECCIÓN EXACTA DEL LOADER
+    const loaderElement = document.getElementById('app-loader');
+    if (loaderElement) {
+        loaderElement.style.opacity = '0';
+        setTimeout(() => {
+            loaderElement.classList.add('hidden');
+        }, 500);
+    }
+
+    const session = localStorage.getItem('rivas_session');
+    if (session) {
+        window.state.currentUser = JSON.parse(session);
+        if (window.launchApp) window.launchApp();
+    } else {
+        if (window.showLogin) window.showLogin();
+    }
+};
+
+window.bootApp = async () => {
+    try {
+        const [
+            autosSnap, usuariosSnap, sucursalesSnap, transaccionesSnap, 
+            ventasSnap, formulariosSnap, consultasSnap, comisionesSnap, cierresSnap
+        ] = await Promise.all([
+            window.getDocs(window.collection(window.db, "autos")),
+            window.getDocs(window.collection(window.db, "usuarios")),
+            window.getDocs(window.collection(window.db, "sucursales")),
+            window.getDocs(window.collection(window.db, "transacciones")),
+            window.getDocs(window.collection(window.db, "ventas")),
+            window.getDocs(window.collection(window.db, "formularios")),
+            window.getDocs(window.collection(window.db, "consultas")),
+            window.getDocs(window.collection(window.db, "comisiones")),
+            window.getDocs(window.collection(window.db, "cierres_personal"))
+        ]);
+
+        window.state.autos = autosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.state.usuarios = usuariosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.state.sucursales = sucursalesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.state.transacciones = transaccionesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.state.ventas = ventasSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.state.formularios = formulariosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.state.consultas = consultasSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.state.comisiones = comisionesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.state.cierres_personal = cierresSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        if (window.initSelects) window.initSelects();
+        
+        window.checkSessionAndReady();
+
+    } catch (error) {
+        console.error("Error cargando datos de Firebase:", error);
+        window.checkSessionAndReady(); // Desbloquea la pantalla si hay error de red
+    }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
-  const formCaja = document.getElementById('form-caja');
-  if(formCaja) formCaja.addEventListener('submit', window.handleCajaSubmit);
-  
-  const formAuto = document.getElementById('form-auto');
-  if(formAuto) formAuto.addEventListener('submit', window.handleAutoSubmit);
+    setTimeout(() => {
+        window.bootApp();
+    }, 100);
 });
-
-// Iniciar Motor
-bootApp();
