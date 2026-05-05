@@ -69,7 +69,7 @@ window.editAuto = (id) => {
   document.getElementById('auto-marca').value = auto.marca; 
   document.getElementById('auto-modelo').value = auto.modelo; 
   document.getElementById('auto-color').value = auto.color || ''; 
-  // FORMATEAMOS LOS KM CON PUNTOS AL EDITAR
+  // ACA FORMATEAMOS LOS KM CON PUNTOS AL EDITAR
   document.getElementById('auto-km').value = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : ''; 
   document.getElementById('auto-anio').value = auto.año; 
   document.getElementById('auto-patente').value = auto.patente; 
@@ -115,7 +115,7 @@ window.handleAutoSubmit = async (e) => {
       marca: document.getElementById('auto-marca').value.toUpperCase(), 
       modelo: document.getElementById('auto-modelo').value.toUpperCase(), 
       color: document.getElementById('auto-color').value.toUpperCase(), 
-      // LIMPIAMOS LOS PUNTOS DE LOS KM PARA GUARDAR EL NÚMERO PURO
+      // ACA LIMPIAMOS LOS PUNTOS DE LOS KM PARA GUARDAR EL NUMERO PURO
       km: Number(document.getElementById('auto-km').value.replace(/[^0-9]/g, '')), 
       año: Number(document.getElementById('auto-anio').value), 
       patente: document.getElementById('auto-patente').value.toUpperCase(), 
@@ -546,7 +546,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
         marca: document.getElementById('p-marca').value.toUpperCase(),
         modelo: document.getElementById('p-modelo').value.toUpperCase(),
         color: document.getElementById('p-color').value.toUpperCase(),
-        // LIMPIAMOS LOS PUNTOS DE KM DE LA PERMUTA TAMBIÉN
         km: Number(document.getElementById('p-km').value.replace(/[^0-9]/g, '') || 0),
         año: Number(document.getElementById('p-anio').value),
         patente: document.getElementById('p-pat').value.toUpperCase(),
@@ -1324,7 +1323,37 @@ window.handleComisionSubmit = async (e) => {
   }
 };
 
+// AQUI ESTÁ LA MODIFICACIÓN EXCLUSIVA PARA GENERAR LOS CHECKBOXES DINÁMICAMENTE
 window.openModalCerrarPagos = () => { 
+  const modalCierreList = document.getElementById('cierre-checkboxes-list');
+  if (modalCierreList) {
+    const usuariosAgencia = (window.state.usuarios || []).filter(u => u.rol === 'Vendedor' || u.rol === 'Encargado').sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
+    let checkboxHtml = '';
+    
+    usuariosAgencia.forEach(u => {
+      const pdtes = (window.state.comisiones || []).filter(c => c.userId === u.id && c.estado === 'Pendiente');
+      const totPdte = pdtes.reduce((acc, curr) => acc + curr.monto, 0);
+      
+      if (totPdte > 0) {
+        checkboxHtml += `
+          <label class="flex items-center justify-between p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl cursor-pointer hover:border-green-500 transition-colors shadow-sm mb-2">
+            <div class="flex items-center">
+              <input type="checkbox" checked value="${u.id}" class="cierre-user-checkbox w-6 h-6 text-green-600 rounded mr-4" onchange="window.calcularTotalPagos()">
+              <span class="font-black text-base">${u.nombre || 'Sin Nombre'}</span>
+            </div>
+            <span class="font-black text-rose-500 text-lg" data-amount="${totPdte}">${window.formatMoney(totPdte)}</span>
+          </label>
+        `;
+      }
+    });
+    
+    if(checkboxHtml === '') {
+      modalCierreList.innerHTML = `<p class="text-sm text-neutral-500 text-center font-bold py-6">No hay comisiones pendientes de pago.</p>`;
+    } else {
+      modalCierreList.innerHTML = checkboxHtml;
+    }
+  }
+
   window.calcularTotalPagos();
   window.openModal('modal-cerrar-pagos'); 
 };
