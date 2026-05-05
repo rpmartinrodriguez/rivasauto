@@ -69,7 +69,8 @@ window.editAuto = (id) => {
   document.getElementById('auto-marca').value = auto.marca; 
   document.getElementById('auto-modelo').value = auto.modelo; 
   document.getElementById('auto-color').value = auto.color || ''; 
-  document.getElementById('auto-km').value = auto.km || ''; 
+  // FORMATEAMOS LOS KM CON PUNTOS AL EDITAR
+  document.getElementById('auto-km').value = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : ''; 
   document.getElementById('auto-anio').value = auto.año; 
   document.getElementById('auto-patente').value = auto.patente; 
   document.getElementById('auto-precio').value = window.formatMoney(auto.precio).replace(/[^0-9]/g, ''); 
@@ -114,7 +115,8 @@ window.handleAutoSubmit = async (e) => {
       marca: document.getElementById('auto-marca').value.toUpperCase(), 
       modelo: document.getElementById('auto-modelo').value.toUpperCase(), 
       color: document.getElementById('auto-color').value.toUpperCase(), 
-      km: Number(document.getElementById('auto-km').value), 
+      // LIMPIAMOS LOS PUNTOS DE LOS KM PARA GUARDAR EL NÚMERO PURO
+      km: Number(document.getElementById('auto-km').value.replace(/[^0-9]/g, '')), 
       año: Number(document.getElementById('auto-anio').value), 
       patente: document.getElementById('auto-patente').value.toUpperCase(), 
       precio: Number(document.getElementById('auto-precio').value.replace(/[^0-9]/g, '')), 
@@ -127,7 +129,6 @@ window.handleAutoSubmit = async (e) => {
     if (window.state.editingAutoId) { 
       await window.fbUpdate("autos", window.state.editingAutoId, objAuto); 
     } else { 
-      // Añadimos datos por defecto para un nuevo auto
       objAuto.estado = 'Disponible';
       objAuto.gastos = [];
       objAuto.documentacion = { 
@@ -239,10 +240,8 @@ window.handleGastoTallerSubmit = async (e, autoId) => {
 
      const nuevosGastos = [...(auto.gastos || []), nuevoGasto];
      
-     // Actualizamos el auto con el nuevo gasto
      await window.fbUpdate("autos", autoId, { gastos: nuevosGastos });
 
-     // Si no fue marcado como "fuera de caja", generamos la transacción real
      if (!esFueraDeCaja) {
         await window.fbAdd("transacciones", {
           userId: window.state.currentUser.id,
@@ -441,7 +440,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
     const auto = window.state.autos.find(x => x.id === autoId);
     const userQueRegistra = window.state.currentUser; 
     
-    // Extracción cuidadosa de cada método de pago
     const vEfectivo = document.getElementById('chk-efectivo')?.checked 
       ? Number(document.getElementById('val-efectivo').value.replace(/[^0-9]/g, '')) 
       : 0;
@@ -462,7 +460,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       ? Number(document.getElementById('p-valor').value.replace(/[^0-9]/g, '')) 
       : 0;
     
-    // Sumatoria total de la operación real
     const totalVentaOperacion = vEfectivo + vCredito + vPagare + vPermuta;
 
     if (totalVentaOperacion <= 0) {
@@ -476,7 +473,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 
     const fDate = new Date().toISOString().split('T')[0];
 
-    // 1. Ingresar efectivo a la caja si lo hay
     if (vEfectivo > 0) {
       const notaEfectivo = document.getElementById('nota-efectivo').value || 'Efectivo';
       await window.fbAdd("transacciones", {
@@ -495,7 +491,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       });
     }
 
-    // 2. Construir objetos de financiación
     let objCredito = null;
     if (vCredito > 0 && cCredito > 0) {
       objCredito = { 
@@ -522,12 +517,11 @@ window.handleDAVentaSubmit = async (e, autoId) => {
     if (vPagare > 0) metodosUsados.push('Pagaré');
     if (vPermuta > 0) metodosUsados.push('Permuta');
     
-    // 3. Registrar la venta oficial en la base de datos
     await window.fbAdd("ventas", {
       fecha: fDate,
       autoDesc: `${auto.marca} ${auto.modelo} (${auto.patente})`,
-      precioListaOriginal: auto.precio, // Guardamos el valor original del auto
-      montoTotal: totalVentaOperacion, // El valor que sumó la operación
+      precioListaOriginal: auto.precio, 
+      montoTotal: totalVentaOperacion, 
       desglose: {
         efectivo: vEfectivo,
         credito: vCredito,
@@ -547,17 +541,17 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       detallePermuta: window.state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
     });
 
-    // 4. Si hay permuta, se da de alta automáticamente en la flota como "A Ingresar"
     if (window.state.ventaData.tienePermuta) {
       await window.fbAdd("autos", { 
         marca: document.getElementById('p-marca').value.toUpperCase(),
         modelo: document.getElementById('p-modelo').value.toUpperCase(),
         color: document.getElementById('p-color').value.toUpperCase(),
-        km: Number(document.getElementById('p-km').value || 0),
+        // LIMPIAMOS LOS PUNTOS DE KM DE LA PERMUTA TAMBIÉN
+        km: Number(document.getElementById('p-km').value.replace(/[^0-9]/g, '') || 0),
         año: Number(document.getElementById('p-anio').value),
         patente: document.getElementById('p-pat').value.toUpperCase(),
-        precio: 0, // Precio de venta aún no fijado
-        costo: vPermuta, // Se toma al valor ingresado en la permuta
+        precio: 0, 
+        costo: vPermuta, 
         condicion: document.getElementById('p-condicion').value,
         estado: 'A Ingresar',
         sucursalId: auto.sucursalId,
@@ -566,10 +560,8 @@ window.handleDAVentaSubmit = async (e, autoId) => {
       });
     }
     
-    // 5. Marcar el auto original como vendido
     await window.fbUpdate("autos", autoId, { estado: 'Vendido' }); 
     
-    // 6. Pre-generar el borrador del Boleto
     const cuotasMax = Math.max(cCredito, cPagare);
     const tipoBoleto = window.state.ventaData.tienePermuta ? 'Boleto Venta con Permuta' : 'Boleto Compra Venta';
     
@@ -722,7 +714,7 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
   }
   
   window.state.isSubmittingBoleto = true;
-  const data = { ...window.state.tempFormData, estado: 'Completado' }; // FORZAR COMPLETADO
+  const data = { ...window.state.tempFormData, estado: 'Completado' }; 
   const btn = document.querySelector('#form-real-boleto button[type="submit"]') || document.querySelector('#modal-asociar-form button.bg-black');
   
   if (btn) {
@@ -730,19 +722,16 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
   }
   
   try {
-    // Si se asocia a un auto, actualizamos su estado
     if (autoIdAsociado) { 
       data.autoIdAsociado = autoIdAsociado; 
       await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' }); 
     }
     
-    // Si ya existe el formulario, lo actualizamos
     if (data.id) {
       const copyData = { ...data }; 
       delete copyData.id; 
       await window.fbUpdate("formularios", data.id, copyData);
       
-      // Actualización optimista local
       const idx = window.state.formularios.findIndex(f => f.id === data.id);
       if (idx !== -1) {
         window.state.formularios[idx] = { ...window.state.formularios[idx], ...copyData };
@@ -1168,7 +1157,6 @@ window.handleCajaSubmit = async (e) => {
       estadoCobro: 'disponible' 
     });
     
-    // Si la transacción está asociada a un auto y es un gasto, la sumamos a la inversión
     if (autoIdAsoc && tipoTrans === 'gasto') { 
       const autoObj = window.state.autos.find(x => x.id === autoIdAsoc); 
       const nuevosGastosAuto = [...(autoObj.gastos || []), { 
@@ -1241,7 +1229,6 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
     }
 
     try {
-      // 1. Ingresar el dinero a la caja
       await window.fbAdd("transacciones", { 
         fecha: fechaHoy, 
         descripcion: `Cobro Cuota ${numeroDeCuota} (${tipo === 'credito' ? 'Crédito' : 'Pagaré'}): ${venta.compradorNombre} - ${venta.autoDesc}`, 
@@ -1257,7 +1244,6 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
         fechaAcreditacion: null 
       });
   
-      // 2. Actualizar el registro de la venta
       await window.fbUpdate("ventas", ventaId, datosDeActualizacion);
       
       window.closeModal('modal-pendientes');
@@ -1385,7 +1371,6 @@ window.confirmarCierrePagos = async (event) => {
     const fechaHoy = new Date().toISOString().split('T')[0];
     const adminUser = window.state.usuarios.find(u => u.rol === 'Admin') || window.state.currentUser;
     
-    // 1. Guardar el ticket del cierre global
     const dataCierre = {
       fecha: fechaHoy,
       cantidadMovimientos: pendientes.length,
@@ -1396,7 +1381,6 @@ window.confirmarCierrePagos = async (event) => {
     const docRef = await window.fbAdd("cierres_personal", dataCierre);
     const cierreOficialId = docRef ? docRef.id : window.generateId();
     
-    // 2. Extraer el dinero de la caja (Efectivizar la salida)
     await window.fbAdd("transacciones", { 
       fecha: fechaHoy, 
       descripcion: `Liquidación de Personal (Cierre de Pagos)`, 
@@ -1411,7 +1395,6 @@ window.confirmarCierrePagos = async (event) => {
       estadoCobro: 'disponible' 
     });
     
-    // 3. Marcar una por una las comisiones como pagadas y vincularlas al ticket
     for (let comision of pendientes) { 
       await window.fbUpdate("comisiones", comision.id, { 
         estado: 'Pagada', 
