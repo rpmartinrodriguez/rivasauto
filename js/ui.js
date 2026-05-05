@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.documentElement.classList.remove('dark');
     }
 
-    // 2. Inicializar Estado del Menú (Chincheta)
+    // 2. Inicializar Estado del Menú Lateral
     window.applySidebarState();
 
     // 3. Inicializar Widget del Dólar
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // --- LÓGICA DE TEMA (DARK/LIGHT) ---
 window.toggleTheme = () => {
     const html = document.documentElement;
-    html.classList.toggle('dark'); // Alterna la clase en la etiqueta <html>
+    html.classList.toggle('dark'); 
     const isDark = html.classList.contains('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
 };
@@ -37,31 +37,29 @@ window.applySidebarState = () => {
 
     if (!sidebar) return;
 
-    // Leemos qué configuración eligió el usuario (por defecto está fijo)
+    // ¿El usuario lo quiere fijado? (Por defecto es true)
     const isPinned = localStorage.getItem('sidebarPinned') !== 'false';
 
-    if (isPinned) {
-        // MODO FIJO (Desktop)
-        sidebar.classList.add('lg:translate-x-0', 'lg:static');
-        sidebar.classList.remove('lg:-translate-x-full', 'lg:absolute');
+    // 1. Limpiamos TODAS las clases "rebeldes" que vienen del HTML para que JS tome el control total
+    sidebar.classList.remove('lg:translate-x-0', 'lg:-translate-x-full', 'lg:static', 'lg:absolute', 'lg:shadow-none');
+    if (hamburgerBtn) hamburgerBtn.classList.remove('hidden', 'lg:hidden');
+    if (overlay) overlay.classList.remove('hidden', 'lg:hidden');
 
-        if (hamburgerBtn) hamburgerBtn.classList.add('lg:hidden'); // Escondemos las 3 rayas en PC
+    if (isPinned && window.innerWidth >= 1024) {
+        // --- MODO PC: MENÚ FIJADO ---
+        sidebar.classList.remove('-translate-x-full', 'absolute', 'z-50', 'shadow-2xl');
+        sidebar.classList.add('translate-x-0', 'static', 'shadow-none');
+        
+        if (hamburgerBtn) hamburgerBtn.classList.add('hidden'); // Ocultamos hamburguesa porque ya está abierto
         if (pinIcon) pinIcon.setAttribute('data-lucide', 'pin-off');
-        if (overlay) overlay.classList.add('lg:hidden'); // Fondo oscuro desactivado en PC
+        if (overlay) overlay.classList.add('hidden'); // Sin fondo oscuro
     } else {
-        // MODO FLOTANTE / DESPLEGABLE (Desktop)
-        sidebar.classList.remove('lg:static', 'lg:translate-x-0');
-        sidebar.classList.add('lg:absolute', 'lg:-translate-x-full');
-
-        if (hamburgerBtn) hamburgerBtn.classList.remove('lg:hidden'); // Mostramos las 3 rayas en PC
+        // --- MODO MÓVIL O PC: MENÚ FLOTANTE ---
+        sidebar.classList.remove('static', 'translate-x-0', 'shadow-none');
+        sidebar.classList.add('absolute', 'z-50', '-translate-x-full', 'h-full', 'shadow-2xl');
+        
         if (pinIcon) pinIcon.setAttribute('data-lucide', 'pin');
-
-        // Asegurarnos que inicie cerrado si la pantalla es grande
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.add('-translate-x-full');
-            sidebar.classList.remove('translate-x-0');
-            if (overlay) overlay.classList.add('hidden');
-        }
+        if (overlay) overlay.classList.add('hidden'); // Oculto hasta que el usuario abra el menú
     }
 
     if (window.lucide) window.lucide.createIcons();
@@ -69,7 +67,7 @@ window.applySidebarState = () => {
 
 window.toggleSidebarPin = () => {
     const isPinned = localStorage.getItem('sidebarPinned') !== 'false';
-    localStorage.setItem('sidebarPinned', !isPinned); // Invierte el valor guardado
+    localStorage.setItem('sidebarPinned', !isPinned); // Invierte la configuración
     window.applySidebarState();
 };
 
@@ -78,75 +76,103 @@ window.toggleSidebar = () => {
     const overlay = document.getElementById('sidebar-overlay');
     if (!sidebar) return;
 
-    // Desliza el menú adentro o afuera
-    sidebar.classList.toggle('-translate-x-full');
-    sidebar.classList.toggle('translate-x-0');
+    // Evaluamos si está cerrado
+    const isClosed = sidebar.classList.contains('-translate-x-full');
 
-    // Controla el fondo oscuro (overlay)
-    if (overlay) {
-        overlay.classList.toggle('hidden');
-        const isPinned = localStorage.getItem('sidebarPinned') !== 'false';
-        if (!isPinned) {
-            overlay.classList.remove('lg:hidden'); // Si está flotante, permitir el fondo oscuro en PC
-        } else {
-            overlay.classList.add('lg:hidden');
-        }
+    if (isClosed) {
+        // ABRIR MENÚ
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+        if (overlay) overlay.classList.remove('hidden');
+    } else {
+        // CERRAR MENÚ
+        sidebar.classList.remove('translate-x-0');
+        sidebar.classList.add('-translate-x-full');
+        if (overlay) overlay.classList.add('hidden');
     }
 };
 
-// --- WIDGET DÓLAR EN TIEMPO REAL ---
+// Escuchar cambios de tamaño de pantalla para ajustar el menú automáticamente
+window.addEventListener('resize', () => {
+    clearTimeout(window.resizeTimer);
+    window.resizeTimer = setTimeout(() => {
+        window.applySidebarState();
+    }, 150);
+});
+
+// --- WIDGET DÓLAR (BOTÓN FIJO / TOGGLE DE VISTA) ---
 window.initDolarWidget = async () => {
     const container = document.getElementById('dolar-widget-container');
     if (!container) return;
 
-    // Forzamos a que sea visible (quitamos el class 'hidden' del index.html)
+    // Quitamos la clase 'hidden' y el evento onclick del contenedor padre que traía el HTML
     container.classList.remove('hidden');
+    container.removeAttribute('onclick');
+    
+    // Inyectamos el botón real. El botón siempre se ve, y el <span> interior es el que se oculta.
     container.innerHTML = `
-        <div class="flex items-center space-x-2 p-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-xl border border-green-200 dark:border-green-800 font-bold text-sm cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors shadow-sm" title="Click para actualizar la cotización">
-            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
-            <span id="dolar-value">Consultando...</span>
-        </div>
+        <button onclick="window.toggleDolarWidget()" class="flex items-center space-x-2 p-2.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-xl border border-green-200 dark:border-green-800 font-bold text-sm cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors shadow-sm" title="Cotización Dólar Blue">
+            <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+            <span id="dolar-value" class="hidden pr-1">Calculando...</span>
+        </button>
     `;
     if (window.lucide) window.lucide.createIcons();
 
-    await window.fetchDolar();
-};
-
-window.fetchDolar = async () => {
-    const valSpan = document.getElementById('dolar-value');
-    if (!valSpan) return;
-    valSpan.innerText = "Calculando...";
+    // Guardamos un estado interno
+    window.dolarValue = "Calculando...";
+    
+    // Hacemos una consulta silenciosa en segundo plano
     try {
-        // Consultamos la API pública de DolarAPI (Dólar Blue)
         const res = await fetch('https://dolarapi.com/v1/dolares/blue');
         const data = await res.json();
-        valSpan.innerText = `Blue: $${data.venta}`;
+        window.dolarValue = `Blue: $${data.venta}`;
     } catch (e) {
-        valSpan.innerText = "Error API";
-        console.error("Error al obtener dólar:", e);
+        window.dolarValue = "Error API";
     }
 };
 
 window.toggleDolarWidget = () => {
-    // Al hacer clic, en lugar de ocultarse, ¡actualiza la cotización!
-    window.fetchDolar();
+    const valSpan = document.getElementById('dolar-value');
+    if (!valSpan) return;
+    
+    // Alternamos la visibilidad del texto (el ícono queda intacto)
+    valSpan.classList.toggle('hidden');
+    
+    // Si lo acabamos de mostrar, pintamos el valor y hacemos un fetch fresco por si cambió
+    if (!valSpan.classList.contains('hidden')) {
+        valSpan.innerText = window.dolarValue;
+        
+        fetch('https://dolarapi.com/v1/dolares/blue')
+            .then(res => res.json())
+            .then(data => {
+                window.dolarValue = `Blue: $${data.venta}`;
+                valSpan.innerText = window.dolarValue;
+            })
+            .catch(() => {});
+    }
 };
 
 // --- NAVEGACIÓN Y MODALES ---
 window.switchTab = (tabId) => {
+    // 1. Ocultar todas las vistas
     document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+    
+    // 2. Mostrar la vista seleccionada
     const view = document.getElementById(`view-${tabId}`);
     if (view) view.classList.remove('hidden');
 
+    // 3. Quitar color activo de todos los botones
     document.querySelectorAll('.nav-btn').forEach(el => {
         el.classList.remove('bg-neutral-100', 'dark:bg-neutral-800', 'text-green-600', 'dark:text-green-500');
     });
 
+    // 4. Poner color activo al botón clickeado
     const activeBtn = document.getElementById(`nav-${tabId}`);
     if (activeBtn) {
         activeBtn.classList.add('bg-neutral-100', 'dark:bg-neutral-800', 'text-green-600', 'dark:text-green-500');
     }
 
+    // 5. Cambiar título del Topbar
     const titles = {
         'flota': 'Flota y Stock',
         'caja': 'Caja Chica',
@@ -161,7 +187,7 @@ window.switchTab = (tabId) => {
     const titleEl = document.getElementById('topbar-title');
     if (titleEl) titleEl.innerText = titles[tabId] || 'Panel Principal';
 
-    // Auto-cerrar el sidebar en móviles, o en PC si está en modo flotante
+    // 6. Autocerrar el menú si estamos en móvil o si el menú está en modo flotante (no fijado)
     const sidebar = document.getElementById('sidebar');
     const isPinned = localStorage.getItem('sidebarPinned') !== 'false';
     if (window.innerWidth < 1024 || !isPinned) {
