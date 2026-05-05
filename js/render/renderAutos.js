@@ -59,6 +59,8 @@ window.renderAutosView = () => {
       const precioFmt = auto.moneda === 'USD' 
         ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() 
         : window.formatMoney(auto.precio);
+        
+      const kmFmt = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : 0;
 
       gridHtml += `
         <div onclick="window.openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
@@ -89,7 +91,7 @@ window.renderAutosView = () => {
                 <span class="text-neutral-500">${auto.modelo}</span>
               </h3>
               <p class="text-sm text-neutral-400 mt-1 font-bold uppercase">
-                Año ${auto.año} • ${auto.color || ''} • ${auto.km || 0} km
+                Año ${auto.año} • ${auto.color || ''} • ${kmFmt} km
               </p>
             </div>
             <div class="mt-auto space-y-3">
@@ -142,6 +144,8 @@ window.renderAutosView = () => {
       const precioFmt = auto.moneda === 'USD' 
         ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() 
         : window.formatMoney(auto.precio);
+        
+      const kmFmt = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : 0;
 
       listHtml += `
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="window.openDetalleAuto('${auto.id}')">
@@ -151,7 +155,7 @@ window.renderAutosView = () => {
           </td>
           <td class="px-6 py-4 font-mono text-sm font-bold uppercase">${auto.patente}</td>
           <td class="px-6 py-4 text-xs text-neutral-600 dark:text-neutral-400 font-bold uppercase">
-            ${auto.color || '-'} • ${auto.km || 0} km • <span>${auto.condicion || 'Propio'}</span>
+            ${auto.color || '-'} • ${kmFmt} km • <span>${auto.condicion || 'Propio'}</span>
           </td>
           <td class="px-6 py-4 flex items-center h-full pt-6">
             <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${bClass}">
@@ -206,6 +210,7 @@ window.renderDetalleAuto = () => {
   if (!window.state.isVentaMode) {
     let badgeClass = auto.estado === 'Señado' ? 'bg-purple-800 text-white dark:bg-purple-300 dark:text-purple-900' : 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900';
     const precioFmt = auto.moneda === 'USD' ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(auto.precio);
+    const kmFmt = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : 0;
     
     html += `
       <div class="bg-black text-white dark:bg-white dark:text-black rounded-[2rem] p-8 mb-6 relative overflow-hidden border border-neutral-800 dark:border-neutral-200">
@@ -221,7 +226,7 @@ window.renderDetalleAuto = () => {
               ${auto.marca} ${auto.modelo}
             </h2>
             <p class="text-sm mt-1 opacity-80 font-bold uppercase">
-              Año ${auto.año} • ${auto.color||''} • ${auto.km||0} km
+              Año ${auto.año} • ${auto.color||''} • ${kmFmt} km
             </p>
           </div>
           <div class="text-right">
@@ -343,7 +348,11 @@ window.renderDetalleAuto = () => {
        if (leadsAuto.length > 0) {
          listHtml = leadsAuto.map(c => {
            const autor = (window.state.usuarios || []).find(u => u.id === c.userId);
-           const txtAutor = window.state.currentUser.rol !== 'Vendedor' ? ` • <span class="text-amber-600 dark:text-amber-400 font-bold">Por: ${autor ? autor.nombre : 'Desconocido'}</span>` : '';
+           const nombreAutor = autor ? autor.nombre : 'Desconocido';
+           const txtAutor = window.state.currentUser.rol !== 'Vendedor' 
+             ? ` • <span class="text-amber-600 dark:text-amber-400 font-bold">Por: ${nombreAutor}</span>` 
+             : '';
+           
            return `
              <div onclick="window.openDetalleLead('${c.id}')" class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors">
                <div>
@@ -354,14 +363,20 @@ window.renderDetalleAuto = () => {
              </div>
            `;
          }).join('');
-       } else { 
-         listHtml = `<p class="text-xs text-neutral-500 py-2 p-4">No hay leads registrados para este vehículo.</p>`; 
+       } else {
+         listHtml = `
+           <p class="text-xs text-neutral-500 py-2 p-4">
+             No hay leads registrados por tu usuario para este vehículo.
+           </p>
+         `;
        }
       
        html += `
          <div>
            <form id="btn-submit-lead-auto" onsubmit="window.handleDA_CRMSubmit(event, '${auto.id}')" class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700 mb-6">
-             <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Cargar Interesado</h4>
+             <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">
+               Cargar Interesado
+             </h4>
              <div class="grid grid-cols-2 gap-4">
                <input id="dac-nombre" required placeholder="Nombre" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
                <input id="dac-tel" required placeholder="Teléfono" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
@@ -371,8 +386,11 @@ window.renderDetalleAuto = () => {
                <span id="txt-submit-lead-auto">Guardar Lead</span>
              </button>
            </form>
+           
            <div class="mt-4">
-             <h5 class="font-bold text-xs uppercase mb-2 text-neutral-500 tracking-wider">Historial de Leads del Vehículo</h5>
+             <h5 class="font-bold text-xs uppercase mb-2 text-neutral-500 tracking-wider">
+               Historial de Leads del Vehículo
+             </h5>
              <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
                ${listHtml}
              </div>
@@ -494,7 +512,7 @@ window.renderDetalleAuto = () => {
             <input id="p-marca" placeholder="Marca" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
             <input id="p-modelo" placeholder="Modelo" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
             <input id="p-color" placeholder="Color" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
-            <input id="p-km" type="number" placeholder="Km" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <input id="p-km" type="text" oninput="window.formatInputMoney(this)" placeholder="Km" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
             <input id="p-anio" type="number" placeholder="Año" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
             <input id="p-pat" placeholder="Patente" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 uppercase outline-none font-bold focus:border-green-500" />
             <select id="p-condicion" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500">
@@ -519,34 +537,46 @@ window.renderDetalleAuto = () => {
 };
 
 window.imprimirFlota = () => {
+   // Ocultamos explícitamente el logo de impresión que usamos para los boletos
+   const globalLogo = document.getElementById('print-logo');
+   if(globalLogo) globalLogo.classList.add('hidden');
+
    let printHtml = `
      <style>
        @media print {
-         @page { margin: 0.5cm; } /* Margen mínimo */
+         @page { margin: 0.2cm; } /* Margen super estrecho para aprovechar toda la hoja */
          body { margin: 0; padding: 0; }
        }
      </style>
-     <h2 class="text-center font-black text-xl mb-4 uppercase">Flota y Stock Actual</h2>
-     <table class="w-full text-left border-collapse border border-black text-[11px]">
-       <thead>
-         <tr class="bg-gray-100 uppercase border-b border-black font-bold">
-           <th class="p-1 border-r border-black">Vehículo</th>
-           <th class="p-1 border-r border-black text-center">Año</th>
-           <th class="p-1 border-r border-black text-center">Patente</th>
-           <th class="p-1 text-right">Precio</th>
-         </tr>
-       </thead>
-       <tbody>
+     <h2 class="text-center font-black text-xl mb-2 mt-2 uppercase">Flota y Stock Actual</h2>
+     <table class="w-full text-left border-collapse border border-black text-[12px]">
+        <thead>
+          <tr class="bg-gray-200 border-b border-black uppercase">
+            <th class="p-1 border-r border-black font-bold">Vehículo</th>
+            <th class="p-1 border-r border-black font-bold text-center">Año</th>
+            <th class="p-1 border-r border-black font-bold text-center">Patente</th>
+            <th class="p-1 border-r border-black font-bold text-center">KM</th>
+            <th class="p-1 border-r border-black font-bold text-center">Color</th>
+            <th class="p-1 border-r border-black font-bold text-center">Condición</th>
+            <th class="p-1 text-right font-bold">Precio</th>
+          </tr>
+        </thead>
+        <tbody>
    `;
    
    (window.state.autos || []).filter(a => a.estado !== 'Vendido').sort((a,b) => String(a.marca || '').localeCompare(String(b.marca || '')) || String(a.modelo || '').localeCompare(String(b.modelo || ''))).forEach(a => {
      const precioFmt = a.moneda === 'USD' ? 'U$S ' + window.formatMoney(a.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(a.precio);
+     const kmFmt = a.km ? new Intl.NumberFormat('es-AR').format(a.km) : '-';
+     
      printHtml += `
        <tr class="border-b border-black">
          <td class="p-1 border-r border-black font-bold uppercase">${a.marca} ${a.modelo}</td>
          <td class="p-1 border-r border-black text-center">${a.año}</td>
          <td class="p-1 border-r border-black text-center uppercase">${a.patente}</td>
-         <td class="p-1 text-right font-black">${precioFmt}</td>
+         <td class="p-1 border-r border-black text-center">${kmFmt}</td>
+         <td class="p-1 border-r border-black text-center uppercase">${a.color || '-'}</td>
+         <td class="p-1 border-r border-black text-center uppercase">${a.condicion || '-'}</td>
+         <td class="p-1 text-right font-bold whitespace-nowrap">${precioFmt}</td>
        </tr>
      `;
    });
@@ -554,11 +584,14 @@ window.imprimirFlota = () => {
    printHtml += `</tbody></table>`;
    
    document.getElementById('print-content').innerHTML = printHtml;
-   document.getElementById('app-wrapper').classList.add('hidden');
+   document.getElementById('app-wrapper').classList.add('hidden'); 
    document.getElementById('print-section').classList.remove('hidden');
    
    setTimeout(() => { 
      window.print(); 
-     window.location.reload(); 
+     document.getElementById('print-section').classList.add('hidden'); 
+     document.getElementById('app-wrapper').classList.remove('hidden'); 
+     // Restauramos la visibilidad del contenedor de logo para la próxima vez
+     if(globalLogo) globalLogo.classList.remove('hidden');
    }, 500);
 };
