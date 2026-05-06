@@ -188,7 +188,7 @@ window.initDolarWidget = async () => {
         window.dolarValue = `C: $${data.compra} | V: $${data.venta}`;
         
         // Texto detallado para el cartel de información (Alert)
-        window.dolarInfoText = `📊 COTIZACIÓN DÓLAR BLUE\n\n💰 Compra: $${data.compra}\n💸 Venta: $${data.venta}\n\n📅 Última actualización:\n${fechaStr} a las ${horaStr}\n\n🏢 Fuente: DolarAPI`;
+        window.dolarInfoText = `📊 COTIZACIÓN DÓLAR BLUE\n\n💰 Compra: $${data.compra}\n💸 Venta: $${data.venta}\n\n📅 Última actualización:\n${fechaStr} a las ${horaStr}\n\n🏢 Fuente: Ambito Financiero`;
         
         const valSpan = document.getElementById('dolar-value');
         
