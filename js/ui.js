@@ -158,10 +158,14 @@ window.initDolarWidget = async () => {
 
     container.classList.remove('hidden'); 
     
+    // Inyectamos el botón con un contenedor interno (wrapper) para el texto y el ícono info
     container.innerHTML = `
         <button onclick="window.toggleDolarWidget()" class="flex items-center space-x-2 p-2.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-xl border border-green-200 dark:border-green-800 font-bold text-sm cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors shadow-sm">
             <i data-lucide="dollar-sign" class="w-5 h-5"></i>
-            <span id="dolar-value" class="hidden pr-1">Cargando...</span>
+            <div id="dolar-value-wrapper" class="hidden flex items-center space-x-2">
+                <span id="dolar-value">Cargando...</span>
+                <i id="dolar-info-icon" data-lucide="info" class="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity" title="Calculando..."></i>
+            </div>
         </button>
     `;
     
@@ -173,31 +177,43 @@ window.initDolarWidget = async () => {
         const res = await fetch('https://dolarapi.com/v1/dolares/blue');
         const data = await res.json();
         
-        // Aquí mostramos los valores de Compra y Venta
+        // Extraemos y formateamos la fecha de la API
+        const fechaActualizacion = new Date(data.fechaActualizacion || new Date());
+        const horaStr = fechaActualizacion.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        const fechaStr = fechaActualizacion.toLocaleDateString('es-AR');
+
+        // Valores de Compra y Venta
         window.dolarValue = `C: $${data.compra} | V: $${data.venta}`;
-        const valSpan = document.getElementById('dolar-value');
+        window.dolarInfoText = `Fuente: DolarAPI (Dólar Blue)\nÚltima actualización: ${fechaStr} a las ${horaStr}`;
         
-        if(valSpan) {
+        const valSpan = document.getElementById('dolar-value');
+        const infoIcon = document.getElementById('dolar-info-icon');
+        
+        if (valSpan) {
             valSpan.innerText = window.dolarValue;
         }
+        if (infoIcon) {
+            infoIcon.setAttribute('title', window.dolarInfoText);
+        }
+        
     } catch (e) {
         window.dolarValue = "Dólar s/c";
+        const valSpan = document.getElementById('dolar-value');
+        if (valSpan) {
+            valSpan.innerText = window.dolarValue;
+        }
         console.error("Error consultando API Dolar:", e);
     }
 };
 
 window.toggleDolarWidget = () => {
-    const valSpan = document.getElementById('dolar-value');
+    const wrapper = document.getElementById('dolar-value-wrapper');
     
-    if (!valSpan) {
+    if (!wrapper) {
         return;
     }
     
-    valSpan.classList.toggle('hidden');
-    
-    if (!valSpan.classList.contains('hidden')) {
-        valSpan.innerText = window.dolarValue || "Cargando...";
-    }
+    wrapper.classList.toggle('hidden');
 };
 
 // --- LOGICA MAESTRA DE CAMPANITA (NOTIFICACIONES DE CRM) ---
