@@ -158,13 +158,15 @@ window.initDolarWidget = async () => {
 
     container.classList.remove('hidden'); 
     
-    // Inyectamos el botón con un contenedor interno (wrapper) para el texto y el ícono info
+    // Inyectamos el botón y separamos la acción de la "i" para que no cierre la vista
     container.innerHTML = `
         <button onclick="window.toggleDolarWidget()" class="flex items-center space-x-2 p-2.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-xl border border-green-200 dark:border-green-800 font-bold text-sm cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors shadow-sm">
             <i data-lucide="dollar-sign" class="w-5 h-5"></i>
             <div id="dolar-value-wrapper" class="hidden flex items-center space-x-2">
                 <span id="dolar-value">Cargando...</span>
-                <i id="dolar-info-icon" data-lucide="info" class="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity" title="Calculando..."></i>
+                <div onclick="window.showDolarInfo(event)" class="p-1 rounded-full hover:bg-green-200 dark:hover:bg-green-800 transition-colors cursor-help" title="Ver Info del Dólar">
+                    <i id="dolar-info-icon" data-lucide="info" class="w-4 h-4 opacity-70"></i>
+                </div>
             </div>
         </button>
     `;
@@ -184,20 +186,19 @@ window.initDolarWidget = async () => {
 
         // Valores de Compra y Venta
         window.dolarValue = `C: $${data.compra} | V: $${data.venta}`;
-        window.dolarInfoText = `Fuente: DolarAPI (Dólar Blue)\nÚltima actualización: ${fechaStr} a las ${horaStr}`;
+        
+        // Texto detallado para el cartel de información (Alert)
+        window.dolarInfoText = `📊 COTIZACIÓN DÓLAR BLUE\n\n💰 Compra: $${data.compra}\n💸 Venta: $${data.venta}\n\n📅 Última actualización:\n${fechaStr} a las ${horaStr}\n\n🏢 Fuente: DolarAPI`;
         
         const valSpan = document.getElementById('dolar-value');
-        const infoIcon = document.getElementById('dolar-info-icon');
         
         if (valSpan) {
             valSpan.innerText = window.dolarValue;
         }
-        if (infoIcon) {
-            infoIcon.setAttribute('title', window.dolarInfoText);
-        }
         
     } catch (e) {
         window.dolarValue = "Dólar s/c";
+        window.dolarInfoText = "Hubo un error al consultar la cotización actual. Verifique su conexión a internet.";
         const valSpan = document.getElementById('dolar-value');
         if (valSpan) {
             valSpan.innerText = window.dolarValue;
@@ -214,6 +215,13 @@ window.toggleDolarWidget = () => {
     }
     
     wrapper.classList.toggle('hidden');
+};
+
+// Nueva función exclusiva para mostrar la info del dólar sin cerrar el widget
+window.showDolarInfo = (e) => {
+    // stopPropagation evita que el click suba hasta el botón padre y lo cierre
+    e.stopPropagation(); 
+    alert(window.dolarInfoText || "Calculando cotización...");
 };
 
 // --- LOGICA MAESTRA DE CAMPANITA (NOTIFICACIONES DE CRM) ---
