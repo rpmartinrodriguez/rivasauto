@@ -1,0 +1,104 @@
+/* ==========================================
+   style.css
+   ========================================== */
+
+/* Importación de fuente desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* Estilos base del sistema */
+body { 
+    font-family: 'Inter', sans-serif; 
+    -webkit-tap-highlight-color: transparent; 
+}
+
+/* ------------------------------------------
+   Animaciones para Vistas y Modales
+   ------------------------------------------ */
+.fade-in { 
+    animation: fadeIn 0.3s ease-in-out; 
+}
+
+.slide-up { 
+    animation: slideUp 0.4s ease-out; 
+}
+
+@keyframes fadeIn { 
+    from { 
+        opacity: 0; 
+    } 
+    to { 
+        opacity: 1; 
+    } 
+}
+
+@keyframes slideUp { 
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    } 
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    } 
+}
+
+/* ------------------------------------------
+   Utilidades Globales
+   ------------------------------------------ */
+/* Ocultar barra de scroll en elementos deslizables (manteniendo la funcionalidad) */
+.no-scrollbar::-webkit-scrollbar { 
+    display: none; 
+}
+
+.no-scrollbar { 
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
+}
+
+/* Estilos para los botones de tipo "switch" / toggle */
+.toggle-checkbox:checked { 
+    right: 0; 
+    border-color: #16a34a; 
+}
+
+.toggle-checkbox:checked + .toggle-label { 
+    background-color: #16a34a; 
+}
+
+/* Ocultar las flechitas por defecto de los campos de tipo número */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+
+/* Transición suave al desaparecer la pantalla de carga */
+#app-loader { 
+    transition: opacity 0.5s ease; 
+}
+
+/* ------------------------------------------
+   Configuración de Impresión (PDF o Papel)
+   ------------------------------------------ */
+@media print {
+    @page { 
+        margin: 0.5cm; 
+    }
+    
+    body { 
+        background: white !important; 
+        color: black !important; 
+    }
+    
+    .no-print { 
+        display: none !important; 
+    }
+    
+    #app-wrapper { 
+        display: none !important; 
+    }
+    
+    #print-section { 
+        display: block !important; 
+    }
+}
