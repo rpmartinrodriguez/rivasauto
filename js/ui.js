@@ -173,7 +173,8 @@ window.initDolarWidget = async () => {
         const res = await fetch('https://dolarapi.com/v1/dolares/blue');
         const data = await res.json();
         
-        window.dolarValue = `Blue: $${data.venta}`;
+        // Aquí mostramos los valores de Compra y Venta
+        window.dolarValue = `C: $${data.compra} | V: $${data.venta}`;
         const valSpan = document.getElementById('dolar-value');
         
         if(valSpan) {
