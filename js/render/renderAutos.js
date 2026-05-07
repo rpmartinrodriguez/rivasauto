@@ -195,33 +195,41 @@ window.renderDetalleAuto = () => {
     }
     headerActions.innerHTML = headerHtml;
 
-    // 2. TABS DE NAVEGACIÓN INTERNA
-    const activeTab = window.state.daActiveSection || 'info'; // Por defecto 'info'
-    const tabClass = "px-6 py-3 text-xs font-black uppercase tracking-widest transition-all relative flex-shrink-0";
-    const activeTabClass = "text-green-600 dark:text-green-500 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-green-500 after:rounded-t-full";
-    const inactiveTabClass = "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200";
+    const activeTab = window.state.daActiveSection || 'info';
+    let html = '';
 
-    let html = `
-        <div class="flex items-center space-x-1 border-b border-neutral-100 dark:border-neutral-800 mb-8 overflow-x-auto no-scrollbar">
-            <button onclick="window.switchDASection('info')" class="${tabClass} ${activeTab === 'info' ? activeTabClass : inactiveTabClass}">
-                Ficha Técnica
-            </button>
-            <button onclick="window.switchDASection('crm')" class="${tabClass} ${activeTab === 'crm' ? activeTabClass : inactiveTabClass}">
-                Interesados CRM
-            </button>
-            <button onclick="window.switchDASection('taller')" class="${tabClass} ${activeTab === 'taller' ? activeTabClass : inactiveTabClass}">
-                Gastos Taller
-            </button>
-            <button onclick="window.switchDASection('docs')" class="${tabClass} ${activeTab === 'docs' ? activeTabClass : inactiveTabClass}">
-                Documentos
-            </button>
-            ${auto.estado !== 'Vendido' ? `
-                <button onclick="window.switchDASection('venta')" class="${tabClass} ${activeTab === 'venta' ? 'text-rose-600 dark:text-rose-500 after:bg-rose-500' : 'text-rose-400 dark:text-rose-600 hover:text-rose-600'}">
-                    Registrar Venta
+    // Calculamos interesados para poder mostrar el número
+    const todosLeads = window.state.consultas || [];
+    const interesados = todosLeads.filter(c => {
+        const interes = (c.marcaInteres || '').toLowerCase();
+        return interes.includes(auto.marca.toLowerCase()) || interes.includes(auto.modelo.toLowerCase());
+    });
+
+    // 2. TABS DE NAVEGACIÓN INTERNA (Solo se muestran si NO estamos en el panel CRM)
+    if (activeTab !== 'crm') {
+        const tabClass = "px-6 py-3 text-xs font-black uppercase tracking-widest transition-all relative flex-shrink-0";
+        const activeTabClass = "text-green-600 dark:text-green-500 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-green-500 after:rounded-t-full";
+        const inactiveTabClass = "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200";
+
+        html += `
+            <div class="flex items-center space-x-1 border-b border-neutral-100 dark:border-neutral-800 mb-8 overflow-x-auto no-scrollbar">
+                <button onclick="window.switchDASection('info')" class="${tabClass} ${activeTab === 'info' ? activeTabClass : inactiveTabClass}">
+                    Ficha Técnica
                 </button>
-            ` : ''}
-        </div>
-    `;
+                <button onclick="window.switchDASection('taller')" class="${tabClass} ${activeTab === 'taller' ? activeTabClass : inactiveTabClass}">
+                    Gastos Taller
+                </button>
+                <button onclick="window.switchDASection('docs')" class="${tabClass} ${activeTab === 'docs' ? activeTabClass : inactiveTabClass}">
+                    Documentos
+                </button>
+                ${auto.estado !== 'Vendido' ? `
+                    <button onclick="window.switchDASection('venta')" class="${tabClass} ${activeTab === 'venta' ? 'text-rose-600 dark:text-rose-500 after:bg-rose-500' : 'text-rose-400 dark:text-rose-600 hover:text-rose-600'}">
+                        Registrar Venta
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }
 
     // 3. RENDERIZADO POR SECCIÓN
     if (activeTab === 'info') {
@@ -256,7 +264,8 @@ window.renderDetalleAuto = () => {
                         </div>
                     </div>
                 </div>
-                <div class="space-y-6">
+                
+                <div class="space-y-4">
                     <div class="bg-black text-white dark:bg-white dark:text-black p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
                         <i data-lucide="banknote" class="absolute -right-4 -bottom-4 w-32 h-32 opacity-10"></i>
                         <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-2">
@@ -275,6 +284,95 @@ window.renderDetalleAuto = () => {
                     <button onclick="window.toggleEstadoAuto('${auto.id}')" class="w-full py-4 rounded-2xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 text-xs font-black uppercase tracking-widest hover:border-green-500 hover:text-green-600 transition-all text-neutral-800 dark:text-neutral-200">
                         Estado Actual: ${auto.estado} (Cambiar)
                     </button>
+
+                    <div onclick="window.switchDASection('crm')" class="w-full p-5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 rounded-2xl cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-600 transition-all flex justify-between items-center group shadow-sm">
+                        <div>
+                            <p class="text-xs font-black text-indigo-800 dark:text-indigo-300 uppercase tracking-widest flex items-center">
+                                <i data-lucide="users" class="w-4 h-4 mr-2"></i> Interesados CRM
+                            </p>
+                            <p class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                                Hay ${interesados.length} personas buscando este modelo
+                            </p>
+                        </div>
+                        <div class="w-8 h-8 bg-indigo-200 dark:bg-indigo-800 rounded-full flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors text-indigo-700 dark:text-indigo-300">
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (activeTab === 'crm') {
+        // PANEL CRM (Reemplaza las pestañas con un botón de volver)
+        html += `
+            <div class="fade-in space-y-6">
+                <button onclick="window.switchDASection('info')" class="mb-4 flex items-center text-xs font-black uppercase tracking-widest text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Volver a la Ficha
+                </button>
+
+                <div class="bg-indigo-50 dark:bg-indigo-900/10 p-6 rounded-3xl border border-indigo-100 dark:border-indigo-800/50">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="text-lg font-black text-indigo-800 dark:text-indigo-300">
+                                Interesados Potenciales
+                            </h4>
+                            <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                                El sistema encontró ${interesados.length} personas que buscan un auto como este.
+                            </p>
+                        </div>
+                        <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-lg">
+                            <i data-lucide="zap" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3 mt-6">
+                        ${interesados.length === 0 ? '<p class="text-center py-8 text-neutral-400 dark:text-neutral-500 text-xs font-bold uppercase tracking-widest italic">Nadie ha preguntado por este modelo aún.</p>' : ''}
+                        
+                        ${interesados.map(c => {
+                            const analisis = window.calcularTermometroLead ? window.calcularTermometroLead(c) : { score: 50, estado: 'Tibio' };
+                            const barColor = analisis.estado === 'Caliente' ? 'bg-rose-500' : (analisis.estado === 'Tibio' ? 'bg-amber-500' : 'bg-blue-500');
+                            
+                            return `
+                                <div onclick="window.closeModal('modal-detalle-auto'); window.openDetalleLead('${c.id}')" class="bg-white dark:bg-neutral-900 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm flex items-center justify-between hover:border-indigo-400 transition-all cursor-pointer group">
+                                    <div class="flex-1">
+                                        <p class="text-sm font-black text-neutral-800 dark:text-neutral-100 group-hover:text-indigo-600 transition-colors">
+                                            ${c.nombre}
+                                        </p>
+                                        <div class="flex items-center mt-1 space-x-3">
+                                            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
+                                                ${c.telefono}
+                                            </span>
+                                            <div class="flex items-center">
+                                                <div class="w-16 h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden mr-2">
+                                                    <div class="${barColor} h-full" style="width: ${analisis.score}%"></div>
+                                                </div>
+                                                <span class="text-[9px] font-black uppercase text-neutral-500">
+                                                    ${analisis.estado}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-neutral-300 dark:text-neutral-600 group-hover:text-indigo-500 transition-colors"></i>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700">
+                    <h5 class="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-4">
+                        Nueva Consulta para este Auto
+                    </h5>
+                    
+                    <form onsubmit="window.handleDA_CRMSubmit(event, '${auto.id}')" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input id="dac-nombre" required placeholder="Nombre del interesado" class="w-full px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-bold text-neutral-800 dark:text-neutral-200" />
+                            <input id="dac-tel" required placeholder="Teléfono" class="w-full px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-bold text-neutral-800 dark:text-neutral-200" />
+                        </div>
+                        <textarea id="dac-nota" rows="2" placeholder="Notas adicionales (opcional)..." class="w-full px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-bold resize-none text-neutral-800 dark:text-neutral-200"></textarea>
+                        <button type="submit" class="w-full py-3.5 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase text-xs tracking-widest shadow-lg hover:scale-[1.02] transition-transform">
+                            Vincular a este Vehículo
+                        </button>
+                    </form>
                 </div>
             </div>
         `;
@@ -354,83 +452,6 @@ window.renderDetalleAuto = () => {
                         <span class="text-sm font-black uppercase text-neutral-800 dark:text-neutral-200">Verificación Policial</span>
                         <i data-lucide="${docs.verificacion ? 'check-circle' : 'circle'}" class="${docs.verificacion ? 'text-green-600 dark:text-green-500' : 'text-neutral-300 dark:text-neutral-700'}"></i>
                     </div>
-                </div>
-            </div>
-        `;
-    } else if (activeTab === 'crm') {
-        // --- SECCIÓN INTELIGENTE: INTERESADOS CRM ---
-        const todosLeads = window.state.consultas || [];
-        const interesados = todosLeads.filter(c => {
-            const interes = (c.marcaInteres || '').toLowerCase();
-            return interes.includes(auto.marca.toLowerCase()) || interes.includes(auto.modelo.toLowerCase());
-        });
-
-        html += `
-            <div class="fade-in space-y-6">
-                <div class="bg-indigo-50 dark:bg-indigo-900/10 p-6 rounded-3xl border border-indigo-100 dark:border-indigo-800/50">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h4 class="text-lg font-black text-indigo-800 dark:text-indigo-300">
-                                Interesados Potenciales
-                            </h4>
-                            <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400 mt-1">
-                                El sistema encontró ${interesados.length} personas que buscan un auto como este.
-                            </p>
-                        </div>
-                        <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-lg">
-                            <i data-lucide="zap" class="w-5 h-5"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-3 mt-6">
-                        ${interesados.length === 0 ? '<p class="text-center py-8 text-neutral-400 dark:text-neutral-500 text-xs font-bold uppercase tracking-widest italic">Nadie ha preguntado por este modelo aún.</p>' : ''}
-                        
-                        ${interesados.map(c => {
-                            const analisis = window.calcularTermometroLead ? window.calcularTermometroLead(c) : { score: 50, estado: 'Tibio' };
-                            const barColor = analisis.estado === 'Caliente' ? 'bg-rose-500' : (analisis.estado === 'Tibio' ? 'bg-amber-500' : 'bg-blue-500');
-                            
-                            return `
-                                <div onclick="window.closeModal('modal-detalle-auto'); window.openDetalleLead('${c.id}')" class="bg-white dark:bg-neutral-900 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm flex items-center justify-between hover:border-indigo-400 transition-all cursor-pointer group">
-                                    <div class="flex-1">
-                                        <p class="text-sm font-black text-neutral-800 dark:text-neutral-100 group-hover:text-indigo-600 transition-colors">
-                                            ${c.nombre}
-                                        </p>
-                                        <div class="flex items-center mt-1 space-x-3">
-                                            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
-                                                ${c.telefono}
-                                            </span>
-                                            <div class="flex items-center">
-                                                <div class="w-16 h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden mr-2">
-                                                    <div class="${barColor} h-full" style="width: ${analisis.score}%"></div>
-                                                </div>
-                                                <span class="text-[9px] font-black uppercase text-neutral-500">
-                                                    ${analisis.estado}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <i data-lucide="chevron-right" class="w-4 h-4 text-neutral-300 dark:text-neutral-600 group-hover:text-indigo-500 transition-colors"></i>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-
-                <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700">
-                    <h5 class="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-4">
-                        Nueva Consulta para este Auto
-                    </h5>
-                    
-                    <form onsubmit="window.handleDA_CRMSubmit(event, '${auto.id}')" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input id="dac-nombre" required placeholder="Nombre del interesado" class="w-full px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-bold text-neutral-800 dark:text-neutral-200" />
-                            <input id="dac-tel" required placeholder="Teléfono" class="w-full px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-bold text-neutral-800 dark:text-neutral-200" />
-                        </div>
-                        <textarea id="dac-nota" rows="2" placeholder="Notas adicionales (opcional)..." class="w-full px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-bold resize-none text-neutral-800 dark:text-neutral-200"></textarea>
-                        <button type="submit" class="w-full py-3.5 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase text-xs tracking-widest shadow-lg hover:scale-[1.02] transition-transform">
-                            Vincular a este Vehículo
-                        </button>
-                    </form>
                 </div>
             </div>
         `;
