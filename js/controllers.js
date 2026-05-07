@@ -45,7 +45,7 @@ window.formatInputMoney = (input) => {
 // --------------------------------------------------------
 
 window.calcularTermometroLead = (lead) => {
-    let score = 50; // Puntaje base
+    let score = 50; 
     
     if (!lead) return { score: 0, estado: 'Frío' };
 
@@ -58,41 +58,35 @@ window.calcularTermometroLead = (lead) => {
 
     // 1. Reglas por Antigüedad
     if (diasAntiguedad <= 3) {
-        score += 20; // Cliente fresco
+        score += 20; 
     } else if (diasAntiguedad <= 7) {
         score += 10; 
     } else if (diasAntiguedad > 30) {
-        score -= 20; // Cliente viejo que se va enfriando
+        score -= 20; 
     }
 
     // 2. Reglas por Gestión e Interacción del Vendedor
     if (lead.historial && lead.historial.length > 0) {
-        // Premio por cantidad de interacciones
         score += (lead.historial.length * 5); 
         
         const completados = lead.historial.filter(h => h.completado);
         const pendientes = lead.historial.filter(h => !h.completado && h.proximoContacto);
 
-        // Premio por acciones completadas (lo llamaron de verdad)
         score += (completados.length * 10);
 
-        // Evaluación de la agenda a futuro
         pendientes.forEach(p => {
             if (p.proximoContacto < todayStr) {
-                score -= 15; // Castigo fuerte: el vendedor tiene una llamada atrasada
+                score -= 15; 
             } else {
-                score += 15; // Premio: el vendedor lo tiene agendado para seguir gestionando
+                score += 15; 
             }
         });
     } else {
-        // Castigo fuerte: cargaron el lead pero nunca le cargaron ni un seguimiento
         score -= 15; 
     }
 
-    // Aseguramos que el score no se salga de los límites 0 y 100
     score = Math.max(0, Math.min(100, score));
 
-    // Traducción del Score a Estados visuales
     let estado = 'Frío';
     if (score >= 70) {
         estado = 'Caliente';
@@ -106,15 +100,6 @@ window.calcularTermometroLead = (lead) => {
 // --------------------------------------------------------
 // 3. CONTROLADORES DE FLOTA Y AUTOS
 // --------------------------------------------------------
-
-window.toggleAutosViewMode = (mode) => { 
-    window.state.autosViewMode = mode; 
-    localStorage.setItem('autosViewMode', mode); 
-    
-    if (window.renderAutosView) {
-        window.renderAutosView(); 
-    }
-};
 
 window.openModalCreateAuto = () => { 
     window.state.editingAutoId = null; 
@@ -216,7 +201,7 @@ window.handleAutoSubmit = async (e) => {
 
 window.openDetalleAuto = (id) => { 
     window.state.selectedAutoId = id; 
-    window.state.daActiveSection = 'crm'; 
+    window.state.daActiveSection = 'info'; 
     window.state.isVentaMode = false; 
     window.state.ventaData.tienePermuta = false; 
     
@@ -471,7 +456,7 @@ window.quitarSeña = async (autoId) => {
 };
 
 // --------------------------------------------------------
-// 4. VENTA Y TRANSACCIONES MAESTRAS
+// 4. VENTA Y TRANSACCIONES MAESTRAS (CON INTELIGENCIA CRM)
 // --------------------------------------------------------
 
 window.handleDAVentaSubmit = async (e, autoId) => {
@@ -493,6 +478,8 @@ window.handleDAVentaSubmit = async (e, autoId) => {
         const auto = window.state.autos.find(x => x.id === autoId);
         const userQueRegistra = window.state.currentUser; 
         
+        // 1. Recolección de valores
+        const nombreComprador = document.getElementById('vent-comp-nombre').value;
         const vEfectivo = document.getElementById('chk-efectivo')?.checked ? Number(document.getElementById('val-efectivo').value.replace(/[^0-9]/g, '')) : 0;
         const vCredito = document.getElementById('chk-credito')?.checked ? Number(document.getElementById('val-credito').value.replace(/[^0-9]/g, '')) : 0;
         const cCredito = Number(document.getElementById('cuotas-credito')?.value || 0);
@@ -514,6 +501,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 
         const fDate = new Date().toISOString().split('T')[0];
 
+        // 2. Registro de Ingresos de Efectivo
         if (vEfectivo > 0) {
             const notaEfectivo = document.getElementById('nota-efectivo').value || 'Efectivo';
             await window.fbAdd("transacciones", {
@@ -532,6 +520,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             });
         }
 
+        // 3. Objetos de Deuda
         let objCredito = null;
         if (vCredito > 0 && cCredito > 0) {
             objCredito = { 
@@ -558,6 +547,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
         if (vPagare > 0) metodosUsados.push('Pagaré');
         if (vPermuta > 0) metodosUsados.push('Permuta');
         
+        // 4. Registro Histórico de Ventas
         await window.fbAdd("ventas", {
             fecha: fDate, 
             autoDesc: `${auto.marca} ${auto.modelo} (${auto.patente})`, 
@@ -569,7 +559,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
                 pagare: vPagare, 
                 permuta: vPermuta 
             },
-            compradorNombre: document.getElementById('vent-comp-nombre').value, 
+            compradorNombre: nombreComprador, 
             compradorTelefono: document.getElementById('vent-comp-tel').value,
             compradorDNI: document.getElementById('vent-comp-dni').value, 
             compradorDomicilio: document.getElementById('vent-comp-domicilio').value,
@@ -582,6 +572,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             detallePermuta: window.state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
         });
 
+        // 5. Alta del Auto en Permuta
         if (window.state.ventaData.tienePermuta) {
             await window.fbAdd("autos", { 
                 marca: document.getElementById('p-marca').value.toUpperCase(), 
@@ -600,8 +591,33 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             });
         }
         
+        // 6. Baja del Auto de la Flota
         await window.fbUpdate("autos", autoId, { estado: 'Vendido' }); 
         
+        // 7. CIERRE INTELIGENTE EN EL CRM (EL PUENTE)
+        try {
+            const leadMatch = (window.state.consultas || []).find(c => c.nombre.trim().toLowerCase() === nombreComprador.trim().toLowerCase());
+            
+            if (leadMatch && leadMatch.estadoLead !== 'Vendido') {
+                await window.fbUpdate("consultas", leadMatch.id, { estadoLead: 'Vendido' });
+                
+                const autoVendidoDesc = `${auto.marca} ${auto.modelo} (${auto.patente})`;
+                const nuevoHistorial = { 
+                    id: window.generateId(), 
+                    fechaCarga: fDate, 
+                    texto: `¡OPERACIÓN CONCRETADA EN SALÓN! Vehículo vendido: ${autoVendidoDesc}`, 
+                    proximoContacto: null, 
+                    completado: true 
+                };
+                
+                const listHistorial = [...(leadMatch.historial || []), nuevoHistorial];
+                await window.fbUpdate("consultas", leadMatch.id, { historial: listHistorial });
+            }
+        } catch(crmErr) {
+            console.error("Error al intentar vincular y cerrar el lead en el CRM:", crmErr);
+        }
+
+        // 8. Auto-generación de Boleto
         const cuotasMax = Math.max(cCredito, cPagare);
         const tipoBoleto = window.state.ventaData.tienePermuta ? 'Boleto Venta con Permuta' : 'Boleto Compra Venta';
         
@@ -610,7 +626,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             fecha: fDate, 
             vendedor: 'RIVAS AUTO', 
             vendedorLoc: 'Gualeguaychú',
-            comprador: document.getElementById('vent-comp-nombre').value, 
+            comprador: nombreComprador, 
             dni: document.getElementById('vent-comp-dni').value,
             domicilio: document.getElementById('vent-comp-domicilio').value, 
             marca: auto.marca, 
@@ -840,7 +856,6 @@ window.handleGlobalLeadSubmit = async (e) => {
             nombre: document.getElementById('gl-nombre').value,
             telefono: document.getElementById('gl-tel').value,
             marcaInteres: document.getElementById('gl-interes').value,
-            // Eliminamos la captura del select. El estado se calcula de forma dinámica en base al historial
             notas: document.getElementById('gl-nota').value,
             fecha: new Date().toISOString().split('T')[0],
             userId: window.state.currentUser.id,
