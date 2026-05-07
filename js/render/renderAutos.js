@@ -48,7 +48,7 @@ window.renderAutosView = () => {
                 ? 'bg-green-500' 
                 : (a.estado === 'Señado' ? 'bg-purple-500' : 'bg-amber-500');
             
-            // INTELIGENCIA: Ver si este auto tiene interesados en el CRM
+            // INTELIGENCIA CRM: Ver si este auto tiene interesados
             const interesados = (window.state.consultas || []).filter(c => {
                 const interes = (c.marcaInteres || '').toLowerCase();
                 return interes.includes(a.marca.toLowerCase()) || interes.includes(a.modelo.toLowerCase());
@@ -57,7 +57,7 @@ window.renderAutosView = () => {
             let badgeInteresados = '';
             if (interesados.length > 0) {
                 badgeInteresados = `
-                    <div class="absolute top-3 left-3 bg-indigo-600 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg flex items-center animate-bounce">
+                    <div class="absolute top-3 left-3 bg-indigo-600 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg flex items-center animate-bounce z-20">
                         <i data-lucide="zap" class="w-3 h-3 mr-1"></i> 
                         ${interesados.length} INTERESADOS
                     </div>
@@ -196,18 +196,18 @@ window.renderDetalleAuto = () => {
     headerActions.innerHTML = headerHtml;
 
     // 2. TABS DE NAVEGACIÓN INTERNA
-    const activeTab = window.state.daActiveSection || 'crm';
+    const activeTab = window.state.daActiveSection || 'info'; // Por defecto 'info'
     const tabClass = "px-6 py-3 text-xs font-black uppercase tracking-widest transition-all relative flex-shrink-0";
     const activeTabClass = "text-green-600 dark:text-green-500 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-green-500 after:rounded-t-full";
     const inactiveTabClass = "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200";
 
     let html = `
         <div class="flex items-center space-x-1 border-b border-neutral-100 dark:border-neutral-800 mb-8 overflow-x-auto no-scrollbar">
+            <button onclick="window.switchDASection('info')" class="${tabClass} ${activeTab === 'info' ? activeTabClass : inactiveTabClass}">
+                Ficha Técnica
+            </button>
             <button onclick="window.switchDASection('crm')" class="${tabClass} ${activeTab === 'crm' ? activeTabClass : inactiveTabClass}">
                 Interesados CRM
-            </button>
-            <button onclick="window.switchDASection('info')" class="${tabClass} ${activeTab === 'info' ? activeTabClass : inactiveTabClass}">
-                Ficha
             </button>
             <button onclick="window.switchDASection('taller')" class="${tabClass} ${activeTab === 'taller' ? activeTabClass : inactiveTabClass}">
                 Gastos Taller
@@ -542,4 +542,51 @@ window.renderDetalleAuto = () => {
 window.toggleVentaPermuta = () => {
     window.state.ventaData.tienePermuta = !window.state.ventaData.tienePermuta;
     window.renderDetalleAuto();
+};
+
+window.imprimirFlota = () => {
+    const autos = window.state.autos.filter(a => a.estado !== 'Vendido');
+    let html = `
+        <div style="font-family: Arial, sans-serif; color: #000; padding: 20px;">
+            <h2 style="text-align: center; text-transform: uppercase; margin-bottom: 20px;">Reporte de Flota y Stock</h2>
+            <p style="text-align: center; color: #555; font-size: 14px; margin-bottom: 30px;">
+                Generado el: ${new Date().toLocaleDateString('es-AR')}
+            </p>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <thead>
+                    <tr style="background-color: #f1f1f1; text-align: left;">
+                        <th style="padding: 10px; border: 1px solid #ddd;">Patente</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Vehículo</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Año / Km</th>
+                        <th style="padding: 10px; border: 1px solid #ddd;">Estado</th>
+                        <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Precio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${autos.map(a => `
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; text-transform: uppercase;">
+                                ${a.patente}
+                            </td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                ${a.marca} ${a.modelo}
+                            </td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                ${a.año} | ${new Intl.NumberFormat('es-AR').format(a.km)} km
+                            </td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                ${a.estado}
+                            </td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">
+                                ${window.formatMoney(a.precio, a.moneda)}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    document.getElementById('print-content').innerHTML = html;
+    window.print();
 };
