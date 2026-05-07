@@ -29,8 +29,11 @@ window.renderClientesView = () => {
     if (leads.length === 0) {
         table.innerHTML = `
             <tr>
-                <td colspan="4" class="text-center py-8 text-neutral-500 font-bold">
-                    No hay clientes/leads en tu cartera.
+                <td colspan="4" class="text-center py-10 text-neutral-500 font-bold">
+                    <div class="flex flex-col items-center justify-center">
+                        <i data-lucide="inbox" class="w-8 h-8 mb-3 opacity-50"></i>
+                        No hay clientes/leads en tu cartera.
+                    </div>
                 </td>
             </tr>
         `;
@@ -41,15 +44,18 @@ window.renderClientesView = () => {
     table.innerHTML = `
         <thead>
             <tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-800/30">
-                <th class="px-6 py-4 font-bold">Cliente</th>
+                <th class="px-6 py-4 font-bold rounded-tl-2xl">Cliente</th>
                 <th class="px-6 py-4 font-bold">Interés / Auto</th>
-                <th class="px-6 py-4 font-bold">Estado</th>
-                <th class="px-6 py-4 font-bold text-right">Próx. Contacto</th>
+                <th class="px-6 py-4 font-bold text-center">Score (Temp)</th>
+                <th class="px-6 py-4 font-bold text-right rounded-tr-2xl">Próx. Contacto</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800/50">
             ${leads.map(c => {
-                // 1. Buscamos si está asociado a un auto específico (incluso si se vendió)
+                // 1. Análisis Inteligente de Temperatura (Llamada al nuevo controlador)
+                const analisis = window.calcularTermometroLead ? window.calcularTermometroLead(c) : { score: 50, estado: 'Tibio' };
+                
+                // 2. Buscamos si está asociado a un auto específico
                 let autoVinculado = '';
                 
                 if (c.autoId) {
@@ -57,51 +63,72 @@ window.renderClientesView = () => {
                     if (auto) {
                         const estadoAuto = auto.estado === 'Vendido' ? '<span class="text-rose-500 ml-1">[VENDIDO]</span>' : '';
                         autoVinculado = `
-                            <div class="text-[10px] text-green-600 dark:text-green-400 font-bold mt-1">
-                                Vinculado a: ${auto.marca} ${auto.modelo} ${auto.patente} ${estadoAuto}
+                            <div class="text-[10px] text-green-600 dark:text-green-400 font-bold mt-1 uppercase tracking-widest flex items-center">
+                                <i data-lucide="link" class="w-3 h-3 mr-1"></i> Ref: ${auto.marca} ${auto.modelo} ${estadoAuto}
+                            </div>
+                        `;
+                    }
+                } else {
+                    // INTELIGENCIA: Buscar si entró algún auto a la flota que coincida con lo que busca
+                    const interesTexto = (c.marcaInteres || '').toLowerCase();
+                    const coincidencias = window.state.autos.filter(a => {
+                        return a.estado !== 'Vendido' && (
+                            interesTexto.includes(a.marca.toLowerCase()) || 
+                            interesTexto.includes(a.modelo.toLowerCase())
+                        );
+                    });
+
+                    if (coincidencias.length > 0) {
+                        autoVinculado = `
+                            <div class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold mt-1 uppercase tracking-widest flex items-center">
+                                <i data-lucide="zap" class="w-3 h-3 mr-1 animate-pulse"></i> ¡Stock Disponible (${coincidencias.length})!
                             </div>
                         `;
                     }
                 }
 
-                // 2. Colores según el estado (Temperatura del Lead)
-                let eClass = 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300';
+                // 3. Colores según el Score Calculado
+                let eClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800'; // Frío
+                let tColor = 'text-blue-500';
                 
-                if (c.estadoLead === 'Caliente') {
-                    eClass = 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400';
-                } else if (c.estadoLead === 'Tibio') {
-                    eClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400';
-                } else if (c.estadoLead === 'Frío') {
-                    eClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+                if (analisis.estado === 'Caliente') {
+                    eClass = 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800';
+                    tColor = 'text-rose-500';
+                } else if (analisis.estado === 'Tibio') {
+                    eClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+                    tColor = 'text-amber-500';
                 }
 
-                // 3. Buscar el próximo contacto pendiente en el historial
+                // 4. Buscar el próximo contacto pendiente en el historial
                 const pendientes = (c.historial || [])
                     .filter(h => !h.completado && h.proximoContacto)
                     .sort((a,b) => new Date(a.proximoContacto) - new Date(b.proximoContacto));
                 
                 const prox = pendientes.length > 0 ? window.formatDate(pendientes[0].proximoContacto) : 'Sin agendar';
 
-                // 4. Retornamos la fila
+                // 5. Retornamos la fila
                 return `
                 <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetalleLead('${c.id}')">
                     <td class="px-6 py-4">
-                        <p class="font-black text-sm">${c.nombre}</p>
-                        <p class="text-xs text-neutral-500 font-bold">${c.telefono}</p>
+                        <p class="font-black text-sm text-neutral-800 dark:text-neutral-200">${c.nombre}</p>
+                        <p class="text-[10px] text-neutral-500 font-bold tracking-widest uppercase mt-0.5">${c.telefono}</p>
                     </td>
                     <td class="px-6 py-4">
                         <p class="text-sm font-bold text-neutral-700 dark:text-neutral-300 truncate max-w-[200px]">
-                            ${c.marcaInteres}
+                            ${c.marcaInteres || 'Consulta General'}
                         </p>
                         ${autoVinculado}
                     </td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-lg ${eClass}">
-                            ${c.estadoLead}
-                        </span>
+                    <td class="px-6 py-4 text-center">
+                        <div class="inline-flex flex-col items-center">
+                            <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg border ${eClass} mb-1 shadow-sm">
+                                ${analisis.estado}
+                            </span>
+                            <span class="text-[10px] font-bold ${tColor}">${analisis.score} pts</span>
+                        </div>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <span class="text-xs font-black ${prox !== 'Sin agendar' ? 'text-amber-600 dark:text-amber-500' : 'text-neutral-400'}">
+                        <span class="text-xs font-black uppercase tracking-wider ${prox !== 'Sin agendar' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400'}">
                             ${prox}
                         </span>
                     </td>
@@ -110,6 +137,10 @@ window.renderClientesView = () => {
             }).join('')}
         </tbody>
     `;
+
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
 };
 
 window.openDetalleLead = (id) => {
@@ -119,95 +150,160 @@ window.openDetalleLead = (id) => {
         return;
     }
 
-    // 1. Panel informativo si está vinculado a un auto
+    // Análisis en tiempo real para esta vista
+    const analisis = window.calcularTermometroLead ? window.calcularTermometroLead(lead) : { score: 50, estado: 'Tibio' };
+
+    // 1. Panel informativo de Coincidencias o Auto Vinculado
     let autoVinculado = '';
+    
     if (lead.autoId) {
         const auto = window.state.autos.find(a => a.id === lead.autoId);
         if (auto) {
             autoVinculado = `
-                <div class="mt-4 p-3 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-xl">
-                    <p class="text-xs font-bold text-green-700 dark:text-green-500 uppercase tracking-widest flex items-center">
-                        <i data-lucide="car" class="w-4 h-4 mr-2"></i> Consulta original por vehículo:
+                <div class="mt-6 p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/50 rounded-2xl shadow-sm">
+                    <p class="text-[10px] font-bold text-green-700 dark:text-green-500 uppercase tracking-widest flex items-center mb-1">
+                        <i data-lucide="link" class="w-3 h-3 mr-1"></i> Consulta original (Referencia):
                     </p>
-                    <p class="text-sm font-black mt-1">
-                        ${auto.marca} ${auto.modelo} (${auto.patente}) - ${auto.estado === 'Vendido' ? 'VENDIDO' : auto.estado}
+                    <p class="text-sm font-black text-neutral-800 dark:text-neutral-200">
+                        ${auto.marca} ${auto.modelo} (${auto.patente})
                     </p>
+                    <p class="text-xs font-bold mt-1 ${auto.estado === 'Vendido' ? 'text-rose-500' : 'text-green-600'}">Estado: ${auto.estado}</p>
+                </div>
+            `;
+        }
+    } else {
+        // Alerta de Coincidencia Inteligente
+        const interesTexto = (lead.marcaInteres || '').toLowerCase();
+        const coincidencias = window.state.autos.filter(a => {
+            return a.estado !== 'Vendido' && (
+                interesTexto.includes(a.marca.toLowerCase()) || 
+                interesTexto.includes(a.modelo.toLowerCase())
+            );
+        });
+
+        if (coincidencias.length > 0) {
+            autoVinculado = `
+                <div class="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800/50 rounded-2xl shadow-sm">
+                    <p class="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center mb-2">
+                        <i data-lucide="zap" class="w-4 h-4 mr-1 animate-pulse"></i> ¡Oportunidad de Cierre!
+                    </p>
+                    <p class="text-xs font-bold text-neutral-600 dark:text-neutral-400 mb-2">Tienes vehículos en stock que coinciden con el interés de este cliente:</p>
+                    <ul class="space-y-1">
+                        ${coincidencias.map(a => `<li class="text-sm font-black text-indigo-800 dark:text-indigo-300">• ${a.marca} ${a.modelo} (${window.formatMoney(a.precio)})</li>`).join('')}
+                    </ul>
                 </div>
             `;
         }
     }
 
+    // 2. Determinar colores de la barra de temperatura
+    let barColor = 'bg-blue-500';
+    if (analisis.estado === 'Caliente') barColor = 'bg-rose-500';
+    else if (analisis.estado === 'Tibio') barColor = 'bg-amber-500';
+
     const historial = lead.historial || [];
 
-    // 2. Construcción del HTML del Modal
+    // 3. Construcción del HTML del Modal
     let html = `
+        <div class="mb-6 p-5 bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-2xl">
+            <div class="flex justify-between items-end mb-2">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Estado Calculado</p>
+                    <h4 class="font-black text-xl uppercase ${barColor.replace('bg-', 'text-')}">${analisis.estado}</h4>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Score</p>
+                    <h4 class="font-black text-2xl">${analisis.score} <span class="text-sm text-neutral-400">/ 100</span></h4>
+                </div>
+            </div>
+            <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-3 overflow-hidden mt-3 shadow-inner">
+                <div class="${barColor} h-3 rounded-full transition-all duration-1000 ease-out" style="width: ${analisis.score}%"></div>
+            </div>
+            <p class="text-[10px] font-bold text-neutral-400 mt-2 text-center uppercase tracking-widest flex items-center justify-center">
+                <i data-lucide="cpu" class="w-3 h-3 mr-1"></i> Analizado por el sistema según historial de atención
+            </p>
+        </div>
+
         <form id="form-edit-lead" onsubmit="window.handleEditLeadSubmit(event, '${id}')" class="space-y-4 mb-6">
             <div class="grid grid-cols-2 gap-4">
-                <input id="edit-lead-nombre" required placeholder="Nombre" value="${lead.nombre}" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold focus:border-green-500 transition-colors" />
-                <input id="edit-lead-tel" required placeholder="Teléfono" value="${lead.telefono}" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold focus:border-green-500 transition-colors" />
+                <div>
+                    <label class="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-1 pl-1">Nombre</label>
+                    <input id="edit-lead-nombre" required value="${lead.nombre}" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold focus:border-green-500 transition-colors" />
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-1 pl-1">Teléfono</label>
+                    <input id="edit-lead-tel" required value="${lead.telefono}" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold focus:border-green-500 transition-colors" />
+                </div>
             </div>
             
-            <select id="edit-lead-estado" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold focus:border-green-500 transition-colors">
-                <option value="Caliente" ${lead.estadoLead === 'Caliente' ? 'selected' : ''}>Alta Prioridad (Caliente)</option>
-                <option value="Tibio" ${lead.estadoLead === 'Tibio' ? 'selected' : ''}>Seguimiento Normal (Tibio)</option>
-                <option value="Frío" ${lead.estadoLead === 'Frío' ? 'selected' : ''}>Baja Prioridad (Frío)</option>
-            </select>
+            <div>
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-1 pl-1">Interés Inicial</label>
+                <input id="edit-lead-interes" disabled value="${lead.marcaInteres || 'No especificado'}" class="w-full rounded-xl px-4 py-3 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none font-bold text-neutral-500 cursor-not-allowed" />
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-1 pl-1">Notas Iniciales</label>
+                <textarea id="edit-lead-nota" rows="2" placeholder="Notas iniciales..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none resize-none font-bold focus:border-green-500 transition-colors">${lead.notas || ''}</textarea>
+            </div>
             
-            <textarea id="edit-lead-nota" rows="2" placeholder="Notas iniciales..." class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none resize-none font-bold focus:border-green-500 transition-colors">${lead.notas || ''}</textarea>
-            
-            ${autoVinculado}
-            
-            <button type="submit" class="w-full py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 rounded-xl font-black uppercase tracking-wider text-xs hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors">
-                Actualizar Datos Base
+            <button type="submit" class="w-full py-3 bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 rounded-xl font-black uppercase tracking-wider text-xs hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors shadow-sm">
+                Actualizar Datos de Contacto
             </button>
         </form>
 
-        <div class="border-t border-neutral-200 dark:border-neutral-800 pt-6">
+        ${autoVinculado}
+
+        <div class="border-t border-neutral-200 dark:border-neutral-800 pt-6 mt-6">
             <h4 class="font-black text-sm uppercase mb-4 text-neutral-500 tracking-wider flex items-center">
                 <i data-lucide="history" class="w-4 h-4 mr-2"></i> Historial y Seguimiento
             </h4>
             
-            <form onsubmit="window.handleAddLeadHistory(event, '${id}')" class="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/50 mb-6">
-                <textarea id="lh-texto" required rows="2" placeholder="Ej: Lo llamé y pidió que le envíe fotos..." class="w-full rounded-xl px-3 py-2 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none resize-none font-bold text-sm mb-3 focus:border-amber-500 transition-colors"></textarea>
+            <form onsubmit="window.handleAddLeadHistory(event, '${id}')" class="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/50 mb-6 shadow-sm">
+                <textarea id="lh-texto" required rows="2" placeholder="Ej: Lo llamé y ofreció permuta por un Gol..." class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none resize-none font-bold text-sm mb-4 focus:border-amber-500 transition-colors"></textarea>
                 
                 <div class="flex items-center space-x-3">
                     <div class="flex-1">
                         <label class="block text-[10px] font-bold text-amber-700 dark:text-amber-500 uppercase tracking-widest mb-1">
-                            Agendar Alerta (Próx. Contacto)
+                            Agendar Próximo Contacto
                         </label>
-                        <input id="lh-fecha" type="date" class="w-full rounded-xl px-3 py-2 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold text-sm focus:border-amber-500 transition-colors" />
+                        <input id="lh-fecha" type="date" required class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold text-sm focus:border-amber-500 transition-colors" />
                     </div>
-                    <button type="submit" class="mt-4 px-4 py-3 bg-amber-500 text-black rounded-xl font-black uppercase tracking-wider text-xs shadow-md hover:scale-105 transition-transform">
-                        Agregar
+                    <button type="submit" class="mt-5 px-5 py-3 bg-amber-500 hover:bg-amber-600 text-black rounded-xl font-black uppercase tracking-wider text-xs shadow-md hover:scale-105 transition-all">
+                        Registrar
                     </button>
                 </div>
             </form>
 
-            <div class="space-y-3 max-h-60 overflow-y-auto no-scrollbar pr-1">
-                ${historial.length === 0 ? '<p class="text-xs text-neutral-500 italic text-center py-4">Sin historial de seguimiento registrado.</p>' : ''}
+            <div class="space-y-4 max-h-60 overflow-y-auto no-scrollbar pr-1">
+                ${historial.length === 0 ? `
+                    <div class="text-center py-6">
+                        <i data-lucide="message-square" class="w-8 h-8 text-neutral-300 mx-auto mb-2"></i>
+                        <p class="text-xs text-neutral-500 font-bold">Aún no has registrado ningún seguimiento.<br>¡Háblale y suma puntos!</p>
+                    </div>
+                ` : ''}
                 
                 ${historial.slice().reverse().map(h => `
-                    <div class="p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 flex flex-col relative transition-opacity ${h.completado ? 'opacity-60' : ''}">
-                        <p class="text-xs font-bold mb-3 text-neutral-800 dark:text-neutral-200">${h.texto}</p>
+                    <div class="p-4 bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm flex flex-col relative transition-opacity ${h.completado ? 'opacity-60' : ''}">
+                        <p class="text-sm font-bold mb-3 text-neutral-800 dark:text-neutral-200 leading-relaxed">${h.texto}</p>
                         
-                        <div class="flex justify-between items-center mt-auto border-t border-neutral-200 dark:border-neutral-700 pt-3">
-                            <span class="text-[10px] text-neutral-400 font-bold tracking-wider">
-                                Registrado: ${window.formatDate(h.fechaCarga)}
+                        <div class="flex justify-between items-center mt-auto border-t border-neutral-100 dark:border-neutral-800 pt-3">
+                            <span class="text-[10px] text-neutral-400 font-bold tracking-wider uppercase">
+                                Carga: ${window.formatDate(h.fechaCarga)}
                             </span>
                             
                             ${h.proximoContacto ? `
                                 <div class="flex items-center">
-                                    <span class="text-[10px] font-black tracking-wider mr-3 ${h.completado ? 'text-green-500' : 'text-amber-500'}">
-                                        Alerta: ${window.formatDate(h.proximoContacto)}
+                                    <span class="text-[10px] font-black uppercase tracking-wider mr-3 ${h.completado ? 'text-green-500' : (h.proximoContacto < new Date().toISOString().split('T')[0] ? 'text-rose-500' : 'text-amber-500')}">
+                                        Agenda: ${window.formatDate(h.proximoContacto)}
                                     </span>
                                     
                                     ${!h.completado ? `
-                                        <button type="button" onclick="window.markHistoryCompleted('${id}', '${h.id}')" class="px-3 py-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500 rounded-lg text-[10px] font-black uppercase hover:bg-green-200 dark:hover:bg-green-800 transition-colors shadow-sm">
-                                            Marcar Hecho
+                                        <button type="button" onclick="window.markHistoryCompleted('${id}', '${h.id}')" class="px-3 py-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-green-200 dark:hover:bg-green-800 transition-colors shadow-sm flex items-center">
+                                            <i data-lucide="check" class="w-3 h-3 mr-1"></i> Hecho
                                         </button>
                                     ` : `
-                                        <div class="flex items-center text-green-500 text-[10px] font-black uppercase tracking-wider">
-                                            <i data-lucide="check-check" class="w-4 h-4 mr-1"></i> Listo
+                                        <div class="flex items-center text-green-500 text-[10px] font-black uppercase tracking-wider bg-green-50 dark:bg-green-900/10 px-2 py-1 rounded">
+                                            <i data-lucide="check-check" class="w-3 h-3 mr-1"></i> Listo
                                         </div>
                                     `}
                                 </div>
@@ -216,10 +312,6 @@ window.openDetalleLead = (id) => {
                     </div>
                 `).join('')}
             </div>
-            
-            <button type="button" onclick="window.closeModal('modal-detalle-lead')" class="w-full mt-6 py-4 bg-black text-white dark:bg-white dark:text-black rounded-xl font-black uppercase tracking-wider shadow-lg hover:scale-[1.02] transition-transform flex justify-center items-center">
-                Cerrar Ficha
-            </button>
         </div>
     `;
 
