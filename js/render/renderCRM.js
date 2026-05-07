@@ -9,7 +9,26 @@ window.renderClientesView = () => {
         return;
     }
 
+    // 1. INYECTAR BUSCADOR DINÁMICAMENTE (Si no existe)
+    const headerDiv = document.querySelector('#view-crm .mb-6');
+    if (headerDiv && !document.getElementById('search-crm')) {
+        headerDiv.className = "mb-6 flex flex-col sm:flex-row justify-between items-center gap-4";
+        headerDiv.innerHTML = `
+            <button onclick="window.openModal('modal-nuevo-lead')" class="bg-black text-white dark:bg-white dark:text-black px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg flex items-center w-full sm:w-auto justify-center shrink-0">
+                <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> Nuevo Lead
+            </button>
+            <div class="relative w-full sm:w-96">
+                <i data-lucide="search" class="absolute left-4 top-3.5 w-4 h-4 text-neutral-400"></i>
+                <input type="text" id="search-crm" onkeyup="window.renderClientesView()" oninput="window.renderClientesView()" placeholder="Buscar por nombre, teléfono o interés..." class="w-full pl-11 pr-4 py-2.5 bg-white/60 dark:bg-neutral-900/60 backdrop-blur-md border border-neutral-200 dark:border-neutral-700 rounded-xl outline-none font-bold text-sm focus:border-green-500 transition-colors shadow-sm">
+            </div>
+        `;
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+
     let leads = window.state.consultas || [];
+    const query = (document.getElementById('search-crm')?.value || '').toLowerCase();
 
     // Filtro estricto por roles para privacidad del CRM
     if (window.state.currentUser.rol === 'Vendedor') {
@@ -22,6 +41,15 @@ window.renderClientesView = () => {
         leads = leads.filter(c => validUsers.includes(c.userId));
     }
 
+    // Filtro del Buscador
+    if (query) {
+        leads = leads.filter(c => 
+            (c.nombre || '').toLowerCase().includes(query) ||
+            (c.telefono || '').toLowerCase().includes(query) ||
+            (c.marcaInteres || '').toLowerCase().includes(query)
+        );
+    }
+
     // Ordenar los leads por fecha de creación (los más nuevos arriba)
     leads.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
@@ -32,7 +60,7 @@ window.renderClientesView = () => {
                 <td colspan="4" class="text-center py-10 text-neutral-500 font-bold">
                     <div class="flex flex-col items-center justify-center">
                         <i data-lucide="inbox" class="w-8 h-8 mb-3 opacity-50"></i>
-                        No hay clientes/leads en tu cartera.
+                        ${query ? 'No se encontraron clientes con esa búsqueda.' : 'No hay clientes/leads en tu cartera.'}
                     </div>
                 </td>
             </tr>
@@ -57,14 +85,17 @@ window.renderClientesView = () => {
     `;
 
     leads.forEach(c => {
-        // 1. Análisis Inteligente de Temperatura (Llamada al controlador)
-        const analisis = window.calcularTermometroLead ? window.calcularTermometroLead(c) : { score: 50, estado: 'Tibio' };
+        // Análisis Inteligente de Temperatura
+        let analisis = window.calcularTermometroLead ? window.calcularTermometroLead(c) : { score: 50, estado: 'Tibio' };
         
-        // 2. Buscamos al creador del Lead
+        // Formatear fecha simple (DD/MM) para que no se corte en celulares
+        const fechaFormat = c.fecha ? c.fecha.split('-').reverse().slice(0, 2).join('/') : '--/--';
+        
+        // Buscamos al creador del Lead
         const creador = (window.state.usuarios || []).find(u => u.id === c.userId);
         const nombreCreador = creador ? creador.nombre : 'Usuario Desconocido';
         
-        // 3. Buscamos si está asociado a un auto específico
+        // Buscamos si está asociado a un auto específico
         let autoVinculado = '';
         
         if (c.autoId) {
@@ -78,7 +109,6 @@ window.renderClientesView = () => {
                 `;
             }
         } else {
-            // INTELIGENCIA: Buscar si entró algún auto a la flota que coincida con lo que busca
             const interesTexto = (c.marcaInteres || '').toLowerCase();
             const coincidencias = window.state.autos.filter(a => {
                 return a.estado !== 'Vendido' && (
@@ -87,7 +117,7 @@ window.renderClientesView = () => {
                 );
             });
 
-            if (coincidencias.length > 0) {
+            if (coincidencias.length > 0 && c.estadoLead !== 'Vendido') {
                 autoVinculado = `
                     <div class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold mt-1 uppercase tracking-widest flex items-center">
                         <i data-lucide="zap" class="w-3 h-3 mr-1 animate-pulse"></i> ¡Stock Disponible (${coincidencias.length})!
@@ -96,11 +126,16 @@ window.renderClientesView = () => {
             }
         }
 
-        // 4. Colores según el Score Calculado
+        // Colores según el Score Calculado (Forzar estado si ya se vendió por salón)
         let eClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800'; // Frío
         let tColor = 'text-blue-500';
         
-        if (analisis.estado === 'Caliente') {
+        if (c.estadoLead === 'Vendido') {
+            eClass = 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800';
+            tColor = 'text-purple-500';
+            analisis.estado = 'Cerrado';
+            analisis.score = 100;
+        } else if (analisis.estado === 'Caliente') {
             eClass = 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800';
             tColor = 'text-rose-500';
         } else if (analisis.estado === 'Tibio') {
@@ -108,29 +143,31 @@ window.renderClientesView = () => {
             tColor = 'text-amber-500';
         }
 
-        // 5. Buscar el próximo contacto pendiente en el historial
+        // Buscar el próximo contacto pendiente en el historial
         const pendientes = (c.historial || [])
             .filter(h => !h.completado && h.proximoContacto)
             .sort((a,b) => new Date(a.proximoContacto) - new Date(b.proximoContacto));
         
-        const prox = pendientes.length > 0 ? window.formatDate(pendientes[0].proximoContacto) : 'Sin agendar';
+        let prox = pendientes.length > 0 ? window.formatDate(pendientes[0].proximoContacto) : 'Sin agendar';
+        if (c.estadoLead === 'Vendido') {
+            prox = 'Vendido';
+        }
 
-        // 6. Armar fila con formato expandido
         tableHtml += `
             <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer" onclick="window.openDetalleLead('${c.id}')">
-                <td class="px-6 py-4 flex items-center space-x-4">
-                    <div class="bg-neutral-100 dark:bg-neutral-800 rounded-xl p-2 text-center min-w-[55px] shadow-sm border border-neutral-200 dark:border-neutral-700">
-                        <p class="text-[9px] font-black uppercase text-neutral-400 tracking-widest mb-0.5">Alta</p>
+                <td class="px-4 py-4 flex items-center space-x-3">
+                    <div class="bg-neutral-100 dark:bg-neutral-800 rounded-xl p-1.5 text-center min-w-[50px] shadow-sm border border-neutral-200 dark:border-neutral-700">
+                        <p class="text-[8px] font-black uppercase text-neutral-400 tracking-widest mb-0.5">Alta</p>
                         <p class="text-xs font-black text-neutral-700 dark:text-neutral-300">
-                            ${window.formatDate(c.fecha).slice(0,5)}
+                            ${fechaFormat}
                         </p>
                     </div>
                     <div>
                         <p class="font-black text-sm text-neutral-800 dark:text-neutral-200">
                             ${c.nombre}
                         </p>
-                        <p class="text-[10px] text-neutral-500 font-bold tracking-widest uppercase mt-1">
-                            ${c.telefono} • <span class="text-indigo-600 dark:text-indigo-400">Vendedor: ${nombreCreador}</span>
+                        <p class="text-[9px] text-neutral-500 font-bold tracking-widest uppercase mt-1">
+                            ${c.telefono} • <span class="text-indigo-600 dark:text-indigo-400">Vend: ${nombreCreador}</span>
                         </p>
                     </div>
                 </td>
@@ -174,12 +211,16 @@ window.openDetalleLead = (id) => {
         return;
     }
 
-    // Análisis en tiempo real para esta vista
-    const analisis = window.calcularTermometroLead ? window.calcularTermometroLead(lead) : { score: 50, estado: 'Tibio' };
+    // Análisis en tiempo real
+    let analisis = window.calcularTermometroLead ? window.calcularTermometroLead(lead) : { score: 50, estado: 'Tibio' };
+    if (lead.estadoLead === 'Vendido') {
+        analisis.estado = 'Cerrado';
+        analisis.score = 100;
+    }
+
     const creador = (window.state.usuarios || []).find(u => u.id === lead.userId);
     const nombreCreador = creador ? creador.nombre : 'Usuario Desconocido';
 
-    // 1. Panel informativo de Coincidencias o Auto Vinculado
     let autoVinculado = '';
     
     if (lead.autoId) {
@@ -199,8 +240,7 @@ window.openDetalleLead = (id) => {
                 </div>
             `;
         }
-    } else {
-        // Alerta de Coincidencia Inteligente
+    } else if (lead.estadoLead !== 'Vendido') {
         const interesTexto = (lead.marcaInteres || '').toLowerCase();
         const coincidencias = window.state.autos.filter(a => {
             return a.estado !== 'Vendido' && (
@@ -232,23 +272,41 @@ window.openDetalleLead = (id) => {
         }
     }
 
-    // 2. Determinar colores de la barra de temperatura
     let barColor = 'bg-blue-500';
-    if (analisis.estado === 'Caliente') barColor = 'bg-rose-500';
+    if (analisis.estado === 'Cerrado') barColor = 'bg-purple-500';
+    else if (analisis.estado === 'Caliente') barColor = 'bg-rose-500';
     else if (analisis.estado === 'Tibio') barColor = 'bg-amber-500';
 
     const historial = lead.historial || [];
 
-    // 3. Construcción del HTML del Modal
+    // Panel de Información si se concretó la venta desde la Flota
+    let panelCerradoInfo = '';
+    if (lead.estadoLead === 'Vendido') {
+        panelCerradoInfo = `
+            <div class="mt-6 mb-6 p-5 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-2xl text-center shadow-inner relative overflow-hidden">
+                <i data-lucide="award" class="absolute -right-4 -bottom-4 w-24 h-24 text-purple-200 dark:text-purple-800 opacity-30"></i>
+                <i data-lucide="check-circle" class="w-10 h-10 text-purple-500 mx-auto mb-2 relative z-10"></i>
+                <h5 class="font-black text-sm text-purple-800 dark:text-purple-400 uppercase tracking-wider relative z-10">
+                    Cliente Cerrado (Vendido)
+                </h5>
+                <p class="text-xs font-bold text-purple-600 dark:text-purple-500 mt-1 relative z-10">
+                    El sistema detectó que este cliente concretó una operación exitosa en el Salón.
+                </p>
+            </div>
+        `;
+    }
+
     let html = `
         <div class="mb-4 pb-4 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
             <p class="text-xs font-bold text-neutral-500">
                 Alta: <span class="text-neutral-800 dark:text-neutral-200">${window.formatDate(lead.fecha)}</span>
             </p>
-            <p class="text-xs font-bold text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 rounded-lg uppercase tracking-widest">
+            <p class="text-[10px] font-bold text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 rounded-lg uppercase tracking-widest">
                 <i data-lucide="user" class="w-3 h-3 inline mr-1"></i> ${nombreCreador}
             </p>
         </div>
+
+        ${panelCerradoInfo}
 
         <div class="mb-6 p-5 bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-2xl">
             <div class="flex justify-between items-end mb-2">
@@ -265,7 +323,7 @@ window.openDetalleLead = (id) => {
                 <div class="${barColor} h-3 rounded-full transition-all duration-1000 ease-out" style="width: ${analisis.score}%"></div>
             </div>
             <p class="text-[10px] font-bold text-neutral-400 mt-2 text-center uppercase tracking-widest flex items-center justify-center">
-                <i data-lucide="cpu" class="w-3 h-3 mr-1"></i> Analizado por el sistema según historial de atención
+                <i data-lucide="cpu" class="w-3 h-3 mr-1"></i> Analizado por el sistema
             </p>
         </div>
 
@@ -311,6 +369,7 @@ window.openDetalleLead = (id) => {
                 <i data-lucide="history" class="w-4 h-4 mr-2"></i> Historial y Seguimiento
             </h4>
             
+            ${lead.estadoLead !== 'Vendido' ? `
             <form onsubmit="window.handleAddLeadHistory(event, '${id}')" class="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/50 mb-6 shadow-sm">
                 <textarea id="lh-texto" required rows="2" placeholder="Ej: Lo llamé y ofreció permuta por un Gol..." class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none resize-none font-bold text-sm mb-4 focus:border-amber-500 transition-colors"></textarea>
                 
@@ -326,6 +385,7 @@ window.openDetalleLead = (id) => {
                     </button>
                 </div>
             </form>
+            ` : ''}
 
             <div class="space-y-4 max-h-60 overflow-y-auto no-scrollbar pr-1">
     `;
@@ -342,7 +402,7 @@ window.openDetalleLead = (id) => {
     } else {
         const histHTML = historial.slice().reverse().map(h => {
             const opacityClass = h.completado ? 'opacity-60' : '';
-            const btnHecho = !h.completado ? `
+            const btnHecho = (!h.completado && lead.estadoLead !== 'Vendido') ? `
                 <button type="button" onclick="window.markHistoryCompleted('${id}', '${h.id}')" class="px-3 py-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-green-200 dark:hover:bg-green-800 transition-colors shadow-sm flex items-center">
                     <i data-lucide="check" class="w-3 h-3 mr-1"></i> Hecho
                 </button>
