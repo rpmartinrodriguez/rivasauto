@@ -62,11 +62,21 @@ window.renderAutosView = () => {
         
       const kmFmt = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : 0;
 
+      // INTELIGENCIA CRM: Buscar si hay interesados para este auto
+      const interesados = (window.state.consultas || []).filter(c => {
+          const interes = (c.marcaInteres || '').toLowerCase();
+          return interes.includes(auto.marca.toLowerCase()) || interes.includes(auto.modelo.toLowerCase());
+      });
+      const badgeInteresados = interesados.length > 0 
+          ? `<div class="absolute top-2 left-2 bg-indigo-600 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg flex items-center z-20 animate-pulse"><i data-lucide="zap" class="w-3 h-3 mr-1"></i> ${interesados.length} INTERESADOS</div>` 
+          : '';
+
       gridHtml += `
         <div onclick="window.openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
           <div class="bg-neutral-50/50 dark:bg-neutral-800/50 rounded-[2rem] p-6 h-full flex flex-col relative">
+            ${badgeInteresados}
             <div class="flex justify-between items-start mb-4">
-              <div class="flex flex-col space-y-1">
+              <div class="flex flex-col space-y-1 mt-1">
                 <div class="flex items-center space-x-2">
                   <span class="px-3 py-1 text-[10px] font-bold uppercase rounded-xl ${bClass}">
                     ${auto.estado}
@@ -147,10 +157,17 @@ window.renderAutosView = () => {
         
       const kmFmt = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : 0;
 
+      // INTELIGENCIA CRM: Ícono para la lista
+      const interesados = (window.state.consultas || []).filter(c => {
+          const interes = (c.marcaInteres || '').toLowerCase();
+          return interes.includes(auto.marca.toLowerCase()) || interes.includes(auto.modelo.toLowerCase());
+      });
+      const interesIcon = interesados.length > 0 ? `<i data-lucide="zap" class="w-3 h-3 text-indigo-500 inline ml-2 animate-pulse" title="${interesados.length} Interesados"></i>` : '';
+
       listHtml += `
         <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer transition-colors" onclick="window.openDetalleAuto('${auto.id}')">
           <td class="px-6 py-4">
-            <p class="font-bold uppercase">${auto.marca} ${auto.modelo}</p>
+            <p class="font-bold uppercase">${auto.marca} ${auto.modelo} ${interesIcon}</p>
             <p class="text-xs text-neutral-500 font-bold mt-1">Año ${auto.año}</p>
           </td>
           <td class="px-6 py-4 font-mono text-sm font-bold uppercase">${auto.patente}</td>
@@ -207,6 +224,13 @@ window.renderDetalleAuto = () => {
   
   let html = '';
   
+  // Calculamos interesados globales del CRM para este modelo
+  const todosLeads = window.state.consultas || [];
+  const interesados = todosLeads.filter(c => {
+      const interes = (c.marcaInteres || '').toLowerCase();
+      return interes.includes(auto.marca.toLowerCase()) || interes.includes(auto.modelo.toLowerCase());
+  });
+  
   if (!window.state.isVentaMode) {
     let badgeClass = auto.estado === 'Señado' ? 'bg-purple-800 text-white dark:bg-purple-300 dark:text-purple-900' : 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900';
     const precioFmt = auto.moneda === 'USD' ? 'U$S ' + window.formatMoney(auto.precio).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(auto.precio);
@@ -246,9 +270,26 @@ window.renderDetalleAuto = () => {
       </div>
     `;
 
+    // NUEVO BOTÓN DE INTERESADOS (Integrado en el diseño principal como solicitaste)
+    html += `
+        <div onclick="window.switchDASection('crm')" class="mb-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 rounded-2xl cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-600 transition-all flex justify-between items-center group shadow-sm">
+            <div>
+                <p class="text-xs font-black text-indigo-800 dark:text-indigo-300 uppercase tracking-widest flex items-center">
+                    <i data-lucide="users" class="w-4 h-4 mr-2"></i> Interesados CRM
+                </p>
+                <p class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                    Hay ${interesados.length} personas buscando este modelo
+                </p>
+            </div>
+            <div class="w-8 h-8 bg-indigo-200 dark:bg-indigo-800 rounded-full flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors text-indigo-700 dark:text-indigo-300">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </div>
+        </div>
+    `;
+
     if (auto.estado === 'Señado') {
       html += `
-        <div class="mt-6 p-4 bg-purple-900/30 border border-purple-500/30 rounded-2xl mb-6">
+        <div class="p-4 bg-purple-900/30 border border-purple-500/30 rounded-2xl mb-6">
           <p class="text-xs text-purple-200 dark:text-purple-600 font-bold uppercase mb-1">
             Vehículo Reservado
           </p>
@@ -282,7 +323,7 @@ window.renderDetalleAuto = () => {
     } else if (auto.estado !== 'Vendido' && (window.state.currentUser.rol === 'Admin' || window.state.currentUser.rol === 'Vendedor' || window.state.currentUser.rol === 'Encargado')) { 
       if (auto.estado === 'Disponible') {
         html += `
-          <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10 flex space-x-3 mb-6">
+          <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800 flex space-x-3 mb-6">
             <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="flex-1 py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all text-sm md:text-base">
               Cerrar Venta
             </button>
@@ -293,7 +334,7 @@ window.renderDetalleAuto = () => {
         `; 
       } else if (auto.estado === 'Señado') {
         html += `
-          <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10 flex space-x-3 mb-6">
+          <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800 flex space-x-3 mb-6">
             <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="flex-1 py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all text-sm md:text-base">
               Cerrar Venta
             </button>
@@ -343,7 +384,40 @@ window.renderDetalleAuto = () => {
        }
        
        leadsAuto = leadsAuto.sort((x,y) => new Date(y.fecha) - new Date(x.fecha));
+
+       // LISTA 1: COINCIDENCIAS INTELIGENTES
+       let potencialesHtml = '';
+       if (interesados.length > 0) {
+           potencialesHtml = `
+                <div class="bg-indigo-50 dark:bg-indigo-900/10 p-5 rounded-3xl border border-indigo-100 dark:border-indigo-800 mb-6">
+                    <h4 class="text-sm font-black text-indigo-800 dark:text-indigo-300 flex items-center uppercase tracking-wider mb-4">
+                        <i data-lucide="zap" class="w-4 h-4 mr-2"></i> Coincidencias CRM
+                    </h4>
+                    <div class="space-y-2">
+                        ${interesados.map(c => {
+                            const analisis = window.calcularTermometroLead ? window.calcularTermometroLead(c) : { score: 50, estado: 'Tibio' };
+                            const barColor = analisis.estado === 'Caliente' ? 'bg-rose-500' : (analisis.estado === 'Tibio' ? 'bg-amber-500' : 'bg-blue-500');
+                            return `
+                                <div onclick="window.closeModal('modal-detalle-auto'); window.openDetalleLead('${c.id}')" class="bg-white dark:bg-neutral-900 p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-sm flex items-center justify-between hover:border-indigo-400 transition-all cursor-pointer">
+                                    <div>
+                                        <p class="text-sm font-black text-neutral-800 dark:text-neutral-100">${c.nombre}</p>
+                                        <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">${c.telefono}</p>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-[9px] font-black uppercase text-neutral-500">${analisis.estado}</span>
+                                        <div class="w-10 h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                                            <div class="${barColor} h-full" style="width: ${analisis.score}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+           `;
+       }
        
+       // LISTA 2: LEADS MANUALES DEL AUTO
        let listHtml = '';
        if (leadsAuto.length > 0) {
          listHtml = leadsAuto.map(c => {
@@ -353,10 +427,17 @@ window.renderDetalleAuto = () => {
              ? ` • <span class="text-amber-600 dark:text-amber-400 font-bold">Por: ${nombreAutor}</span>` 
              : '';
            
+           // Score del CRM
+           const analisis = window.calcularTermometroLead ? window.calcularTermometroLead(c) : { score: 50, estado: 'Tibio' };
+           const colorEst = analisis.estado === 'Caliente' ? 'text-rose-500 border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/20' : (analisis.estado === 'Tibio' ? 'text-amber-500 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20' : 'text-blue-500 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20');
+
            return `
-             <div onclick="window.openDetalleLead('${c.id}')" class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors">
+             <div onclick="window.closeModal('modal-detalle-auto'); window.openDetalleLead('${c.id}')" class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors">
                <div>
-                 <p class="text-sm font-bold">${c.nombre || 'Sin Nombre'}</p>
+                 <p class="text-sm font-bold flex items-center">
+                    ${c.nombre || 'Sin Nombre'}
+                    <span class="ml-2 text-[9px] font-black uppercase px-2 py-0.5 rounded border ${colorEst}">${analisis.estado}</span>
+                 </p>
                  <p class="text-xs text-neutral-500">${c.telefono || '-'} • ${window.formatDate(c.fecha)}${txtAutor}</p>
                </div>
                <p class="text-xs text-neutral-500 italic max-w-[120px] truncate text-right">"${c.notas || ''}"</p>
@@ -366,16 +447,17 @@ window.renderDetalleAuto = () => {
        } else {
          listHtml = `
            <p class="text-xs text-neutral-500 py-2 p-4">
-             No hay leads registrados por tu usuario para este vehículo.
+             No hay leads manuales registrados para este vehículo.
            </p>
          `;
        }
       
        html += `
          <div>
+           ${potencialesHtml}
            <form id="btn-submit-lead-auto" onsubmit="window.handleDA_CRMSubmit(event, '${auto.id}')" class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700 mb-6">
              <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">
-               Cargar Interesado
+               Cargar Interesado Manual
              </h4>
              <div class="grid grid-cols-2 gap-4">
                <input id="dac-nombre" required placeholder="Nombre" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
@@ -389,7 +471,7 @@ window.renderDetalleAuto = () => {
            
            <div class="mt-4">
              <h5 class="font-bold text-xs uppercase mb-2 text-neutral-500 tracking-wider">
-               Historial de Leads del Vehículo
+               Leads Vinculados Manualmente
              </h5>
              <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
                ${listHtml}
@@ -401,9 +483,9 @@ window.renderDetalleAuto = () => {
        html += `
          <form onsubmit="window.handleGastoTallerSubmit(event, '${auto.id}')" class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-2xl mb-6">
            <div class="grid grid-cols-2 gap-3 mb-3">
-             <input id="gt-desc" placeholder="Reparación..." required class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700" />
-             <input id="gt-monto" oninput="window.formatInputMoney(this)" placeholder="Monto ($)" required class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700" />
-             <select id="gt-cat" class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700">
+             <input id="gt-desc" placeholder="Reparación..." required class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700 font-bold" />
+             <input id="gt-monto" oninput="window.formatInputMoney(this)" placeholder="Monto ($)" required class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700 font-bold" />
+             <select id="gt-cat" class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700 font-bold">
                ${window.state.categoriasGasto.map(c => `<option value="${c}">${c}</option>`).join('')}
              </select>
              <label class="flex items-center text-xs font-bold cursor-pointer">
