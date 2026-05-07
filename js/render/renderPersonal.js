@@ -8,7 +8,7 @@ window.renderPersonalView = () => {
         return;
     }
     
-    // Contenedores principales (reutilizamos los IDs del HTML pero cambiamos su contenido)
+    // Contenedores principales
     const tablePersonal = document.getElementById('personal-table');
     const tableCierres = document.getElementById('cierres-table');
     const selectUserBono = document.getElementById('comision-user');
@@ -19,10 +19,9 @@ window.renderPersonalView = () => {
         .sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
     
     // ----------------------------------------------------
-    // 1. REDISEÑO: TARJETAS DE EMPLEADOS (Reemplaza la tabla)
+    // 1. TARJETAS DE EMPLEADOS
     // ----------------------------------------------------
     if (tablePersonal) {
-        // Obtenemos el contenedor padre para cambiar su estructura
         const parentDiv = tablePersonal.closest('.bg-white\\/60') || tablePersonal.parentElement;
         
         if (usuariosAgencia.length === 0) {
@@ -117,7 +116,7 @@ window.renderPersonalView = () => {
         }
     }
     
-    // Asegurar que el botón del topbar sea el de Asignar Bono
+    // Botón Topbar
     const headerActions = document.querySelector('#view-personal .flex.justify-between.items-center .space-x-2.flex');
     if (headerActions) {
         headerActions.innerHTML = `
@@ -133,7 +132,7 @@ window.renderPersonalView = () => {
 };
 
 // ----------------------------------------------------
-// 4. MODAL: DETALLE INDIVIDUAL DEL EMPLEADO (REDISEÑADO)
+// 4. MODAL: DETALLE INDIVIDUAL DEL EMPLEADO
 // ----------------------------------------------------
 window.openDetallePersonal = (userId) => {
     const empleado = (window.state.usuarios || []).find(x => x.id === userId);
@@ -142,7 +141,6 @@ window.openDetallePersonal = (userId) => {
         return;
     }
     
-    // Obtenemos todas sus comisiones ordenadas por fecha (más nuevas arriba)
     const comisiones = (window.state.comisiones || [])
         .filter(c => c.userId === userId)
         .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
@@ -152,6 +150,11 @@ window.openDetallePersonal = (userId) => {
     
     const totalPendiente = pendientes.reduce((acc, curr) => acc + curr.monto, 0);
     const totalHistorico = pagadas.reduce((acc, curr) => acc + curr.monto, 0);
+
+    // NUEVO: Buscar las ventas que cerró ESTE empleado
+    const ventasEmpleado = (window.state.ventas || [])
+        .filter(v => v.userId === userId)
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     
     // CABECERA DEL EMPLEADO Y BOTÓN LIQUIDAR
     let html = `
@@ -187,10 +190,67 @@ window.openDetallePersonal = (userId) => {
             </button>
         </div>
     `;
-    
-    // SECCIÓN 1: COMISIONES PENDIENTES
+
+    // --- NUEVA SECCIÓN: VENTAS CERRADAS POR EL EMPLEADO ---
     html += `
-        <h5 class="font-black text-sm uppercase text-neutral-500 tracking-wider mb-4 flex items-center">
+        <h5 class="font-black text-sm uppercase text-neutral-500 tracking-wider mb-4 flex items-center border-t border-neutral-200 dark:border-neutral-800 pt-6">
+            <i data-lucide="badge-dollar-sign" class="w-4 h-4 mr-2 text-indigo-500"></i> Ventas Cerradas (${ventasEmpleado.length})
+        </h5>
+    `;
+
+    if (ventasEmpleado.length === 0) {
+        html += `
+            <div class="p-6 bg-neutral-50 dark:bg-neutral-800/30 rounded-2xl border border-neutral-200 dark:border-neutral-700 text-center mb-8">
+                <p class="text-sm font-bold text-neutral-500">Aún no ha concretado ninguna venta.</p>
+            </div>
+        `;
+    } else {
+        html += `<div class="space-y-3 mb-8">`;
+        ventasEmpleado.forEach(v => {
+            // Buscamos si a esta venta se le asignó una comisión para ESTE usuario
+            const comision = (window.state.comisiones || []).find(c => c.ventaId === v.id && c.userId === userId);
+            
+            let comisionHtml = '';
+            if (comision) {
+                const colorC = comision.estado === 'Pagada' ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30' : 'text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30';
+                comisionHtml = `
+                    <div class="flex flex-col items-end sm:items-center sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2 mt-2 sm:mt-0">
+                        <span class="text-[10px] font-black ${colorC} px-2 py-1 rounded-lg uppercase tracking-wider border ${comision.estado === 'Pagada' ? 'border-green-200 dark:border-green-800' : 'border-amber-200 dark:border-amber-800'}">
+                            Comisionado: ${window.formatMoney(comision.monto)} (${comision.estado})
+                        </span>
+                    </div>
+                `;
+            } else {
+                comisionHtml = `
+                    <div class="flex items-center mt-2 sm:mt-0 bg-rose-50 dark:bg-rose-900/10 p-1.5 rounded-xl border border-rose-200 dark:border-rose-800">
+                        <span class="text-[10px] font-black text-rose-500 uppercase tracking-widest mr-3 ml-2">Sin comisión asignada</span>
+                        <button onclick="window.asignarComisionDesdePersonal('${v.id}', '${userId}')" class="px-3 py-1.5 bg-black text-white dark:bg-white dark:text-black text-[10px] font-black uppercase tracking-wider rounded-lg shadow-md hover:scale-105 transition-transform flex items-center">
+                            <i data-lucide="plus-circle" class="w-3 h-3 mr-1"></i> Asignar
+                        </button>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 p-4 rounded-xl flex flex-col sm:flex-row sm:justify-between sm:items-center shadow-sm">
+                    <div class="mb-2 sm:mb-0">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="text-[10px] font-bold text-neutral-400">${window.formatDate(v.fecha)}</span>
+                            <span class="text-[10px] font-bold text-neutral-500 uppercase">A: ${v.compradorNombre}</span>
+                        </div>
+                        <p class="text-sm font-black text-neutral-800 dark:text-neutral-200">${v.autoDesc}</p>
+                        <p class="text-[10px] font-bold text-neutral-500 mt-0.5 uppercase tracking-widest">Monto Operación: ${window.formatMoney(v.montoTotal)}</p>
+                    </div>
+                    ${comisionHtml}
+                </div>
+            `;
+        });
+        html += `</div>`;
+    }
+    
+    // --- SECCIÓN: COMISIONES PENDIENTES ---
+    html += `
+        <h5 class="font-black text-sm uppercase text-neutral-500 tracking-wider mb-4 flex items-center border-t border-neutral-200 dark:border-neutral-800 pt-6">
             <i data-lucide="clock" class="w-4 h-4 mr-2 text-amber-500"></i> Por Cobrar (${pendientes.length})
         </h5>
     `;
@@ -224,7 +284,7 @@ window.openDetallePersonal = (userId) => {
         html += `</div>`;
     }
 
-    // SECCIÓN 2: HISTORIAL DE PAGADOS
+    // --- SECCIÓN: HISTORIAL DE PAGADOS ---
     html += `
         <h5 class="font-black text-sm uppercase text-neutral-500 tracking-wider mb-4 flex items-center border-t border-neutral-200 dark:border-neutral-800 pt-6">
             <i data-lucide="check-check" class="w-4 h-4 mr-2 text-green-500"></i> Historial Pagado (${pagadas.length})
@@ -314,7 +374,6 @@ window.openDetalleCierre = (cierreId) => {
     if (comisionesPagadas.length === 0) {
         html += `<p class="text-neutral-500 text-sm font-bold italic">El detalle no está disponible.</p>`;
     } else {
-        // Agrupamos por usuario por si en el futuro se hacen tickets globales nuevamente
         const agrupado = {};
         comisionesPagadas.forEach(c => {
             if (!agrupado[c.userId]) {
@@ -368,6 +427,27 @@ window.openDetalleCierre = (cierreId) => {
     }
     
     window.openModal('modal-detalle-cierre');
+};
+
+// ----------------------------------------------------
+// NUEVA FUNCIÓN: CONEXIÓN ENTRE VISTA PERSONAL Y COMISIONES
+// ----------------------------------------------------
+window.asignarComisionDesdePersonal = (ventaId, userId) => {
+    // Cerramos el modal de la ficha del empleado
+    window.closeModal('modal-detalle-personal');
+    
+    // Si la función base de asignar existe en controllers.js, la ejecutamos
+    if (window.openModalComisionPorVenta) {
+        window.openModalComisionPorVenta(ventaId);
+        
+        // Esperamos un instante a que el modal cargue y forzamos la selección del vendedor
+        setTimeout(() => {
+            const userSelect = document.getElementById('comision-user');
+            if (userSelect) {
+                userSelect.value = userId;
+            }
+        }, 150);
+    }
 };
 
 // ----------------------------------------------------
