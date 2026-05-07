@@ -41,7 +41,70 @@ window.formatInputMoney = (input) => {
 };
 
 // --------------------------------------------------------
-// 2. CONTROLADORES DE FLOTA Y AUTOS
+// 2. ALGORITMO INTELIGENTE DE CRM (LEAD SCORING)
+// --------------------------------------------------------
+
+window.calcularTermometroLead = (lead) => {
+    let score = 50; // Puntaje base
+    
+    if (!lead) return { score: 0, estado: 'Frío' };
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const fechaAlta = new Date(lead.fecha || todayStr);
+    
+    // Diferencia en días desde que ingresó la consulta
+    const diasAntiguedad = Math.floor((today - fechaAlta) / (1000 * 60 * 60 * 24));
+
+    // 1. Reglas por Antigüedad
+    if (diasAntiguedad <= 3) {
+        score += 20; // Cliente fresco
+    } else if (diasAntiguedad <= 7) {
+        score += 10; 
+    } else if (diasAntiguedad > 30) {
+        score -= 20; // Cliente viejo que se va enfriando
+    }
+
+    // 2. Reglas por Gestión e Interacción del Vendedor
+    if (lead.historial && lead.historial.length > 0) {
+        // Premio por cantidad de interacciones
+        score += (lead.historial.length * 5); 
+        
+        const completados = lead.historial.filter(h => h.completado);
+        const pendientes = lead.historial.filter(h => !h.completado && h.proximoContacto);
+
+        // Premio por acciones completadas (lo llamaron de verdad)
+        score += (completados.length * 10);
+
+        // Evaluación de la agenda a futuro
+        pendientes.forEach(p => {
+            if (p.proximoContacto < todayStr) {
+                score -= 15; // Castigo fuerte: el vendedor tiene una llamada atrasada
+            } else {
+                score += 15; // Premio: el vendedor lo tiene agendado para seguir gestionando
+            }
+        });
+    } else {
+        // Castigo fuerte: cargaron el lead pero nunca le cargaron ni un seguimiento
+        score -= 15; 
+    }
+
+    // Aseguramos que el score no se salga de los límites 0 y 100
+    score = Math.max(0, Math.min(100, score));
+
+    // Traducción del Score a Estados visuales
+    let estado = 'Frío';
+    if (score >= 70) {
+        estado = 'Caliente';
+    } else if (score >= 40) {
+        estado = 'Tibio';
+    }
+
+    return { score, estado };
+};
+
+// --------------------------------------------------------
+// 3. CONTROLADORES DE FLOTA Y AUTOS
 // --------------------------------------------------------
 
 window.toggleAutosViewMode = (mode) => { 
@@ -67,10 +130,7 @@ window.editAuto = (id) => {
     document.getElementById('auto-marca').value = auto.marca; 
     document.getElementById('auto-modelo').value = auto.modelo; 
     document.getElementById('auto-color').value = auto.color || ''; 
-    
-    // Formateo de los kilómetros con puntos separadores
     document.getElementById('auto-km').value = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : ''; 
-    
     document.getElementById('auto-anio').value = auto.año; 
     document.getElementById('auto-patente').value = auto.patente; 
     document.getElementById('auto-precio').value = window.formatMoney(auto.precio).replace(/[^0-9]/g, ''); 
@@ -411,7 +471,7 @@ window.quitarSeña = async (autoId) => {
 };
 
 // --------------------------------------------------------
-// 3. VENTA Y TRANSACCIONES MAESTRAS
+// 4. VENTA Y TRANSACCIONES MAESTRAS
 // --------------------------------------------------------
 
 window.handleDAVentaSubmit = async (e, autoId) => {
@@ -598,7 +658,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 };
 
 // --------------------------------------------------------
-// 4. CONTROLADORES DE FORMULARIOS Y BOLETOS
+// 5. CONTROLADORES DE FORMULARIOS Y BOLETOS
 // --------------------------------------------------------
 
 window.preGuardarBoleto = (e, tipo) => {
@@ -756,7 +816,7 @@ window.calcRemanentePermuta = () => {
 };
 
 // --------------------------------------------------------
-// 5. CONTROLADORES DE CRM (LEADS Y CONSULTAS)
+// 6. CONTROLADORES DE CRM (LEADS Y CONSULTAS)
 // --------------------------------------------------------
 
 window.handleGlobalLeadSubmit = async (e) => {
@@ -780,7 +840,7 @@ window.handleGlobalLeadSubmit = async (e) => {
             nombre: document.getElementById('gl-nombre').value,
             telefono: document.getElementById('gl-tel').value,
             marcaInteres: document.getElementById('gl-interes').value,
-            estadoLead: document.getElementById('gl-estado').value,
+            // Eliminamos la captura del select. El estado se calcula de forma dinámica en base al historial
             notas: document.getElementById('gl-nota').value,
             fecha: new Date().toISOString().split('T')[0],
             userId: window.state.currentUser.id,
@@ -834,7 +894,6 @@ window.handleDA_CRMSubmit = async (e, autoId) => {
             nombre: document.getElementById('dac-nombre').value, 
             telefono: document.getElementById('dac-tel').value, 
             notas: document.getElementById('dac-nota').value, 
-            estadoLead: 'Tibio', 
             fecha: new Date().toISOString().split('T')[0],
             userId: window.state.currentUser.id, 
             sucursalId: window.state.currentUser.sucursalId, 
@@ -887,13 +946,11 @@ window.handleEditLeadSubmit = async (e, id) => {
         const nombreLead = document.getElementById('edit-lead-nombre').value;
         const telefonoLead = document.getElementById('edit-lead-tel').value;
         const notasLead = document.getElementById('edit-lead-nota').value;
-        const estadoLead = document.getElementById('edit-lead-estado') ? document.getElementById('edit-lead-estado').value : 'Tibio';
         
         await window.fbUpdate("consultas", id, { 
             nombre: nombreLead, 
             telefono: telefonoLead, 
-            notas: notasLead, 
-            estadoLead: estadoLead 
+            notas: notasLead
         });
         
         if (window.renderClientesView) {
@@ -1030,7 +1087,7 @@ window.markHistoryCompleted = async (leadId, histId) => {
 };
 
 // --------------------------------------------------------
-// 6. CONTROLADORES DE ADMINISTRACIÓN Y SUCURSALES
+// 7. CONTROLADORES DE ADMINISTRACIÓN Y SUCURSALES
 // --------------------------------------------------------
 
 window.handleSaveSucursal = async (e) => { 
@@ -1177,7 +1234,7 @@ window.resetUserForm = () => {
 };
 
 // --------------------------------------------------------
-// 7. CONTROLADORES DE CAJA CHICA Y COBROS PENDIENTES
+// 8. CONTROLADORES DE CAJA CHICA Y COBROS PENDIENTES
 // --------------------------------------------------------
 
 window.agregarCategoria = async () => { 
@@ -1327,7 +1384,7 @@ window.cobrarCuotaVenta = async (ventaId, tipo) => {
 };
 
 // --------------------------------------------------------
-// 8. CONTROLADORES DE COMISIONES Y CIERRES DE MES
+// 9. CONTROLADORES DE COMISIONES Y CIERRES DE MES
 // --------------------------------------------------------
 
 window.openModalAsignarBono = () => { 
