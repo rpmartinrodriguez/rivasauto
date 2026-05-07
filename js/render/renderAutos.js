@@ -287,7 +287,7 @@ window.renderDetalleAuto = () => {
       </div>
     `;
 
-    // AÑADIDO: Detalle de Inteligencia CRM justo debajo de la caja negra
+    // Detalle de Inteligencia CRM justo debajo de la caja negra
     if (interesados.length > 0) {
         html += `
             <div onclick="window.switchDASection('crm')" class="mb-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 rounded-2xl cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-600 transition-all flex justify-between items-center group shadow-sm">
@@ -342,7 +342,7 @@ window.renderDetalleAuto = () => {
     } else if (auto.estado !== 'Vendido' && (window.state.currentUser.rol === 'Admin' || window.state.currentUser.rol === 'Vendedor' || window.state.currentUser.rol === 'Encargado')) { 
       if (auto.estado === 'Disponible') {
         html += `
-          <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10 flex space-x-3 mb-6">
+          <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800 flex space-x-3 mb-6">
             <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="flex-1 py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all text-sm md:text-base">
               Cerrar Venta
             </button>
@@ -353,7 +353,7 @@ window.renderDetalleAuto = () => {
         `; 
       } else if (auto.estado === 'Señado') {
         html += `
-          <div class="mt-8 pt-6 border-t border-white/10 dark:border-black/10 flex space-x-3 mb-6">
+          <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800 flex space-x-3 mb-6">
             <button onclick="window.state.isVentaMode=true; window.renderDetalleAuto()" class="flex-1 py-4 bg-green-600 text-white dark:bg-green-500 dark:text-black font-black rounded-2xl shadow hover:bg-green-700 transition-all text-sm md:text-base">
               Cerrar Venta
             </button>
@@ -393,11 +393,9 @@ window.renderDetalleAuto = () => {
         </div>
       `;
     } else if (window.state.daActiveSection === 'crm') {
-       // Filtro de leads manuales para este auto, respetando el ROL
        let leadsAuto = leadsPermitidos.filter(c => c.autoId === auto.id);
        leadsAuto = leadsAuto.sort((x,y) => new Date(y.fecha) - new Date(x.fecha));
 
-       // LISTA 1: COINCIDENCIAS INTELIGENTES (Las que sacamos arriba)
        let potencialesHtml = '';
        if (interesados.length > 0) {
            potencialesHtml = `
@@ -438,10 +436,16 @@ window.renderDetalleAuto = () => {
              ? ` • <span class="text-amber-600 dark:text-amber-400 font-bold">Por: ${nombreAutor}</span>` 
              : '';
            
+           const analisis = window.calcularTermometroLead ? window.calcularTermometroLead(c) : { score: 50, estado: 'Tibio' };
+           const colorEst = analisis.estado === 'Caliente' ? 'text-rose-500 border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/20' : (analisis.estado === 'Tibio' ? 'text-amber-500 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20' : 'text-blue-500 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20');
+
            return `
              <div onclick="window.closeModal('modal-detalle-auto'); window.openDetalleLead('${c.id}')" class="p-3 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer transition-colors">
                <div>
-                 <p class="text-sm font-bold">${c.nombre || 'Sin Nombre'}</p>
+                 <p class="text-sm font-bold flex items-center">
+                    ${c.nombre || 'Sin Nombre'}
+                    <span class="ml-2 text-[9px] font-black uppercase px-2 py-0.5 rounded border ${colorEst}">${analisis.estado}</span>
+                 </p>
                  <p class="text-xs text-neutral-500">${c.telefono || '-'} • ${window.formatDate(c.fecha)}${txtAutor}</p>
                </div>
                <p class="text-xs text-neutral-500 italic max-w-[120px] truncate text-right">"${c.notas || ''}"</p>
@@ -451,7 +455,7 @@ window.renderDetalleAuto = () => {
        } else {
          listHtml = `
            <p class="text-xs text-neutral-500 py-2 p-4">
-             No hay leads registrados por tu usuario para este vehículo específicamente.
+             No hay leads manuales registrados para este vehículo.
            </p>
          `;
        }
@@ -459,10 +463,9 @@ window.renderDetalleAuto = () => {
        html += `
          <div>
            ${potencialesHtml}
-
            <form id="btn-submit-lead-auto" onsubmit="window.handleDA_CRMSubmit(event, '${auto.id}')" class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-700 mb-6">
              <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">
-               Cargar Interesado Específico
+               Cargar Interesado Manual
              </h4>
              <div class="grid grid-cols-2 gap-4">
                <input id="dac-nombre" required placeholder="Nombre" class="w-full mb-4 rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-green-500 font-bold" />
@@ -476,7 +479,7 @@ window.renderDetalleAuto = () => {
            
            <div class="mt-4">
              <h5 class="font-bold text-xs uppercase mb-2 text-neutral-500 tracking-wider">
-               Leads Específicos del Vehículo
+               Leads Vinculados Manualmente
              </h5>
              <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
                ${listHtml}
@@ -488,9 +491,9 @@ window.renderDetalleAuto = () => {
        html += `
          <form onsubmit="window.handleGastoTallerSubmit(event, '${auto.id}')" class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-2xl mb-6">
            <div class="grid grid-cols-2 gap-3 mb-3">
-             <input id="gt-desc" placeholder="Reparación..." required class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700" />
-             <input id="gt-monto" oninput="window.formatInputMoney(this)" placeholder="Monto ($)" required class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700" />
-             <select id="gt-cat" class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700">
+             <input id="gt-desc" placeholder="Reparación..." required class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700 font-bold" />
+             <input id="gt-monto" oninput="window.formatInputMoney(this)" placeholder="Monto ($)" required class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700 font-bold" />
+             <select id="gt-cat" class="bg-white dark:bg-neutral-900 p-2 rounded-lg text-sm border dark:border-neutral-700 font-bold">
                ${window.state.categoriasGasto.map(c => `<option value="${c}">${c}</option>`).join('')}
              </select>
              <label class="flex items-center text-xs font-bold cursor-pointer">
@@ -542,7 +545,13 @@ window.renderDetalleAuto = () => {
         <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-6">
           <h4 class="font-bold mb-4 text-sm uppercase text-neutral-500 tracking-wider">Datos Comprador</h4>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <input id="vent-comp-nombre" required placeholder="Nombre y Apellido" class="col-span-2 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+            <div class="col-span-2">
+                <datalist id="crm-leads-list">
+                    ${leadsPermitidos.filter(c => c.estadoLead !== 'Vendido').map(c => `<option value="${c.nombre}">${c.telefono}</option>`).join('')}
+                </datalist>
+                <input id="vent-comp-nombre" list="crm-leads-list" oninput="window.autoFillComprador(this.value)" required placeholder="Nombre y Apellido" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+                <p class="text-[10px] text-neutral-500 mt-1 font-bold px-1">*Si el cliente está en el CRM, selecciónalo de la lista para vincularlo automáticamente.</p>
+            </div>
             <input id="vent-comp-tel" required placeholder="Teléfono" class="col-span-2 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
             <input id="vent-comp-dni" required placeholder="D.N.I" class="col-span-2 md:col-span-1 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
             <input id="vent-comp-domicilio" required placeholder="Domicilio" class="col-span-2 md:col-span-3 w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
@@ -623,15 +632,25 @@ window.renderDetalleAuto = () => {
   if(window.lucide) window.lucide.createIcons();
 };
 
+// Función para autocompletar el teléfono si selecciona a alguien de la lista del CRM
+window.autoFillComprador = (nombreSeleccionado) => {
+    const lead = (window.state.consultas || []).find(c => c.nombre === nombreSeleccionado);
+    if (lead) {
+        const telInput = document.getElementById('vent-comp-tel');
+        if (telInput && !telInput.value) {
+            telInput.value = lead.telefono || '';
+        }
+    }
+};
+
 window.imprimirFlota = () => {
-   // Ocultamos explícitamente el logo de impresión que usamos para los boletos
    const globalLogo = document.getElementById('print-logo');
    if(globalLogo) globalLogo.classList.add('hidden');
 
    let printHtml = `
      <style>
        @media print {
-         @page { margin: 0.2cm; } /* Margen super estrecho para aprovechar toda la hoja */
+         @page { margin: 0.2cm; }
          body { margin: 0; padding: 0; }
        }
      </style>
@@ -678,7 +697,6 @@ window.imprimirFlota = () => {
      window.print(); 
      document.getElementById('print-section').classList.add('hidden'); 
      document.getElementById('app-wrapper').classList.remove('hidden'); 
-     // Restauramos la visibilidad del contenedor de logo para la próxima vez
      if(globalLogo) globalLogo.classList.remove('hidden');
    }, 500);
 };
