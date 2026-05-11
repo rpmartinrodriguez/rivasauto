@@ -268,7 +268,7 @@ window.handleGastoTallerSubmit = async (e, autoId) => {
         const fDate = new Date().toISOString().split('T')[0];
 
         const nuevoGasto = { 
-            id: window.generateId(), 
+            id: window.generateId ? window.generateId() : Date.now().toString(), 
             fecha: fDate, 
             descripcion: desc, 
             categoria: cat, 
@@ -603,7 +603,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
                 
                 const autoVendidoDesc = `${auto.marca} ${auto.modelo} (${auto.patente})`;
                 const nuevoHistorial = { 
-                    id: window.generateId(), 
+                    id: window.generateId ? window.generateId() : Date.now().toString(), 
                     fechaCarga: fDate, 
                     texto: `¡OPERACIÓN CONCRETADA EN SALÓN! Vehículo vendido: ${autoVendidoDesc}`, 
                     proximoContacto: null, 
@@ -677,158 +677,80 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 // 5. CONTROLADORES DE FORMULARIOS Y BOLETOS
 // --------------------------------------------------------
 
-window.preGuardarBoleto = (e, tipo) => {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    
-    let baseData = {};
-    const fechaHoy = new Date().toISOString().split('T')[0];
-    
-    if (tipo === 'simple') { 
-        baseData = {
-            tipo: 'Boleto Compra Venta', 
-            fecha: fechaHoy, 
-            vendedor: document.getElementById('bf-vendedor').value,
-            vendedorDomicilio: document.getElementById('bf-vendedor-domicilio').value, 
-            vendedorLoc: document.getElementById('bf-vendedor-loc').value,
-            vendedorTel: document.getElementById('bf-vendedor-tel').value, 
-            comprador: document.getElementById('bf-comprador').value,
-            domicilio: document.getElementById('bf-domicilio').value, 
-            locComp: document.getElementById('bf-loc-comp').value,
-            telefono: document.getElementById('bf-telefono').value, 
-            categoria: document.getElementById('bf-categoria').value,
-            marca: document.getElementById('bf-marca').value, 
-            modelo: document.getElementById('bf-modelo').value,
-            tipoVehiculo: document.getElementById('bf-tipo').value, 
-            año: document.getElementById('bf-anio').value,
-            motor: document.getElementById('bf-motor').value, 
-            chasis: document.getElementById('bf-chasis').value,
-            dominio: document.getElementById('bf-dominio').value.toUpperCase(), 
-            monto: document.getElementById('bf-monto').value,
-            montoLetras: document.getElementById('bf-monto-letras').value, 
-            formaPago: document.getElementById('bf-formapago').value,
-            diasTransf: document.getElementById('bf-dias-transf').value, 
-            ciudadFirma: document.getElementById('bf-ciudad-firma').value,
-            observaciones: document.getElementById('bf-obs').value, 
-            estado: 'Pendiente' 
-        };
-    } else { 
-        baseData = {
-            tipo: 'Boleto Venta con Permuta', 
-            fecha: fechaHoy, 
-            vendedor: document.getElementById('bf-vendedor').value,
-            comprador: document.getElementById('bf-comprador').value, 
-            dni: document.getElementById('bf-dni').value,
-            telefono: document.getElementById('bf-telefono').value, 
-            domicilio: document.getElementById('bf-domicilio').value,
-            altura: document.getElementById('bf-altura').value, 
-            locComp: document.getElementById('bf-loc-comp').value,
-            marca: document.getElementById('bf-marca').value, 
-            modelo: document.getElementById('bf-modelo').value,
-            año: document.getElementById('bf-anio').value, 
-            dominio: document.getElementById('bf-dominio').value.toUpperCase(),
-            motor: document.getElementById('bf-motor').value, 
-            chasis: document.getElementById('bf-chasis').value,
-            locPat: document.getElementById('bf-loc-pat').value, 
-            monto: document.getElementById('bf-monto').value,
-            montoLetras: document.getElementById('bf-monto-letras').value, 
-            efectivo: document.getElementById('bf-efectivo').value,
-            p_marca: document.getElementById('bp-marca').value, 
-            p_modelo: document.getElementById('bp-modelo').value,
-            p_anio: document.getElementById('bp-anio').value, 
-            p_dominio: document.getElementById('bp-dominio').value.toUpperCase(),
-            p_motor: document.getElementById('bp-motor').value, 
-            p_chasis: document.getElementById('bp-chasis').value,
-            p_locPat: document.getElementById('bp-loc-pat').value, 
-            p_tasado: document.getElementById('bp-tasado').value,
-            p_tasadoLetras: document.getElementById('bp-tasado-letras').value, 
-            remanenteLetras: document.getElementById('bf-remanente-letras').value,
-            detalleRemanente: document.getElementById('bf-detalle-remanente').value, 
-            observaciones: document.getElementById('bf-obs').value,
-            estado: 'Pendiente' 
-        };
-    }
-    
-    const autoId = window.state.tempFormData.autoIdAsociado; 
-    const formId = window.state.tempFormData.id;
-    
-    window.state.tempFormData = { ...baseData, autoIdAsociado: autoId, id: formId };
-    
-    if (autoId || formId) { 
-        window.guardarYImprimirFormulario(autoId); 
-    } else { 
-        document.getElementById('asoc-auto-select').innerHTML = `<option value="">-- Seleccionar Automóvil --</option>` + 
-        window.state.autos.filter(a => a.estado !== 'Vendido').map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
-        
-        window.closeModal('modal-boleto'); 
-        document.getElementById('asoc-select-container').classList.add('hidden'); 
-        window.openModal('modal-asociar-form'); 
-    }
-};
-
 window.guardarYImprimirFormulario = async (autoIdAsociado) => {
-    if (window.state.isSubmittingBoleto) {
-        return;
+    // Si ya está enviando, prevenimos doble click
+    if (window.state.isSubmittingBoleto) return;
+
+    // Evitar bug si el parámetro recibido es el Evento del clic del boton HTML
+    if (autoIdAsociado && typeof autoIdAsociado === 'object') {
+        autoIdAsociado = null;
     }
-    
+
     window.state.isSubmittingBoleto = true;
-    const data = { ...window.state.tempFormData, estado: 'Completado' }; 
-    const btn = document.querySelector('#form-real-boleto button[type="submit"]') || document.querySelector('#modal-asociar-form button.bg-black');
     
-    if (btn) {
-        window.setBtnLoader(btn, true);
-    }
+    // Creamos una copia limpia de los datos
+    const dataToSave = { ...window.state.tempFormData, estado: 'Completado' };
+    const formId = dataToSave.id; // Guardamos el ID si existe para actualizar
+
+    // FIREBASE ESCUDO: Firebase no acepta "undefined" ni la propiedad "id" dentro del payload.
+    delete dataToSave.id;
     
-    try {
-        if (autoIdAsociado) { 
-            data.autoIdAsociado = autoIdAsociado; 
-            await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' }); 
+    Object.keys(dataToSave).forEach(key => {
+        if (dataToSave[key] === undefined) {
+            dataToSave[key] = null;
         }
-        
-        if (data.id) {
-            const copyData = { ...data }; 
-            delete copyData.id; 
-            await window.fbUpdate("formularios", data.id, copyData);
+    });
+
+    const btn = document.querySelector('#form-real-boleto button[type="submit"]') || document.querySelector('#modal-asociar-form button.bg-black');
+    if (btn) window.setBtnLoader(btn, true);
+
+    try {
+        if (autoIdAsociado) {
+            dataToSave.autoIdAsociado = autoIdAsociado;
+            await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' });
+        }
+
+        if (formId) {
+            await window.fbUpdate("formularios", formId, dataToSave);
             
-            const idx = window.state.formularios.findIndex(f => f.id === data.id);
+            // Actualizar vista local
+            const idx = window.state.formularios.findIndex(f => f.id === formId);
             if (idx !== -1) {
-                window.state.formularios[idx] = { ...window.state.formularios[idx], ...copyData };
+                window.state.formularios[idx] = { ...window.state.formularios[idx], ...dataToSave, id: formId };
             }
         } else {
-            await window.fbAdd("formularios", data);
+            await window.fbAdd("formularios", dataToSave);
         }
-        
-        window.closeModal('modal-asociar-form'); 
+
+        window.closeModal('modal-asociar-form');
         window.closeModal('modal-boleto');
-        
+
         if (window.imprimirBoletoHtml) {
-            window.imprimirBoletoHtml(data);
+            window.imprimirBoletoHtml(dataToSave);
         }
-        
+
     } catch (err) {
         console.error("Error guardando el formulario", err);
+        alert("Ocurrió un error al guardar. Verifica la consola.");
     } finally {
-        window.state.isSubmittingBoleto = false; 
-        
-        if (btn) {
-            window.setBtnLoader(btn, false);
-        }
-        
-        if (window.renderFormulariosView) {
-            window.renderFormulariosView();
-        }
+        window.state.isSubmittingBoleto = false;
+        if (btn) window.setBtnLoader(btn, false);
+        if (window.renderFormulariosView) window.renderFormulariosView();
     }
 };
 
-window.calcRemanentePermuta = () => {
-    const monto = Number(document.getElementById('bf-monto')?.value || 0);
-    const tasado = Number(document.getElementById('bp-tasado')?.value || 0);
-    const diff = monto - tasado;
-    const remInput = document.getElementById('bf-remanente-num');
-    
-    if (remInput) {
-        remInput.value = window.formatMoney(diff);
+// Funciones puente para los botones HTML del modal asociar
+window.vincularYGuardarFormulario = () => {
+    const sel = document.getElementById('asoc-auto-select');
+    if (sel && sel.value) {
+        window.guardarYImprimirFormulario(sel.value);
+    } else {
+        alert("Debes seleccionar un vehículo de la lista para vincularlo.");
     }
+};
+
+window.ignorarYGuardarFormulario = () => {
+    window.guardarYImprimirFormulario(null);
 };
 
 // --------------------------------------------------------
@@ -1035,7 +957,7 @@ window.handleAddLeadHistory = async (e, leadId) => {
         const prox = document.getElementById('lh-fecha').value;
         
         const nuevoHistorial = { 
-            id: window.generateId(), 
+            id: window.generateId ? window.generateId() : Date.now().toString(), 
             fechaCarga: new Date().toISOString().split('T')[0], 
             texto: texto, 
             proximoContacto: prox || null, 
@@ -1518,7 +1440,7 @@ window.liquidarPersonal = async (userId) => {
         };
         
         const docRef = await window.fbAdd("cierres_personal", dataCierre);
-        const cierreOficialId = docRef ? docRef.id : window.generateId();
+        const cierreOficialId = docRef ? docRef.id : window.generateId ? window.generateId() : Date.now().toString();
 
         await window.fbAdd("transacciones", {
             fecha: fechaHoy, 
