@@ -270,14 +270,178 @@ window.openModalBoleto = (tipo) => {
     if (window.lucide) window.lucide.createIcons();
 };
 
-// NUEVA FUNCIÓN: Editar formulario existente
+window.calcRemanentePermuta = () => {
+    const monto = Number(document.getElementById('bf-monto')?.value.replace(/[^0-9]/g, '') || 0);
+    const tasado = Number(document.getElementById('bp-tasado')?.value.replace(/[^0-9]/g, '') || 0);
+    const diff = monto - tasado;
+    const remInput = document.getElementById('bf-remanente-num');
+    
+    if (remInput) {
+        remInput.value = window.formatMoney(diff);
+    }
+};
+
+window.preGuardarBoleto = (e, tipo) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    
+    let baseData = {};
+    const fechaHoy = new Date().toISOString().split('T')[0];
+    
+    if (tipo === 'simple') { 
+        baseData = {
+            tipo: 'Boleto Compra Venta', 
+            fecha: fechaHoy, 
+            vendedor: document.getElementById('bf-vendedor').value,
+            vendedorDomicilio: document.getElementById('bf-vendedor-domicilio').value, 
+            vendedorLoc: document.getElementById('bf-vendedor-loc').value,
+            vendedorTel: document.getElementById('bf-vendedor-tel').value, 
+            comprador: document.getElementById('bf-comprador').value,
+            domicilio: document.getElementById('bf-domicilio').value, 
+            locComp: document.getElementById('bf-loc-comp').value,
+            telefono: document.getElementById('bf-telefono').value, 
+            categoria: document.getElementById('bf-categoria').value,
+            marca: document.getElementById('bf-marca').value, 
+            modelo: document.getElementById('bf-modelo').value,
+            tipoVehiculo: document.getElementById('bf-tipo').value, 
+            año: document.getElementById('bf-anio').value,
+            motor: document.getElementById('bf-motor').value, 
+            chasis: document.getElementById('bf-chasis').value,
+            dominio: document.getElementById('bf-dominio').value.toUpperCase(), 
+            monto: document.getElementById('bf-monto').value,
+            montoLetras: document.getElementById('bf-monto-letras').value, 
+            formaPago: document.getElementById('bf-formapago').value,
+            diasTransf: document.getElementById('bf-dias-transf').value, 
+            ciudadFirma: document.getElementById('bf-ciudad-firma').value,
+            observaciones: document.getElementById('bf-obs').value, 
+            estado: 'Pendiente' 
+        };
+    } else { 
+        baseData = {
+            tipo: 'Boleto Venta con Permuta', 
+            fecha: fechaHoy, 
+            vendedor: document.getElementById('bf-vendedor').value,
+            comprador: document.getElementById('bf-comprador').value, 
+            dni: document.getElementById('bf-dni').value,
+            telefono: document.getElementById('bf-telefono').value, 
+            domicilio: document.getElementById('bf-domicilio').value,
+            altura: document.getElementById('bf-altura').value, 
+            locComp: document.getElementById('bf-loc-comp').value,
+            marca: document.getElementById('bf-marca').value, 
+            modelo: document.getElementById('bf-modelo').value,
+            año: document.getElementById('bf-anio').value, 
+            dominio: document.getElementById('bf-dominio').value.toUpperCase(),
+            motor: document.getElementById('bf-motor').value, 
+            chasis: document.getElementById('bf-chasis').value,
+            locPat: document.getElementById('bf-loc-pat').value, 
+            monto: document.getElementById('bf-monto').value,
+            montoLetras: document.getElementById('bf-monto-letras').value, 
+            efectivo: document.getElementById('bf-efectivo').value,
+            p_marca: document.getElementById('bp-marca').value, 
+            p_modelo: document.getElementById('bp-modelo').value,
+            p_anio: document.getElementById('bp-anio').value, 
+            p_dominio: document.getElementById('bp-dominio').value.toUpperCase(),
+            p_motor: document.getElementById('bp-motor').value, 
+            p_chasis: document.getElementById('bp-chasis').value,
+            p_locPat: document.getElementById('bp-loc-pat').value, 
+            p_tasado: document.getElementById('bp-tasado').value,
+            p_tasadoLetras: document.getElementById('bp-tasado-letras').value, 
+            remanenteLetras: document.getElementById('bf-remanente-letras').value,
+            detalleRemanente: document.getElementById('bf-detalle-remanente').value, 
+            observaciones: document.getElementById('bf-obs').value,
+            estado: 'Pendiente' 
+        };
+    }
+    
+    const autoId = window.state.tempFormData?.autoIdAsociado || null; 
+    const formId = window.state.tempFormData?.id || null;
+    
+    window.state.tempFormData = { ...baseData, autoIdAsociado: autoId, id: formId };
+    
+    if (autoId || formId) { 
+        // Si ya está asociado a un auto o es edición, guarda de una
+        window.guardarYImprimirFormulario(autoId); 
+    } else { 
+        // Si no está asociado, abre el modal para elegir a qué auto del stock asociarlo
+        const selectBox = document.getElementById('asoc-auto-select');
+        if(selectBox) {
+            selectBox.innerHTML = `<option value="">-- Seleccionar Automóvil --</option>` + 
+            window.state.autos.filter(a => a.estado !== 'Vendido').map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
+        }
+        
+        window.closeModal('modal-boleto'); 
+        const cont = document.getElementById('asoc-select-container');
+        if(cont) {
+            cont.classList.remove('hidden'); // Aseguramos que la lista se muestre
+        }
+        window.openModal('modal-asociar-form'); 
+    }
+};
+
+window.guardarYImprimirFormulario = async (autoIdAsociado) => {
+    if (window.state.isSubmittingBoleto) return;
+    
+    // Evitar bug si el parámetro recibido es el Evento del clic del boton HTML
+    if (autoIdAsociado && typeof autoIdAsociado === 'object') {
+        autoIdAsociado = null;
+    }
+
+    window.state.isSubmittingBoleto = true;
+    const data = { ...window.state.tempFormData, estado: 'Completado' }; 
+    const btn = document.querySelector('#form-real-boleto button[type="submit"]') || document.querySelector('#modal-asociar-form button.bg-black');
+    
+    if (btn) window.setBtnLoader(btn, true);
+    
+    try {
+        if (autoIdAsociado) { 
+            data.autoIdAsociado = autoIdAsociado; 
+            await window.fbUpdate("autos", autoIdAsociado, { estado: 'Vendido' }); 
+        }
+        
+        if (data.id) {
+            const copyData = { ...data }; 
+            delete copyData.id; 
+            await window.fbUpdate("formularios", data.id, copyData);
+        } else {
+            await window.fbAdd("formularios", data);
+        }
+        
+        window.closeModal('modal-asociar-form'); 
+        window.closeModal('modal-boleto');
+        
+        if (window.imprimirBoletoHtml) {
+            window.imprimirBoletoHtml(data);
+        }
+        
+    } catch (err) {
+        console.error("Error guardando el formulario", err);
+    } finally {
+        window.state.isSubmittingBoleto = false; 
+        if (btn) window.setBtnLoader(btn, false);
+        if (window.renderFormulariosView) window.renderFormulariosView();
+    }
+};
+
+// Funciones puente para los botones HTML del modal asociar
+window.vincularYGuardarFormulario = () => {
+    const sel = document.getElementById('asoc-auto-select');
+    if (sel && sel.value) {
+        window.guardarYImprimirFormulario(sel.value);
+    } else {
+        alert("Debes seleccionar un vehículo de la lista.");
+    }
+};
+
+window.ignorarYGuardarFormulario = () => {
+    window.guardarYImprimirFormulario(null);
+};
+
+// Editar formulario existente
 window.editarFormulario = (f) => {
     const tipo = f.tipo.includes('Permuta') ? 'permuta' : 'simple';
     
-    // Abrimos el modal vacío según el tipo
     window.openModalBoleto(tipo);
 
-    // Esperamos un instante a que se renderice el HTML del modal para llenarlo
     setTimeout(() => {
         window.state.tempFormData.id = f.id;
         window.state.tempFormData.autoIdAsociado = f.autoIdAsociado;
@@ -336,7 +500,6 @@ window.editarFormulario = (f) => {
             document.getElementById('bf-detalle-remanente').value = f.detalleRemanente || '';
             document.getElementById('bf-obs').value = f.observaciones || '';
             
-            // Calculamos el saldo a favor para que se vea en el input
             window.calcRemanentePermuta();
         }
     }, 100);
@@ -345,18 +508,16 @@ window.editarFormulario = (f) => {
 window.imprimirBoletoHtml = (data) => {
     const printContent = document.getElementById('print-content');
     
-    // Mostramos el logo global en los boletos
     const globalLogo = document.getElementById('print-logo');
     if(globalLogo) globalLogo.classList.remove('hidden');
 
     let html = '';
     
-    // Función de seguridad "Escudo" para evitar errores si un dato viene vacío (undefined o null)
+    // Función "Escudo" para evitar errores si un dato viene vacío
     const sUpper = (val) => (val || '').toString().toUpperCase();
     const sStr = (val) => (val || '').toString();
 
     if (data.tipo.includes('Permuta')) {
-        // BOLETO DE COMPRA VENTA CON PERMUTA (Formal Argentino)
         html = `
             <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; padding: 20px; text-align: justify;">
                 <h2 style="text-align: center; text-transform: uppercase; text-decoration: underline; margin-bottom: 30px; font-size: 18px;">BOLETO DE COMPRA VENTA AUTOMOTOR CON PERMUTA</h2>
@@ -398,7 +559,6 @@ window.imprimirBoletoHtml = (data) => {
             </div>
         `;
     } else {
-        // BOLETO COMPRA VENTA SIMPLE (Formal Argentino)
         html = `
             <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; padding: 20px; text-align: justify;">
                 <h2 style="text-align: center; text-transform: uppercase; text-decoration: underline; margin-bottom: 30px; font-size: 18px;">BOLETO DE COMPRA VENTA AUTOMOTOR</h2>
@@ -436,7 +596,6 @@ window.imprimirBoletoHtml = (data) => {
 
     printContent.innerHTML = html;
     
-    // Ocultar la app y mostrar la zona de impresión
     document.getElementById('app-wrapper').classList.add('hidden');
     document.getElementById('print-section').classList.remove('hidden');
     
