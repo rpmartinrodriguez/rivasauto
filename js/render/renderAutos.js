@@ -592,15 +592,14 @@ window.renderDetalleAuto = () => {
         </div>
         
         <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-8">
-          <div class="flex justify-between items-center mb-6">
-            <h4 class="font-bold flex items-center text-neutral-700 dark:text-neutral-300">
-              <i data-lucide="repeat" class="w-5 h-5 mr-2 opacity-60"></i> Recibe Vehículo en Permuta
+          
+          <div class="flex items-center justify-between mb-6 bg-indigo-100 dark:bg-indigo-900/30 p-4 rounded-2xl border border-indigo-300 dark:border-indigo-700">
+            <h4 class="font-black flex items-center text-indigo-800 dark:text-indigo-300 uppercase tracking-widest text-sm">
+              <i data-lucide="repeat" class="w-5 h-5 mr-2"></i> Recibe Vehículo en Permuta
             </h4>
-            <label class="flex items-center cursor-pointer">
-              <input type="checkbox" id="vent-hasperm" class="sr-only toggle-checkbox" onchange="document.getElementById('permuta-fields').classList.toggle('hidden', !this.checked); window.state.ventaData.tienePermuta=this.checked;" ${window.state.ventaData.tienePermuta ? 'checked' : ''} />
-              <div class="toggle-label bg-neutral-300 dark:bg-neutral-600 relative">
-                <div class="absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${window.state.ventaData.tienePermuta ? 'translate-x-6' : ''}"></div>
-              </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="vent-hasperm" class="sr-only peer" onchange="document.getElementById('permuta-fields').classList.toggle('hidden', !this.checked); window.state.ventaData.tienePermuta=this.checked;" ${window.state.ventaData.tienePermuta ? 'checked' : ''} />
+              <div class="w-14 h-7 bg-neutral-300 peer-focus:outline-none rounded-full peer dark:bg-neutral-600 peer-checked:after:translate-x-7 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
             </label>
           </div>
           
