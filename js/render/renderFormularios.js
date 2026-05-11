@@ -40,13 +40,23 @@ window.renderFormulariosView = () => {
         return;
     }
 
+    // Identificar si es Admin para habilitar eliminación
+    const isAdmin = window.state.currentUser?.rol === 'Admin';
+
     tbody.innerHTML = formularios.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).map(f => {
         const badgeClass = f.tipo.includes('Permuta') 
             ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' 
             : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300';
 
-        // Escapamos las comillas simples para evitar que se rompa el JSON al imprimir
+        // Escapamos las comillas simples para evitar que se rompa el JSON al imprimir/editar
         const fJson = JSON.stringify(f).replace(/'/g, "&#39;");
+
+        // Botón de eliminar (SOLO ADMIN)
+        const btnEliminar = isAdmin ? `
+            <button onclick="window.eliminarFormulario('${f.id}')" class="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg transition-colors shadow-sm" title="Eliminar">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+        ` : '';
 
         return `
             <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
@@ -68,9 +78,10 @@ window.renderFormulariosView = () => {
                     <button onclick='window.imprimirBoletoHtml(${fJson})' class="p-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:text-blue-500 dark:hover:text-blue-400 rounded-lg transition-colors mr-1 shadow-sm" title="Imprimir / Ver">
                         <i data-lucide="printer" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="window.eliminarFormulario('${f.id}')" class="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg transition-colors shadow-sm" title="Eliminar">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <button onclick='window.editarFormulario(${fJson})' class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors mr-1 shadow-sm" title="Editar Formulario">
+                        <i data-lucide="edit" class="w-4 h-4"></i>
                     </button>
+                    ${btnEliminar}
                 </td>
             </tr>
         `;
@@ -259,6 +270,78 @@ window.openModalBoleto = (tipo) => {
     if (window.lucide) window.lucide.createIcons();
 };
 
+// NUEVA FUNCIÓN: Editar formulario existente
+window.editarFormulario = (f) => {
+    const tipo = f.tipo.includes('Permuta') ? 'permuta' : 'simple';
+    
+    // Abrimos el modal vacío según el tipo
+    window.openModalBoleto(tipo);
+
+    // Esperamos un instante a que se renderice el HTML del modal para llenarlo
+    setTimeout(() => {
+        window.state.tempFormData.id = f.id;
+        window.state.tempFormData.autoIdAsociado = f.autoIdAsociado;
+
+        if (tipo === 'simple') {
+            document.getElementById('bf-vendedor').value = f.vendedor || '';
+            document.getElementById('bf-vendedor-domicilio').value = f.vendedorDomicilio || '';
+            document.getElementById('bf-vendedor-loc').value = f.vendedorLoc || '';
+            document.getElementById('bf-vendedor-tel').value = f.vendedorTel || '';
+            document.getElementById('bf-comprador').value = f.comprador || '';
+            document.getElementById('bf-domicilio').value = f.domicilio || '';
+            document.getElementById('bf-loc-comp').value = f.locComp || '';
+            document.getElementById('bf-telefono').value = f.telefono || '';
+            document.getElementById('bf-categoria').value = f.categoria || '';
+            document.getElementById('bf-marca').value = f.marca || '';
+            document.getElementById('bf-modelo').value = f.modelo || '';
+            document.getElementById('bf-tipo').value = f.tipoVehiculo || '';
+            document.getElementById('bf-anio').value = f.año || '';
+            document.getElementById('bf-motor').value = f.motor || '';
+            document.getElementById('bf-chasis').value = f.chasis || '';
+            document.getElementById('bf-dominio').value = f.dominio || '';
+            document.getElementById('bf-monto').value = f.monto || '';
+            document.getElementById('bf-monto-letras').value = f.montoLetras || '';
+            document.getElementById('bf-formapago').value = f.formaPago || '';
+            document.getElementById('bf-dias-transf').value = f.diasTransf || '';
+            document.getElementById('bf-ciudad-firma').value = f.ciudadFirma || '';
+            document.getElementById('bf-obs').value = f.observaciones || '';
+        } else {
+            document.getElementById('bf-vendedor').value = f.vendedor || '';
+            document.getElementById('bf-comprador').value = f.comprador || '';
+            document.getElementById('bf-dni').value = f.dni || '';
+            document.getElementById('bf-telefono').value = f.telefono || '';
+            document.getElementById('bf-domicilio').value = f.domicilio || '';
+            document.getElementById('bf-altura').value = f.altura || '';
+            document.getElementById('bf-loc-comp').value = f.locComp || '';
+            document.getElementById('bf-marca').value = f.marca || '';
+            document.getElementById('bf-modelo').value = f.modelo || '';
+            document.getElementById('bf-anio').value = f.año || '';
+            document.getElementById('bf-dominio').value = f.dominio || '';
+            document.getElementById('bf-motor').value = f.motor || '';
+            document.getElementById('bf-chasis').value = f.chasis || '';
+            document.getElementById('bf-loc-pat').value = f.locPat || '';
+            document.getElementById('bf-monto').value = f.monto || '';
+            document.getElementById('bf-monto-letras').value = f.montoLetras || '';
+            document.getElementById('bf-efectivo').value = f.efectivo || '';
+            document.getElementById('bp-marca').value = f.p_marca || '';
+            document.getElementById('bp-modelo').value = f.p_modelo || '';
+            document.getElementById('bp-anio').value = f.p_anio || '';
+            document.getElementById('bp-dominio').value = f.p_dominio || '';
+            document.getElementById('bp-motor').value = f.p_motor || '';
+            document.getElementById('bp-chasis').value = f.p_chasis || '';
+            document.getElementById('bp-loc-pat').value = f.p_locPat || '';
+            document.getElementById('bp-tasado').value = f.p_tasado || '';
+            document.getElementById('bp-tasado-letras').value = f.p_tasadoLetras || '';
+            document.getElementById('bf-remanente-letras').value = f.remanenteLetras || '';
+            document.getElementById('bf-detalle-remanente').value = f.detalleRemanente || '';
+            document.getElementById('bf-obs').value = f.observaciones || '';
+            
+            // Calculamos el saldo a favor para que se vea en el input
+            window.calcRemanentePermuta();
+        }
+    }, 100);
+};
+
 window.imprimirBoletoHtml = (data) => {
     const printContent = document.getElementById('print-content');
     
@@ -268,34 +351,38 @@ window.imprimirBoletoHtml = (data) => {
 
     let html = '';
     
+    // Función de seguridad "Escudo" para evitar errores si un dato viene vacío (undefined o null)
+    const sUpper = (val) => (val || '').toString().toUpperCase();
+    const sStr = (val) => (val || '').toString();
+
     if (data.tipo.includes('Permuta')) {
         // BOLETO DE COMPRA VENTA CON PERMUTA (Formal Argentino)
         html = `
             <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; padding: 20px; text-align: justify;">
                 <h2 style="text-align: center; text-transform: uppercase; text-decoration: underline; margin-bottom: 30px; font-size: 18px;">BOLETO DE COMPRA VENTA AUTOMOTOR CON PERMUTA</h2>
                 
-                <p>En la ciudad de <strong>Gualeguaychú</strong>, Provincia de Entre Ríos, a los <strong>${window.formatDate(data.fecha)}</strong>, entre el señor/a <strong>${data.vendedor.toUpperCase()}</strong>, en adelante denominado "EL VENDEDOR", y el señor/a <strong>${data.comprador.toUpperCase()}</strong>, D.N.I. N° <strong>${data.dni}</strong>, domiciliado en calle <strong>${data.domicilio} ${data.altura || ''}</strong> de la localidad de <strong>${data.locComp.toUpperCase()}</strong>, teléfono <strong>${data.telefono}</strong>, en adelante denominado "EL COMPRADOR", convienen en celebrar el presente contrato de Compra-Venta, sujeto a las siguientes cláusulas y condiciones:</p>
+                <p>En la ciudad de <strong>Gualeguaychú</strong>, Provincia de Entre Ríos, a los <strong>${window.formatDate(data.fecha)}</strong>, entre el señor/a <strong>${sUpper(data.vendedor)}</strong>, en adelante denominado "EL VENDEDOR", y el señor/a <strong>${sUpper(data.comprador)}</strong>, D.N.I. N° <strong>${sStr(data.dni)}</strong>, domiciliado en calle <strong>${sStr(data.domicilio)} ${sStr(data.altura)}</strong> de la localidad de <strong>${sUpper(data.locComp)}</strong>, teléfono <strong>${sStr(data.telefono)}</strong>, en adelante denominado "EL COMPRADOR", convienen en celebrar el presente contrato de Compra-Venta, sujeto a las siguientes cláusulas y condiciones:</p>
 
                 <p><strong>PRIMERA:</strong> EL VENDEDOR vende y EL COMPRADOR compra un vehículo usado, cuyas características son las siguientes:<br>
-                Marca: <strong>${data.marca.toUpperCase()}</strong> - Modelo: <strong>${data.modelo.toUpperCase()}</strong> - Año: <strong>${data.año}</strong><br>
-                Dominio: <strong>${data.dominio.toUpperCase()}</strong> - Motor N°: <strong>${data.motor || 'S/D'}</strong> - Chasis N°: <strong>${data.chasis || 'S/D'}</strong><br>
-                Radicación actual: <strong>${data.locPat || 'S/D'}</strong>. En el estado en que se encuentra y que EL COMPRADOR declara conocer y aceptar, prestando plena conformidad.</p>
+                Marca: <strong>${sUpper(data.marca)}</strong> - Modelo: <strong>${sUpper(data.modelo)}</strong> - Año: <strong>${sStr(data.año)}</strong><br>
+                Dominio: <strong>${sUpper(data.dominio)}</strong> - Motor N°: <strong>${sUpper(data.motor) || 'S/D'}</strong> - Chasis N°: <strong>${sUpper(data.chasis) || 'S/D'}</strong><br>
+                Radicación actual: <strong>${sUpper(data.locPat) || 'S/D'}</strong>. En el estado en que se encuentra y que EL COMPRADOR declara conocer y aceptar, prestando plena conformidad.</p>
 
-                <p><strong>SEGUNDA:</strong> El precio total y convenido de esta operación se fija en la suma de Pesos <strong>${data.monto}</strong> (Son Pesos: <strong>${data.montoLetras.toUpperCase()}</strong>), que serán abonados de la siguiente forma:</p>
+                <p><strong>SEGUNDA:</strong> El precio total y convenido de esta operación se fija en la suma de Pesos <strong>${sStr(data.monto)}</strong> (Son Pesos: <strong>${sUpper(data.montoLetras)}</strong>), que serán abonados de la siguiente forma:</p>
                 
                 <ul style="list-style-type: none; padding-left: 20px;">
-                    <li><strong>A)</strong> La suma de Pesos <strong>${data.efectivo || '$ 0'}</strong> en dinero en efectivo, sirviendo el presente de suficiente recibo.</li>
+                    <li><strong>A)</strong> La suma de Pesos <strong>${sStr(data.efectivo) || '$ 0'}</strong> en dinero en efectivo, sirviendo el presente de suficiente recibo.</li>
                     <li><strong>B)</strong> EL COMPRADOR entrega en concepto de Permuta/Parte de pago, y EL VENDEDOR acepta, un vehículo de las siguientes características:<br>
-                    Marca: <strong>${data.p_marca.toUpperCase()}</strong> - Modelo: <strong>${data.p_modelo.toUpperCase()}</strong> - Año: <strong>${data.p_anio}</strong><br>
-                    Dominio: <strong>${data.p_dominio.toUpperCase()}</strong> - Motor N°: <strong>${data.p_motor || 'S/D'}</strong> - Chasis N°: <strong>${data.p_chasis || 'S/D'}</strong>. Dicha unidad se tasa de común acuerdo en la suma de Pesos <strong>${data.p_tasado}</strong> (Son Pesos: <strong>${data.p_tasadoLetras.toUpperCase()}</strong>).</li>
-                    <li><strong>C)</strong> El saldo remanente de Pesos <strong>${data.remanenteLetras.toUpperCase()}</strong> se cancelará de la siguiente manera: <strong>${data.detalleRemanente || 'No aplica'}</strong>.</li>
+                    Marca: <strong>${sUpper(data.p_marca)}</strong> - Modelo: <strong>${sUpper(data.p_modelo)}</strong> - Año: <strong>${sStr(data.p_anio)}</strong><br>
+                    Dominio: <strong>${sUpper(data.p_dominio)}</strong> - Motor N°: <strong>${sUpper(data.p_motor) || 'S/D'}</strong> - Chasis N°: <strong>${sUpper(data.p_chasis) || 'S/D'}</strong>. Dicha unidad se tasa de común acuerdo en la suma de Pesos <strong>${sStr(data.p_tasado)}</strong> (Son Pesos: <strong>${sUpper(data.p_tasadoLetras)}</strong>).</li>
+                    <li><strong>C)</strong> El saldo remanente de Pesos <strong>${sUpper(data.remanenteLetras)}</strong> se cancelará de la siguiente manera: <strong>${sStr(data.detalleRemanente) || 'No aplica'}</strong>.</li>
                 </ul>
 
                 <p><strong>TERCERA:</strong> EL COMPRADOR asume a partir de la fecha y hora de entrega de la unidad toda responsabilidad civil y/o penal por accidentes, daños o perjuicios ocasionados con el vehículo, como así también las infracciones de tránsito que se cometieran.</p>
 
                 <p><strong>CUARTA:</strong> Ambos vehículos objeto de este contrato se entregan con la documentación pertinente para su transferencia. Las partes se comprometen a realizar la transferencia de dominio dentro de los 15 días hábiles de la firma del presente. Todos los gastos de transferencia serán a cargo exclusivo de la parte compradora, salvo pacto en contrario.</p>
                 
-                ${data.observaciones ? `<p><strong>OBSERVACIONES:</strong> ${data.observaciones}</p>` : ''}
+                ${data.observaciones ? `<p><strong>OBSERVACIONES:</strong> ${sStr(data.observaciones)}</p>` : ''}
 
                 <p style="margin-top: 40px;">En prueba de conformidad, se firman dos (2) ejemplares de un mismo tenor y a un solo efecto en el lugar y fecha arriba indicados.</p>
 
@@ -316,21 +403,21 @@ window.imprimirBoletoHtml = (data) => {
             <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; padding: 20px; text-align: justify;">
                 <h2 style="text-align: center; text-transform: uppercase; text-decoration: underline; margin-bottom: 30px; font-size: 18px;">BOLETO DE COMPRA VENTA AUTOMOTOR</h2>
                 
-                <p>En la ciudad de <strong>${data.ciudadFirma.toUpperCase()}</strong>, a los <strong>${window.formatDate(data.fecha)}</strong>, entre <strong>${data.vendedor.toUpperCase()}</strong>, domiciliado en <strong>${data.vendedorDomicilio}</strong> de la localidad de <strong>${data.vendedorLoc}</strong>, teléfono <strong>${data.vendedorTel}</strong>, por una parte, en adelante "EL VENDEDOR", y por la otra parte el señor/a <strong>${data.comprador.toUpperCase()}</strong>, domiciliado en calle <strong>${data.domicilio}</strong> de la localidad de <strong>${data.locComp}</strong>, teléfono <strong>${data.telefono}</strong>, en adelante "EL COMPRADOR", convienen en celebrar el presente boleto de compraventa, sujeto a las siguientes cláusulas:</p>
+                <p>En la ciudad de <strong>${sUpper(data.ciudadFirma)}</strong>, a los <strong>${window.formatDate(data.fecha)}</strong>, entre <strong>${sUpper(data.vendedor)}</strong>, domiciliado en <strong>${sStr(data.vendedorDomicilio)}</strong> de la localidad de <strong>${sStr(data.vendedorLoc)}</strong>, teléfono <strong>${sStr(data.vendedorTel)}</strong>, por una parte, en adelante "EL VENDEDOR", y por la otra parte el señor/a <strong>${sUpper(data.comprador)}</strong>, domiciliado en calle <strong>${sStr(data.domicilio)}</strong> de la localidad de <strong>${sStr(data.locComp)}</strong>, teléfono <strong>${sStr(data.telefono)}</strong>, en adelante "EL COMPRADOR", convienen en celebrar el presente boleto de compraventa, sujeto a las siguientes cláusulas:</p>
 
                 <p><strong>PRIMERA:</strong> EL VENDEDOR vende y EL COMPRADOR adquiere un vehículo usado cuyas características son:<br>
-                Tipo: <strong>${data.tipoVehiculo.toUpperCase()}</strong> - Categoría: <strong>${data.categoria.toUpperCase()}</strong><br>
-                Marca: <strong>${data.marca.toUpperCase()}</strong> - Modelo: <strong>${data.modelo.toUpperCase()}</strong> - Año: <strong>${data.año}</strong><br>
-                Dominio: <strong>${data.dominio.toUpperCase()}</strong> - Motor N°: <strong>${data.motor || 'S/D'}</strong> - Chasis N°: <strong>${data.chasis || 'S/D'}</strong>.<br>
+                Tipo: <strong>${sUpper(data.tipoVehiculo) || 'S/D'}</strong> - Categoría: <strong>${sUpper(data.categoria) || 'S/D'}</strong><br>
+                Marca: <strong>${sUpper(data.marca)}</strong> - Modelo: <strong>${sUpper(data.modelo)}</strong> - Año: <strong>${sStr(data.año)}</strong><br>
+                Dominio: <strong>${sUpper(data.dominio)}</strong> - Motor N°: <strong>${sUpper(data.motor) || 'S/D'}</strong> - Chasis N°: <strong>${sUpper(data.chasis) || 'S/D'}</strong>.<br>
                 El vehículo se entrega en el estado general que se encuentra, siendo conocido y aceptado por el comprador, quien declara haberlo revisado a su entera satisfacción.</p>
 
-                <p><strong>SEGUNDA:</strong> El precio total y definitivo de esta venta se conviene en la suma de Pesos <strong>${data.monto}</strong> (Son Pesos: <strong>${data.montoLetras.toUpperCase()}</strong>). Dicho importe es abonado de la siguiente manera: <strong>${data.formaPago}</strong>.</p>
+                <p><strong>SEGUNDA:</strong> El precio total y definitivo de esta venta se conviene en la suma de Pesos <strong>${sStr(data.monto)}</strong> (Son Pesos: <strong>${sUpper(data.montoLetras)}</strong>). Dicho importe es abonado de la siguiente manera: <strong>${sStr(data.formaPago)}</strong>.</p>
 
                 <p><strong>TERCERA:</strong> El comprador se hace cargo a partir del momento de la firma y entrega de la unidad, de toda responsabilidad civil y/o penal derivada de accidentes de tránsito, daños a terceros, infracciones municipales o policiales, asumiendo la guarda del mismo.</p>
 
-                <p><strong>CUARTA:</strong> El comprador asume la obligación de realizar la transferencia de dominio a su nombre o de quien indique en el plazo perentorio de <strong>${data.diasTransf}</strong> días hábiles, siendo todos los gastos, aranceles y honorarios que demande la misma por su exclusiva cuenta y orden.</p>
+                <p><strong>CUARTA:</strong> El comprador asume la obligación de realizar la transferencia de dominio a su nombre o de quien indique en el plazo perentorio de <strong>${sStr(data.diasTransf)}</strong> días hábiles, siendo todos los gastos, aranceles y honorarios que demande la misma por su exclusiva cuenta y orden.</p>
                 
-                ${data.observaciones ? `<p><strong>OBSERVACIONES:</strong> ${data.observaciones}</p>` : ''}
+                ${data.observaciones ? `<p><strong>OBSERVACIONES:</strong> ${sStr(data.observaciones)}</p>` : ''}
 
                 <p style="margin-top: 40px;">De plena conformidad, se leen y firman dos (2) ejemplares de idéntico tenor en el lugar y fecha consignados en el encabezamiento.</p>
 
