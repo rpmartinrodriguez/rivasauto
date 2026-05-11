@@ -591,32 +591,30 @@ window.renderDetalleAuto = () => {
           </div>
         </div>
         
-        <div class="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mb-8">
-          
-          <div class="flex items-center justify-between mb-6 bg-indigo-100 dark:bg-indigo-900/30 p-4 rounded-2xl border border-indigo-300 dark:border-indigo-700">
-            <h4 class="font-black flex items-center text-indigo-800 dark:text-indigo-300 uppercase tracking-widest text-sm">
-              <i data-lucide="repeat" class="w-5 h-5 mr-2"></i> Recibe Vehículo en Permuta
-            </h4>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="vent-hasperm" class="sr-only peer" onchange="document.getElementById('permuta-fields').classList.toggle('hidden', !this.checked); window.state.ventaData.tienePermuta=this.checked;" ${window.state.ventaData.tienePermuta ? 'checked' : ''} />
-              <div class="w-14 h-7 bg-neutral-300 peer-focus:outline-none rounded-full peer dark:bg-neutral-600 peer-checked:after:translate-x-7 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+        <div class="mb-8">
+            <label class="flex items-center space-x-3 cursor-pointer bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-200 dark:border-indigo-800 transition-colors hover:bg-indigo-100 dark:hover:bg-indigo-900/40 shadow-sm">
+                <input type="checkbox" id="vent-hasperm" class="w-6 h-6 text-indigo-600 rounded cursor-pointer focus:ring-indigo-500" onchange="document.getElementById('permuta-fields').classList.toggle('hidden', !this.checked); window.state.ventaData.tienePermuta=this.checked;" ${window.state.ventaData.tienePermuta ? 'checked' : ''} />
+                <span class="font-black text-indigo-800 dark:text-indigo-300 uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="repeat" class="w-5 h-5 mr-2"></i> Recibir Vehículo en Permuta
+                </span>
             </label>
-          </div>
           
-          <div id="permuta-fields" class="${window.state.ventaData.tienePermuta ? '' : 'hidden'} grid grid-cols-2 md:grid-cols-3 gap-4 fade-in">
-            <input id="p-marca" placeholder="Marca" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
-            <input id="p-modelo" placeholder="Modelo" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
-            <input id="p-color" placeholder="Color" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
-            <input id="p-km" type="text" oninput="window.formatInputMoney(this)" placeholder="Km" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-            <input id="p-anio" type="number" placeholder="Año" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
-            <input id="p-pat" placeholder="Patente" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 uppercase outline-none font-bold focus:border-green-500" />
-            <select id="p-condicion" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500">
-              <option value="Propio">Propio</option>
-              <option value="Consignación">Consignación</option>
-            </select>
-            <div class="col-span-2 mt-2">
-              <label class="block text-xs font-bold uppercase mb-2 text-neutral-500">Valor Real de Toma / Costo ($)</label>
-              <input id="p-valor" type="text" oninput="window.formatInputMoney(this)" placeholder="Ingresará a la flota con este costo base" class="w-full rounded-xl px-4 py-4 text-lg font-black bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
+          <div id="permuta-fields" class="${window.state.ventaData.tienePermuta ? '' : 'hidden'} bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-[2rem] border border-neutral-200 dark:border-neutral-700 mt-4 fade-in">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <input id="p-marca" placeholder="Marca" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
+              <input id="p-modelo" placeholder="Modelo" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
+              <input id="p-color" placeholder="Color" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500 uppercase" />
+              <input id="p-km" type="text" oninput="window.formatInputMoney(this)" placeholder="Km" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+              <input id="p-anio" type="number" placeholder="Año" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500" />
+              <input id="p-pat" placeholder="Patente" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 uppercase outline-none font-bold focus:border-green-500" />
+              <select id="p-condicion" class="rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none font-bold focus:border-green-500">
+                <option value="Propio">Propio</option>
+                <option value="Consignación">Consignación</option>
+              </select>
+              <div class="col-span-2 mt-2">
+                <label class="block text-xs font-bold uppercase mb-2 text-neutral-500">Valor Real de Toma / Costo ($)</label>
+                <input id="p-valor" type="text" oninput="window.formatInputMoney(this)" placeholder="Ingresará a la flota con este costo base" class="w-full rounded-xl px-4 py-4 text-lg font-black bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 outline-none focus:border-green-500" />
+              </div>
             </div>
           </div>
         </div>
