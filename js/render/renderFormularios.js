@@ -187,6 +187,17 @@ window.renderFormulariosView = () => {
             </button>
         ` : '';
 
+        // Botón inteligente de VINCULAR AL AUTO
+        const btnVincular = !f.autoIdAsociado ? `
+            <button onclick="window.abrirAsociarVehiculo('${f.id}')" class="p-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-lg transition-colors mr-1 shadow-sm" title="Vincular a Vehículo de Flota">
+                <i data-lucide="link" class="w-4 h-4"></i>
+            </button>
+        ` : `
+            <button onclick="window.abrirAsociarVehiculo('${f.id}')" class="p-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 rounded-lg transition-colors mr-1 shadow-sm" title="Vehículo ya vinculado (Click para cambiar)">
+                <i data-lucide="link-2" class="w-4 h-4"></i>
+            </button>
+        `;
+
         return `
             <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                 <td class="px-6 py-4 text-sm font-bold text-neutral-800 dark:text-neutral-200">
@@ -210,6 +221,7 @@ window.renderFormulariosView = () => {
                     <button onclick='window.editarFormulario(${fJson})' class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors mr-1 shadow-sm" title="Editar Formulario">
                         <i data-lucide="edit" class="w-4 h-4"></i>
                     </button>
+                    ${btnVincular}
                     ${btnEliminar}
                 </td>
             </tr>
@@ -219,6 +231,27 @@ window.renderFormulariosView = () => {
     if (window.lucide) {
         window.lucide.createIcons();
     }
+};
+
+window.abrirAsociarVehiculo = (formId) => {
+    const f = window.state.formularios.find(x => x.id === formId);
+    if (!f) return;
+    
+    // Cargamos los datos del formulario al estado temporal para que la función de guardado sepa a quién actualizar
+    window.state.tempFormData = { ...f }; 
+    
+    const selectBox = document.getElementById('asoc-auto-select');
+    if(selectBox) {
+        selectBox.innerHTML = `<option value="">-- Seleccionar Automóvil --</option>` + 
+        window.state.autos.filter(a => a.estado !== 'Vendido').map(a => `<option value="${a.id}">${a.marca} ${a.modelo} (${a.patente})</option>`).join(''); 
+    }
+    
+    const cont = document.getElementById('asoc-select-container');
+    if(cont) {
+        cont.classList.remove('hidden'); 
+    }
+    
+    window.openModal('modal-asociar-form');
 };
 
 window.eliminarFormulario = async (id) => {
@@ -338,7 +371,7 @@ window.openModalBoleto = (tipo) => {
                                 
                                 <div class="col-span-2 border-t border-neutral-100 dark:border-neutral-800 pt-4 mt-2">
                                     <input id="bf-monto" required oninput="window.formatInputMoney(this); document.getElementById('bf-monto-letras').value = window.numeroALetras(Number(this.value.replace(/[^0-9]/g, ''))); window.calcRemanentePermuta()" placeholder="Precio Total del Vehículo ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-black mb-3" />
-                                    <input id="bf-monto-letras" required placeholder="Precio Total (En Letras)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold uppercase" />
+                                    <input id="bf-monto-letras" required placeholder="Precio Total (En Letras - Auto)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold uppercase" />
                                 </div>
                             </div>
                         </div>
@@ -375,7 +408,7 @@ window.openModalBoleto = (tipo) => {
                                     <span class="text-xs font-bold uppercase text-amber-700 dark:text-amber-500">Saldo a favor vendedor:</span>
                                     <input id="bf-remanente-num" disabled class="flex-1 rounded-xl px-4 py-2 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-600 outline-none font-black text-amber-800 dark:text-amber-400 text-right" />
                                 </div>
-                                <input id="bf-remanente-letras" placeholder="Saldo Remanente (En Letras)" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold uppercase" />
+                                <input id="bf-remanente-letras" placeholder="Saldo Remanente (En Letras - Auto)" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold uppercase" />
                                 <textarea id="bf-detalle-remanente" rows="2" placeholder="Detalle de pago del saldo (Ej: 12 Cuotas, Transferencia posterior, etc)" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none resize-none font-bold"></textarea>
                             </div>
                         </div>
