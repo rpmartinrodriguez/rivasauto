@@ -1218,15 +1218,22 @@ window.handleCajaSubmit = async (e) => {
     }
     
     try {
+        const autoIdSel = document.getElementById('caja-auto').value || null;
+        const tipoTx = document.getElementById('caja-tipo').value;
+        const descTx = document.getElementById('caja-desc').value;
+        const catTx = document.getElementById('caja-cat').value;
+        const montoTx = Number(document.getElementById('caja-monto').value.replace(/[^0-9]/g, ''));
+        const fDate = document.getElementById('caja-fecha').value;
+
         const data = {
             userId: window.state.currentUser.id, 
             sucursalId: window.state.currentUser.sucursalId,
-            fecha: document.getElementById('caja-fecha').value, 
-            tipo: document.getElementById('caja-tipo').value,
-            descripcion: document.getElementById('caja-desc').value, 
-            categoria: document.getElementById('caja-cat').value,
-            valor: Number(document.getElementById('caja-monto').value.replace(/[^0-9]/g, '')),
-            autoId: document.getElementById('caja-auto').value || null, 
+            fecha: fDate, 
+            tipo: tipoTx,
+            descripcion: descTx, 
+            categoria: catTx,
+            valor: montoTx,
+            autoId: autoIdSel, 
             tipoComprobante: document.getElementById('caja-comprobante').value,
             numComprobante: document.getElementById('caja-comp-num').value, 
             iva: Number(document.getElementById('caja-iva').value.replace(/[^0-9]/g, '') || 0),
@@ -1234,6 +1241,23 @@ window.handleCajaSubmit = async (e) => {
         };
         
         await window.fbAdd("transacciones", data);
+
+        // Si es un gasto asociado a un auto, impactamos la Ficha del Auto (Taller) para que no quede huérfano
+        if (tipoTx === 'gasto' && autoIdSel) {
+            const auto = window.state.autos.find(x => x.id === autoIdSel);
+            if (auto) {
+                const nuevoGasto = { 
+                    id: window.generateId ? window.generateId() : Date.now().toString(), 
+                    fecha: fDate, 
+                    descripcion: descTx, 
+                    categoria: catTx, 
+                    monto: montoTx, 
+                    fueraDeCaja: false 
+                };
+                const nuevosGastos = [...(auto.gastos || []), nuevoGasto];
+                await window.fbUpdate("autos", autoIdSel, { gastos: nuevosGastos });
+            }
+        }
         
         window.closeModal('modal-caja');
         e.target.reset();
@@ -1242,10 +1266,7 @@ window.handleCajaSubmit = async (e) => {
         console.error("Error guardando transaccion de caja:", err);
     } finally {
         window.state.isSubmittingCaja = false;
-        
-        if (btn) {
-            window.setBtnLoader(btn, false);
-        }
+        if (btn) window.setBtnLoader(btn, false);
     }
 };
 
