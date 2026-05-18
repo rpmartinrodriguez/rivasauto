@@ -374,7 +374,7 @@ window.confirmarIngresoAuto = async (event) => {
 window.abrirCajaParaGastos = () => { 
     window.closeModal('modal-ingreso-auto'); 
     window.switchTab('caja'); 
-    window.openModal('modal-caja'); 
+    window.openModalCaja(); 
     
     setTimeout(() => { 
         document.getElementById('caja-auto').value = window.state.pendingIngresoAutoId; 
@@ -678,21 +678,17 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 // --------------------------------------------------------
 
 window.guardarYImprimirFormulario = async (autoIdAsociado) => {
-    // Si ya está enviando, prevenimos doble click
     if (window.state.isSubmittingBoleto) return;
 
-    // Evitar bug si el parámetro recibido es el Evento del clic del boton HTML
     if (autoIdAsociado && typeof autoIdAsociado === 'object') {
         autoIdAsociado = null;
     }
 
     window.state.isSubmittingBoleto = true;
     
-    // Creamos una copia limpia de los datos
     const dataToSave = { ...window.state.tempFormData, estado: 'Completado' };
-    const formId = dataToSave.id; // Guardamos el ID si existe para actualizar
+    const formId = dataToSave.id; 
 
-    // FIREBASE ESCUDO: Firebase no acepta "undefined" ni la propiedad "id" dentro del payload.
     delete dataToSave.id;
     
     Object.keys(dataToSave).forEach(key => {
@@ -713,7 +709,6 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
         if (formId) {
             await window.fbUpdate("formularios", formId, dataToSave);
             
-            // Actualizar vista local
             const idx = window.state.formularios.findIndex(f => f.id === formId);
             if (idx !== -1) {
                 window.state.formularios[idx] = { ...window.state.formularios[idx], ...dataToSave, id: formId };
@@ -739,7 +734,6 @@ window.guardarYImprimirFormulario = async (autoIdAsociado) => {
     }
 };
 
-// Funciones puente para los botones HTML del modal asociar
 window.vincularYGuardarFormulario = () => {
     const sel = document.getElementById('asoc-auto-select');
     if (sel && sel.value) {
@@ -1202,12 +1196,59 @@ window.marcarCobrado = async (id) => {
     window.closeModal('modal-pendientes'); 
 };
 
+window.openModalCaja = () => {
+    window.state.editingTransaccionId = null;
+    document.getElementById('form-caja').reset();
+    const title = document.getElementById('modal-caja-title');
+    if(title) title.innerText = "Nuevo Movimiento de Caja";
+    window.openModal('modal-caja');
+};
+
+window.editTransaccion = (id) => {
+    const t = window.state.transacciones.find(x => x.id === id);
+    if (!t) return;
+    
+    window.state.editingTransaccionId = id;
+    
+    document.getElementById('caja-fecha').value = t.fecha;
+    document.getElementById('caja-tipo').value = t.tipo;
+    document.getElementById('caja-desc').value = t.descripcion;
+    document.getElementById('caja-cat').value = t.categoria;
+    document.getElementById('caja-monto').value = window.formatMoney(t.valor).replace(/[^0-9]/g, '');
+    
+    if (document.getElementById('caja-auto')) {
+        document.getElementById('caja-auto').value = t.autoId || '';
+    }
+    if (document.getElementById('caja-comprobante')) {
+        document.getElementById('caja-comprobante').value = t.tipoComprobante || 'X';
+        if (window.handleComprobanteChange) window.handleComprobanteChange(t.tipoComprobante || 'X');
+    }
+    if (document.getElementById('caja-comp-num')) {
+        document.getElementById('caja-comp-num').value = t.numComprobante || '';
+    }
+    if (document.getElementById('caja-iva')) {
+        document.getElementById('caja-iva').value = t.iva ? window.formatMoney(t.iva).replace(/[^0-9]/g, '') : '';
+    }
+
+    const title = document.getElementById('modal-caja-title');
+    if(title) title.innerText = "Editar Movimiento de Caja";
+    
+    window.openModal('modal-caja');
+};
+
 window.handleCajaSubmit = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
     if (window.state.isSubmittingCaja) {
         return;
+    }
+
+    // ALERTA DE SEGURIDAD PARA EDICIONES
+    if (window.state.editingTransaccionId) {
+        if (!confirm("⚠️ ADVERTENCIA: Estás a punto de modificar un movimiento contable. Esto alterará los saldos históricos de la caja. ¿Deseas continuar con la edición?")) {
+            return;
+        }
     }
     
     window.state.isSubmittingCaja = true;
@@ -1239,11 +1280,19 @@ window.handleCajaSubmit = async (e) => {
             iva: Number(document.getElementById('caja-iva').value.replace(/[^0-9]/g, '') || 0),
             estadoCobro: 'disponible'
         };
-        
-        await window.fbAdd("transacciones", data);
 
-        // Si es un gasto asociado a un auto, impactamos la Ficha del Auto (Taller) para que no quede huérfano
-        if (tipoTx === 'gasto' && autoIdSel) {
+        if (window.state.editingTransaccionId) {
+            // Dejamos la marca de que fue modificado
+            data.editado = true;
+            data.fechaEdicion = new Date().toISOString();
+            await window.fbUpdate("transacciones", window.state.editingTransaccionId, data);
+        } else {
+            await window.fbAdd("transacciones", data);
+        }
+
+        // Si es un gasto asociado a un auto y es NUEVO, impactamos la Ficha del Auto (Taller) 
+        // Si es una edición, preferimos no duplicar o romper el gasto ya cargado en el auto.
+        if (tipoTx === 'gasto' && autoIdSel && !window.state.editingTransaccionId) {
             const auto = window.state.autos.find(x => x.id === autoIdSel);
             if (auto) {
                 const nuevoGasto = { 
@@ -1261,6 +1310,7 @@ window.handleCajaSubmit = async (e) => {
         
         window.closeModal('modal-caja');
         e.target.reset();
+        window.state.editingTransaccionId = null; // Reiniciar estado
         
     } catch(err) {
         console.error("Error guardando transaccion de caja:", err);
