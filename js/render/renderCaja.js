@@ -144,15 +144,27 @@ window.renderCajaView = () => {
             detalleFactura = ` | FACT: ${t.tipoComprobante} ${t.numComprobante}`;
         }
 
+        // MARCADOR DE AUDITORÍA: Si fue editado, mostramos la (i) roja
+        const badgeEditado = t.editado ? `
+            <i data-lucide="info" class="w-4 h-4 text-rose-500 inline ml-1 cursor-help hover:scale-110 transition-transform" title="Este movimiento fue editado"></i>
+        ` : '';
+
+        // BOTÓN EDITAR: Solo visible para el Administrador
+        const btnEditar = currentRole === 'Admin' ? `
+            <button onclick="window.editTransaccion('${t.id}')" class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors shadow-sm ml-2" title="Editar Movimiento">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+            </button>
+        ` : '';
+
         // Agregamos la fila al principio del string (para que las más nuevas queden arriba en la vista)
         rowsHtml = `
-            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
                 <td class="px-6 py-4 text-xs font-bold text-neutral-500">
                     ${window.formatDate(t.fecha)}
                 </td>
                 <td class="px-6 py-4">
-                    <p class="font-bold text-sm text-neutral-800 dark:text-neutral-200">
-                        ${t.descripcion}
+                    <p class="font-bold text-sm text-neutral-800 dark:text-neutral-200 flex items-center">
+                        ${t.descripcion} ${badgeEditado}
                     </p>
                     <p class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">
                         ${t.categoria} ${detalleFactura}
@@ -165,8 +177,9 @@ window.renderCajaView = () => {
                 <td class="px-6 py-4 text-right font-black ${montoClass}">
                     ${signo} ${window.formatMoney(monto)}
                 </td>
-                <td class="px-6 py-4 text-right font-black text-lg text-neutral-800 dark:text-neutral-200">
+                <td class="px-6 py-4 text-right font-black text-lg text-neutral-800 dark:text-neutral-200 flex justify-end items-center">
                     ${window.formatMoney(saldo)}
+                    ${btnEditar}
                 </td>
             </tr>
         ` + rowsHtml; 
