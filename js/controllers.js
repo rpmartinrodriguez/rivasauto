@@ -266,9 +266,13 @@ window.handleGastoTallerSubmit = async (e, autoId) => {
         const cat = document.getElementById('gt-cat').value;
         const esFueraDeCaja = document.getElementById('gt-fuera-caja').checked;
         const fDate = new Date().toISOString().split('T')[0];
+        
+        // Creamos un ID único que usaremos para vincular ambos si es necesario
+        const txUnicoId = window.generateId ? window.generateId() : Date.now().toString();
 
         const nuevoGasto = { 
-            id: window.generateId ? window.generateId() : Date.now().toString(), 
+            id: txUnicoId, 
+            txId: txUnicoId,
             fecha: fDate, 
             descripcion: desc, 
             categoria: cat, 
@@ -281,7 +285,7 @@ window.handleGastoTallerSubmit = async (e, autoId) => {
         await window.fbUpdate("autos", autoId, { gastos: nuevosGastos });
 
         if (!esFueraDeCaja) {
-            await window.fbAdd("transacciones", {
+            const dataTx = {
                 userId: window.state.currentUser.id, 
                 sucursalId: window.state.currentUser.sucursalId, 
                 fecha: fDate, 
@@ -294,7 +298,11 @@ window.handleGastoTallerSubmit = async (e, autoId) => {
                 numComprobante: '', 
                 iva: 0, 
                 estadoCobro: 'disponible'
-            });
+            };
+            
+            // Forzamos el ID de la transacción si la función lo permite, 
+            // sino Firebase le asignará uno pero el vínculo principal seguirá por nombre.
+            await window.fbAdd("transacciones", dataTx);
         }
         
         if (window.renderDetalleAuto) {
@@ -1244,7 +1252,6 @@ window.handleCajaSubmit = async (e) => {
         return;
     }
 
-    // ALERTA DE SEGURIDAD PARA EDICIONES
     if (window.state.editingTransaccionId) {
         if (!confirm("⚠️ ADVERTENCIA: Estás a punto de modificar un movimiento contable. Esto alterará los saldos históricos de la caja. ¿Deseas continuar con la edición?")) {
             return;
@@ -1281,36 +1288,60 @@ window.handleCajaSubmit = async (e) => {
             estadoCobro: 'disponible'
         };
 
-        if (window.state.editingTransaccionId) {
-            // Dejamos la marca de que fue modificado
+        // ====== INICIO SINCRONIZADOR INTELIGENTE CAJA <-> AUTO ======
+        let txId = window.state.editingTransaccionId;
+        const oldTx = txId ? window.state.transacciones.find(t => t.id === txId) : null;
+        const oldAutoId = oldTx ? oldTx.autoId : null;
+
+        if (txId) {
             data.editado = true;
             data.fechaEdicion = new Date().toISOString();
-            await window.fbUpdate("transacciones", window.state.editingTransaccionId, data);
+            await window.fbUpdate("transacciones", txId, data);
         } else {
-            await window.fbAdd("transacciones", data);
+            const docRef = await window.fbAdd("transacciones", data);
+            txId = docRef ? docRef.id : data.id; 
         }
 
-        // Si es un gasto asociado a un auto y es NUEVO, impactamos la Ficha del Auto (Taller) 
-        // Si es una edición, preferimos no duplicar o romper el gasto ya cargado en el auto.
-        if (tipoTx === 'gasto' && autoIdSel && !window.state.editingTransaccionId) {
+        // 1. Si editamos y cambiamos de auto (o lo desvinculamos), quitar el gasto del auto viejo
+        if (txId && oldAutoId && oldAutoId !== autoIdSel) {
+            const oldAuto = window.state.autos.find(x => x.id === oldAutoId);
+            if (oldAuto) {
+                const gastosLimpios = (oldAuto.gastos || []).filter(g => g.txId !== txId && g.id !== txId);
+                await window.fbUpdate("autos", oldAutoId, { gastos: gastosLimpios });
+            }
+        }
+
+        // 2. Si es un gasto y tiene un auto seleccionado, agregarlo o actualizarlo en el auto
+        if (tipoTx === 'gasto' && autoIdSel) {
             const auto = window.state.autos.find(x => x.id === autoIdSel);
             if (auto) {
-                const nuevoGasto = { 
-                    id: window.generateId ? window.generateId() : Date.now().toString(), 
+                let gastosActuales = auto.gastos || [];
+                const gastoIndex = gastosActuales.findIndex(g => g.txId === txId || g.id === txId);
+                
+                const objGasto = { 
+                    id: txId, // Mismo ID para vincularlos siempre
+                    txId: txId,
                     fecha: fDate, 
                     descripcion: descTx, 
                     categoria: catTx, 
                     monto: montoTx, 
                     fueraDeCaja: false 
                 };
-                const nuevosGastos = [...(auto.gastos || []), nuevoGasto];
-                await window.fbUpdate("autos", autoIdSel, { gastos: nuevosGastos });
+
+                if (gastoIndex >= 0) {
+                    gastosActuales[gastoIndex] = objGasto;
+                } else {
+                    gastosActuales.push(objGasto);
+                }
+                
+                await window.fbUpdate("autos", autoIdSel, { gastos: gastosActuales });
             }
         }
+        // ====== FIN SINCRONIZADOR ======
         
         window.closeModal('modal-caja');
         e.target.reset();
-        window.state.editingTransaccionId = null; // Reiniciar estado
+        window.state.editingTransaccionId = null; 
         
     } catch(err) {
         console.error("Error guardando transaccion de caja:", err);
