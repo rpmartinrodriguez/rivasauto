@@ -28,19 +28,15 @@ window.renderCajaView = () => {
     }
 
     // 2. Construir el contenedor de Filtros (Buscador + Dropdown de Rol)
-    // Usamos un id interno para inyectar esto solo 1 vez y evitar que el input pierda el foco al tipear
     if (filterContainer && !document.getElementById('caja-filters-wrapper')) {
         let optionsHtml = `<option value="">Todas mis cajas visibles</option>`;
         let usersToFilter = [];
         
         if (currentRole === 'Admin') {
-            // El Admin ve a absolutamente todos los usuarios
             usersToFilter = window.state.usuarios;
         } else if (currentRole === 'Encargado') {
-            // El Encargado ve a los de su sucursal (excluyendo a los Administradores)
             usersToFilter = window.state.usuarios.filter(u => u.sucursalId === currentSuc && u.rol !== 'Admin');
         } else {
-            // El Vendedor solo se ve a sí mismo
             usersToFilter = [window.state.currentUser];
         }
 
@@ -166,12 +162,18 @@ window.renderCajaView = () => {
             <i data-lucide="info" class="w-4 h-4 text-rose-500 inline ml-1 cursor-help hover:scale-110 transition-transform" title="Este movimiento fue editado"></i>
         ` : '';
 
-        // BOTÓN EDITAR: Solo visible para el Administrador
-        const btnEditar = currentRole === 'Admin' ? `
-            <button onclick="window.editTransaccion('${t.id}')" class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors shadow-sm ml-2" title="Editar Movimiento">
-                <i data-lucide="edit-3" class="w-4 h-4"></i>
-            </button>
-        ` : '';
+        // BOTONES DE AUDITORÍA (EDITAR Y ELIMINAR): Solo visible para el Administrador
+        let btnAcciones = '';
+        if (currentRole === 'Admin') {
+            btnAcciones = `
+                <button onclick="window.editTransaccion('${t.id}')" class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors shadow-sm ml-2" title="Editar Movimiento">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                </button>
+                <button onclick="window.deleteTransaccion('${t.id}')" class="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg transition-colors shadow-sm ml-1" title="Eliminar Movimiento">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            `;
+        }
 
         // Agregamos la fila al principio del string (para que las más nuevas queden arriba en la vista)
         rowsHtml = `
@@ -196,7 +198,7 @@ window.renderCajaView = () => {
                 </td>
                 <td class="px-6 py-4 text-right font-black text-lg text-neutral-800 dark:text-neutral-200 flex justify-end items-center">
                     ${window.formatMoney(saldo)}
-                    ${btnEditar}
+                    ${btnAcciones}
                 </td>
             </tr>
         ` + rowsHtml; 
