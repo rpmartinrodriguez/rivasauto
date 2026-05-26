@@ -27,10 +27,10 @@ window.renderCajaView = () => {
         }
     }
 
-    // 2. Construir el Dropdown de Filtro según el Rol del usuario
-    if (filterContainer) {
+    // 2. Construir el contenedor de Filtros (Buscador + Dropdown de Rol)
+    // Usamos un id interno para inyectar esto solo 1 vez y evitar que el input pierda el foco al tipear
+    if (filterContainer && !document.getElementById('caja-filters-wrapper')) {
         let optionsHtml = `<option value="">Todas mis cajas visibles</option>`;
-        
         let usersToFilter = [];
         
         if (currentRole === 'Admin') {
@@ -44,16 +44,13 @@ window.renderCajaView = () => {
             usersToFilter = [window.state.currentUser];
         }
 
-        // Si ve a más de 1 usuario, le mostramos el menú para poder filtrar
+        let roleFilterHtml = '';
         if (usersToFilter.length > 1) {
             usersToFilter.forEach(u => {
                 optionsHtml += `<option value="${u.id}">${u.nombre} (${u.rol})</option>`;
             });
             
-            // Guardamos el valor seleccionado si ya existía antes de repintar la vista
-            const currentFilterVal = document.getElementById('caja-user-filter')?.value || '';
-            
-            filterContainer.innerHTML = `
+            roleFilterHtml = `
                 <div class="flex items-center space-x-2 bg-white dark:bg-neutral-900 p-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-sm">
                     <i data-lucide="filter" class="w-4 h-4 text-neutral-400 ml-2"></i>
                     <select id="caja-user-filter" onchange="window.renderCajaView()" class="bg-transparent border-none outline-none text-sm font-bold text-neutral-700 dark:text-neutral-300 pr-2 cursor-pointer focus:ring-0">
@@ -61,25 +58,28 @@ window.renderCajaView = () => {
                     </select>
                 </div>
             `;
-            
-            // Restauramos la selección previa del usuario
-            if (document.getElementById('caja-user-filter')) {
-                document.getElementById('caja-user-filter').value = currentFilterVal;
-            }
-            
-            filterContainer.classList.remove('hidden');
-        } else {
-            // Si solo es él mismo, ocultamos el filtro
-            filterContainer.classList.add('hidden');
-            filterContainer.innerHTML = '';
         }
+
+        filterContainer.innerHTML = `
+            <div id="caja-filters-wrapper" class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <div class="relative w-full sm:w-72">
+                    <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-neutral-400"></i>
+                    <input type="text" id="search-caja" oninput="window.renderCajaView()" placeholder="Buscar por detalle, monto, auto..." class="w-full pl-9 pr-4 py-2 bg-white/60 dark:bg-neutral-900/60 backdrop-blur-md border border-neutral-200 dark:border-neutral-800 rounded-xl text-sm font-bold outline-none focus:border-green-500 transition-colors shadow-sm">
+                </div>
+                ${roleFilterHtml}
+            </div>
+        `;
+        
+        filterContainer.classList.remove('hidden');
     }
 
-    // 3. Filtrar las transacciones de caja según el rol y lo elegido en el selector
+    // 3. Obtener valores de los filtros activos
     const selectedUserId = document.getElementById('caja-user-filter')?.value || '';
+    const searchQuery = (document.getElementById('search-caja')?.value || '').toLowerCase().trim();
     
+    // 4. Filtrar las transacciones
     let transacciones = (window.state.transacciones || []).filter(t => {
-        // A. Regla base de visibilidad
+        // A. Regla base de visibilidad según ROL
         let isVisible = false;
         
         if (currentRole === 'Admin') {
@@ -93,9 +93,26 @@ window.renderCajaView = () => {
             }
         }
 
-        // B. Si pasó la regla base y además hay un filtro selecto activo, lo aplicamos
+        // B. Filtro por selector de Usuario
         if (isVisible && selectedUserId !== '') {
-            return t.userId === selectedUserId;
+            if (t.userId !== selectedUserId) {
+                isVisible = false;
+            }
+        }
+
+        // C. Filtro por Buscador de Texto Libre
+        if (isVisible && searchQuery !== '') {
+            let autoStr = '';
+            if (t.autoId) {
+                const a = window.state.autos.find(x => x.id === t.autoId);
+                if (a) autoStr = `${a.marca} ${a.modelo} ${a.patente}`;
+            }
+            
+            const combinedStr = `${t.descripcion} ${t.categoria} ${t.valor} ${t.tipoComprobante || ''} ${t.numComprobante || ''} ${autoStr}`.toLowerCase();
+            
+            if (!combinedStr.includes(searchQuery)) {
+                isVisible = false;
+            }
         }
         
         return isVisible;
@@ -192,7 +209,7 @@ window.renderCajaView = () => {
                 <td colspan="5" class="text-center py-10 text-neutral-500 font-bold">
                     <div class="flex flex-col items-center justify-center">
                         <i data-lucide="inbox" class="w-8 h-8 mb-3 opacity-50"></i>
-                        No hay movimientos registrados en esta caja.
+                        No se encontraron movimientos con esos filtros.
                     </div>
                 </td>
             </tr>
