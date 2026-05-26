@@ -1244,6 +1244,31 @@ window.editTransaccion = (id) => {
     window.openModal('modal-caja');
 };
 
+window.deleteTransaccion = async (id) => {
+    if (!confirm("⚠️ ADVERTENCIA CRÍTICA: Estás a punto de ELIMINAR permanentemente un movimiento contable. Esto alterará los saldos históricos de la caja. ¿Estás absolutamente seguro de continuar?")) {
+        return;
+    }
+
+    try {
+        const t = window.state.transacciones.find(x => x.id === id);
+        if (!t) return;
+
+        // Si es un gasto asociado a un auto, quitarlo del taller de ese auto
+        if (t.tipo === 'gasto' && t.autoId) {
+            const auto = window.state.autos.find(x => x.id === t.autoId);
+            if (auto) {
+                const gastosLimpios = (auto.gastos || []).filter(g => g.txId !== id && g.id !== id);
+                await window.fbUpdate("autos", t.autoId, { gastos: gastosLimpios });
+            }
+        }
+
+        await window.fbDelete("transacciones", id);
+    } catch (err) {
+        console.error("Error eliminando transacción de caja:", err);
+        alert("Hubo un error al eliminar el movimiento.");
+    }
+};
+
 window.handleCajaSubmit = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
@@ -1319,7 +1344,7 @@ window.handleCajaSubmit = async (e) => {
                 const gastoIndex = gastosActuales.findIndex(g => g.txId === txId || g.id === txId);
                 
                 const objGasto = { 
-                    id: txId, // Mismo ID para vincularlos siempre
+                    id: txId, 
                     txId: txId,
                     fecha: fDate, 
                     descripcion: descTx, 
