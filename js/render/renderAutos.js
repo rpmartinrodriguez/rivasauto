@@ -12,6 +12,36 @@ window.renderAutosView = () => {
   const container = document.getElementById('autos-container');
   if (!container) return;
 
+  // --- 1. INYECTAR BUSCADOR DINÁMICAMENTE ---
+  let searchWrapper = document.getElementById('search-autos-wrapper');
+  if (!searchWrapper && container.parentNode) {
+      searchWrapper = document.createElement('div');
+      searchWrapper.id = 'search-autos-wrapper';
+      searchWrapper.className = 'mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 w-full fade-in';
+      
+      searchWrapper.innerHTML = `
+          <div class="relative w-full sm:w-96">
+              <i data-lucide="search" class="absolute left-4 top-3.5 w-4 h-4 text-neutral-400"></i>
+              <input type="text" id="search-autos" oninput="window.renderAutosView()" placeholder="Buscar marca, modelo, patente, estado..." class="w-full pl-11 pr-4 py-2.5 bg-white/60 dark:bg-neutral-900/60 backdrop-blur-md border border-neutral-200 dark:border-neutral-800 rounded-xl text-sm font-bold outline-none focus:border-green-500 transition-colors shadow-sm">
+          </div>
+      `;
+      
+      // Agrupamos los botones de vista de forma segura
+      const btnGrid = document.getElementById('btn-view-grid');
+      const btnList = document.getElementById('btn-view-list');
+      
+      if (btnGrid && btnList) {
+          const tglWrap = document.createElement('div');
+          tglWrap.className = 'flex space-x-2 bg-white/60 dark:bg-neutral-900/60 backdrop-blur-md p-1 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-800 shrink-0';
+          tglWrap.appendChild(btnGrid);
+          tglWrap.appendChild(btnList);
+          searchWrapper.appendChild(tglWrap);
+      }
+
+      container.parentNode.insertBefore(searchWrapper, container);
+      if (window.lucide) window.lucide.createIcons();
+  }
+
   const btnGrid = document.getElementById('btn-view-grid');
   const btnList = document.getElementById('btn-view-list');
   
@@ -27,20 +57,38 @@ window.renderAutosView = () => {
       : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
   }
   
-  const autosValidos = (window.state.autos || [])
-    .filter(a => a.estado !== 'Vendido')
-    .sort((a, b) => String(a.marca || '').localeCompare(String(b.marca || '')) || String(a.modelo || '').localeCompare(String(b.modelo || '')));
+  // Base de autos no vendidos
+  let autosValidos = (window.state.autos || []).filter(a => a.estado !== 'Vendido');
+  
+  // --- 2. FILTRO DE BÚSQUEDA ---
+  const searchInput = document.getElementById('search-autos');
+  const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+  if (query) {
+      autosValidos = autosValidos.filter(a => 
+          (a.marca || '').toLowerCase().includes(query) ||
+          (a.modelo || '').toLowerCase().includes(query) ||
+          (a.patente || '').toLowerCase().includes(query) ||
+          (a.estado || '').toLowerCase().includes(query) ||
+          (a.año || '').toString().includes(query) ||
+          (a.color || '').toLowerCase().includes(query)
+      );
+  }
+
+  autosValidos.sort((a, b) => String(a.marca || '').localeCompare(String(b.marca || '')) || String(a.modelo || '').localeCompare(String(b.modelo || '')));
   
   if (autosValidos.length === 0) { 
     container.innerHTML = `
-      <div class="col-span-full py-12 text-center text-neutral-500 font-bold">
-        No hay vehículos en la flota.
+      <div class="col-span-full py-16 text-center text-neutral-500 font-bold bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2rem] shadow-sm">
+        <i data-lucide="car" class="w-12 h-12 mx-auto mb-4 opacity-30"></i>
+        ${query ? `No encontramos vehículos que coincidan con "<strong>${query}</strong>".` : 'No hay vehículos en la flota.'}
       </div>
     `; 
+    if (window.lucide) window.lucide.createIcons();
     return; 
   }
 
-  // --- FILTRO DE SEGURIDAD CRM (Aplicado a la vista general) ---
+  // --- 3. FILTRO DE SEGURIDAD CRM (Aplicado a la vista general) ---
   let leadsPermitidos = window.state.consultas || [];
   if (window.state.currentUser.rol === 'Vendedor') {
     leadsPermitidos = leadsPermitidos.filter(c => c.userId === window.state.currentUser.id);
@@ -81,7 +129,7 @@ window.renderAutosView = () => {
           : '';
 
       gridHtml += `
-        <div onclick="window.openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50">
+        <div onclick="window.openDetalleAuto('${auto.id}')" class="group cursor-pointer bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-[2.5rem] p-2 shadow-sm hover:shadow-lg transition-all hover:border-green-500/50 relative overflow-hidden">
           <div class="bg-neutral-50/50 dark:bg-neutral-800/50 rounded-[2rem] p-6 h-full flex flex-col relative">
             ${badgeInteresados}
             <div class="flex justify-between items-start mb-4">
@@ -629,7 +677,6 @@ window.renderDetalleAuto = () => {
   if(window.lucide) window.lucide.createIcons();
 };
 
-// Función para autocompletar el teléfono si selecciona a alguien de la lista del CRM
 window.autoFillComprador = (nombreSeleccionado) => {
     const lead = (window.state.consultas || []).find(c => c.nombre === nombreSeleccionado);
     if (lead) {
