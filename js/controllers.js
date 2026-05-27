@@ -144,12 +144,13 @@ window.handleAutoSubmit = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingAuto) {
+    const btn = e.submitter || document.getElementById('modal-auto-submit');
+
+    if (window.state.isSubmittingAuto || (btn && btn.disabled)) {
         return; 
     }
     
     window.state.isSubmittingAuto = true;
-    const btn = document.getElementById('modal-auto-submit');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -248,12 +249,13 @@ window.handleGastoTallerSubmit = async (e, autoId) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingGastoTaller) {
+    const btn = e.submitter || e.target.querySelector('button[type="submit"]') || e.target.querySelector('button');
+
+    if (window.state.isSubmittingGastoTaller || (btn && btn.disabled)) {
         return;
     }
     
     window.state.isSubmittingGastoTaller = true;
-    const btn = e.target.querySelector('button[type="submit"]');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -300,8 +302,6 @@ window.handleGastoTallerSubmit = async (e, autoId) => {
                 estadoCobro: 'disponible'
             };
             
-            // Forzamos el ID de la transacción si la función lo permite, 
-            // sino Firebase le asignará uno pero el vínculo principal seguirá por nombre.
             await window.fbAdd("transacciones", dataTx);
         }
         
@@ -344,9 +344,9 @@ window.openModalIngreso = (id) => {
 
 window.confirmarIngresoAuto = async (event) => { 
     const precio = Number(document.getElementById('ingreso-precio').value.replace(/[^0-9]/g, '')); 
-    const btn = event ? event.target : document.querySelector('#modal-ingreso-auto button.bg-black');
+    const btn = event?.submitter || event?.target || document.querySelector('#modal-ingreso-auto button.bg-black');
     
-    if (window.state.isConfirmandoIngreso) {
+    if (window.state.isConfirmandoIngreso || (btn && btn.disabled)) {
         return; 
     }
     
@@ -402,12 +402,13 @@ window.confirmarSeñado = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingSeña) {
+    const btn = e.submitter || document.querySelector('#form-seña button[type="submit"]');
+
+    if (window.state.isSubmittingSeña || (btn && btn.disabled)) {
         return;
     }
     
     window.state.isSubmittingSeña = true;
-    const btn = document.querySelector('#form-seña button[type="submit"]');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -471,12 +472,13 @@ window.handleDAVentaSubmit = async (e, autoId) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingVenta) {
+    const btn = e.submitter || document.querySelector('#btn-submit-venta button');
+
+    if (window.state.isSubmittingVenta || (btn && btn.disabled)) {
         return;
     }
     
     window.state.isSubmittingVenta = true;
-    const btn = document.querySelector('#btn-submit-venta button');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -763,12 +765,13 @@ window.handleGlobalLeadSubmit = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingLead) {
+    const btn = e.submitter || e.target.querySelector('button[type="submit"]');
+
+    if (window.state.isSubmittingLead || (btn && btn.disabled)) {
         return;
     }
     
     window.state.isSubmittingLead = true;
-    const btn = e.target.querySelector('button[type="submit"]');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -813,12 +816,13 @@ window.handleDA_CRMSubmit = async (e, autoId) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingDALead) {
+    const btn = e.submitter || e.target.querySelector('button[type="submit"]');
+
+    if (window.state.isSubmittingDALead || (btn && btn.disabled)) {
         return;
     }
     
     window.state.isSubmittingDALead = true;
-    const btn = e.target.querySelector('button[type="submit"]');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -870,12 +874,13 @@ window.handleEditLeadSubmit = async (e, id) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isEditingLead) {
+    const btn = e.submitter || document.querySelector('#form-edit-lead button[type="submit"]');
+
+    if (window.state.isEditingLead || (btn && btn.disabled)) {
         return;
     }
     
     window.state.isEditingLead = true;
-    const btn = e.submitter || document.querySelector('#form-edit-lead button[type="submit"]');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -942,7 +947,7 @@ window.handleAddLeadHistory = async (e, leadId) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    const btn = e.target.querySelector('button[type="submit"]');
+    const btn = e.submitter || e.target.querySelector('button[type="submit"]');
     
     if(btn) {
         window.setBtnLoader(btn, true);
@@ -1033,12 +1038,13 @@ window.handleSaveSucursal = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingSucursal) {
+    const btn = e.submitter || document.getElementById('new-suc-submit');
+
+    if (window.state.isSubmittingSucursal || (btn && btn.disabled)) {
         return;
     }
     
     window.state.isSubmittingSucursal = true;
-    const btn = document.getElementById('new-suc-submit');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -1090,12 +1096,13 @@ window.handleSaveUser = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingUser) {
+    const btn = e.submitter || document.getElementById('new-user-submit');
+
+    if (window.state.isSubmittingUser || (btn && btn.disabled)) {
         return;
     }
     
     window.state.isSubmittingUser = true;
-    const btn = document.getElementById('new-user-submit');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -1253,7 +1260,6 @@ window.deleteTransaccion = async (id) => {
         const t = window.state.transacciones.find(x => x.id === id);
         if (!t) return;
 
-        // Si es un gasto asociado a un auto, quitarlo del taller de ese auto
         if (t.tipo === 'gasto' && t.autoId) {
             const auto = window.state.autos.find(x => x.id === t.autoId);
             if (auto) {
@@ -1273,7 +1279,11 @@ window.handleCajaSubmit = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingCaja) {
+    // Captura estricta del botón para frenar los clics múltiples al instante
+    const btn = e.submitter || e.target.querySelector('button[type="submit"]') || e.target.querySelector('button');
+
+    // Escudo: Si ya está enviando, o si el botón ya está deshabilitado, rechazamos la petición extra
+    if (window.state.isSubmittingCaja || (btn && btn.disabled)) {
         return;
     }
 
@@ -1284,7 +1294,6 @@ window.handleCajaSubmit = async (e) => {
     }
     
     window.state.isSubmittingCaja = true;
-    const btn = e.target.querySelector('button[type="submit"]');
     
     if (btn) {
         window.setBtnLoader(btn, true);
@@ -1313,7 +1322,6 @@ window.handleCajaSubmit = async (e) => {
             estadoCobro: 'disponible'
         };
 
-        // ====== INICIO SINCRONIZADOR INTELIGENTE CAJA <-> AUTO ======
         let txId = window.state.editingTransaccionId;
         const oldTx = txId ? window.state.transacciones.find(t => t.id === txId) : null;
         const oldAutoId = oldTx ? oldTx.autoId : null;
@@ -1327,7 +1335,6 @@ window.handleCajaSubmit = async (e) => {
             txId = docRef ? docRef.id : data.id; 
         }
 
-        // 1. Si editamos y cambiamos de auto (o lo desvinculamos), quitar el gasto del auto viejo
         if (txId && oldAutoId && oldAutoId !== autoIdSel) {
             const oldAuto = window.state.autos.find(x => x.id === oldAutoId);
             if (oldAuto) {
@@ -1336,7 +1343,6 @@ window.handleCajaSubmit = async (e) => {
             }
         }
 
-        // 2. Si es un gasto y tiene un auto seleccionado, agregarlo o actualizarlo en el auto
         if (tipoTx === 'gasto' && autoIdSel) {
             const auto = window.state.autos.find(x => x.id === autoIdSel);
             if (auto) {
@@ -1362,7 +1368,6 @@ window.handleCajaSubmit = async (e) => {
                 await window.fbUpdate("autos", autoIdSel, { gastos: gastosActuales });
             }
         }
-        // ====== FIN SINCRONIZADOR ======
         
         window.closeModal('modal-caja');
         e.target.reset();
@@ -1461,12 +1466,13 @@ window.handleComisionSubmit = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    if (window.state.isSubmittingComision) {
+    const btn = e.submitter || e.target.querySelector('button[type="submit"]');
+
+    if (window.state.isSubmittingComision || (btn && btn.disabled)) {
         return;
     }
     
     window.state.isSubmittingComision = true;
-    const btn = e.target.querySelector('button[type="submit"]');
     
     if (btn) {
         window.setBtnLoader(btn, true);
