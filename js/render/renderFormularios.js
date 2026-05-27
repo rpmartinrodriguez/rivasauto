@@ -371,7 +371,7 @@ window.openModalBoleto = (tipo) => {
                                 
                                 <div class="col-span-2 border-t border-neutral-100 dark:border-neutral-800 pt-4 mt-2">
                                     <input id="bf-monto" required oninput="window.formatInputMoney(this); document.getElementById('bf-monto-letras').value = window.numeroALetras(Number(this.value.replace(/[^0-9]/g, ''))); window.calcRemanentePermuta()" placeholder="Precio Total del Vehículo ($)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-black mb-3" />
-                                    <input id="bf-monto-letras" required placeholder="Precio Total (En Letras - Auto)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold uppercase" />
+                                    <input id="bf-monto-letras" required placeholder="Precio Total (En Letras)" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold uppercase" />
                                 </div>
                             </div>
                         </div>
@@ -408,7 +408,7 @@ window.openModalBoleto = (tipo) => {
                                     <span class="text-xs font-bold uppercase text-amber-700 dark:text-amber-500">Saldo a favor vendedor:</span>
                                     <input id="bf-remanente-num" disabled class="flex-1 rounded-xl px-4 py-2 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-600 outline-none font-black text-amber-800 dark:text-amber-400 text-right" />
                                 </div>
-                                <input id="bf-remanente-letras" placeholder="Saldo Remanente (En Letras - Auto)" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold uppercase" />
+                                <input id="bf-remanente-letras" placeholder="Saldo Remanente (En Letras)" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none font-bold uppercase" />
                                 <textarea id="bf-detalle-remanente" rows="2" placeholder="Detalle de pago del saldo (Ej: 12 Cuotas, Transferencia posterior, etc)" class="w-full rounded-xl px-4 py-3 bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-700 outline-none resize-none font-bold"></textarea>
                             </div>
                         </div>
@@ -601,15 +601,25 @@ window.imprimirBoletoHtml = (data) => {
     const globalLogo = document.getElementById('print-logo');
     if(globalLogo) globalLogo.classList.remove('hidden');
 
-    let html = '';
+    let html = `
+        <style>
+            @media print {
+                @page {
+                    margin: 0; 
+                }
+                body {
+                    margin: 1.5cm; 
+                }
+            }
+        </style>
+    `;
     
-    // Función "Escudo" para evitar errores si un dato viene vacío
     const sUpper = (val) => (val || '').toString().toUpperCase();
     const sStr = (val) => (val || '').toString();
 
     if (data.tipo.includes('Permuta')) {
-        html = `
-            <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; padding: 20px; text-align: justify;">
+        html += `
+            <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; text-align: justify;">
                 <h2 style="text-align: center; text-transform: uppercase; text-decoration: underline; margin-bottom: 30px; font-size: 18px;">BOLETO DE COMPRA VENTA AUTOMOTOR CON PERMUTA</h2>
                 
                 <p>En la ciudad de <strong>Gualeguaychú</strong>, Provincia de Entre Ríos, a los <strong>${window.formatDate(data.fecha)}</strong>, entre el señor/a <strong>${sUpper(data.vendedor)}</strong>, en adelante denominado "EL VENDEDOR", y el señor/a <strong>${sUpper(data.comprador)}</strong>, D.N.I. N° <strong>${sStr(data.dni)}</strong>, domiciliado en calle <strong>${sStr(data.domicilio)} ${sStr(data.altura)}</strong> de la localidad de <strong>${sUpper(data.locComp)}</strong>, teléfono <strong>${sStr(data.telefono)}</strong>, en adelante denominado "EL COMPRADOR", convienen en celebrar el presente contrato de Compra-Venta, sujeto a las siguientes cláusulas y condiciones:</p>
@@ -639,7 +649,7 @@ window.imprimirBoletoHtml = (data) => {
 
                 <div style="margin-top: 80px; display: flex; justify-content: space-around;">
                     <div style="text-align: center;">
-                        <p style="border-top: 1px solid #000; padding-top: 5px; width: 250px;">Firma Vendedor (Rivas Auto)</p>
+                        <p style="border-top: 1px solid #000; padding-top: 5px; width: 250px;">Firma Vendedor</p>
                     </div>
                     <div style="text-align: center;">
                         <p style="border-top: 1px solid #000; padding-top: 5px; width: 250px;">Firma Comprador</p>
@@ -649,8 +659,8 @@ window.imprimirBoletoHtml = (data) => {
             </div>
         `;
     } else {
-        html = `
-            <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; padding: 20px; text-align: justify;">
+        html += `
+            <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; text-align: justify;">
                 <h2 style="text-align: center; text-transform: uppercase; text-decoration: underline; margin-bottom: 30px; font-size: 18px;">BOLETO DE COMPRA VENTA AUTOMOTOR</h2>
                 
                 <p>En la ciudad de <strong>${sUpper(data.ciudadFirma)}</strong>, a los <strong>${window.formatDate(data.fecha)}</strong>, entre <strong>${sUpper(data.vendedor)}</strong>, domiciliado en <strong>${sStr(data.vendedorDomicilio)}</strong> de la localidad de <strong>${sStr(data.vendedorLoc)}</strong>, teléfono <strong>${sStr(data.vendedorTel)}</strong>, por una parte, en adelante "EL VENDEDOR", y por la otra parte el señor/a <strong>${sUpper(data.comprador)}</strong>, domiciliado en calle <strong>${sStr(data.domicilio)}</strong> de la localidad de <strong>${sStr(data.locComp)}</strong>, teléfono <strong>${sStr(data.telefono)}</strong>, en adelante "EL COMPRADOR", convienen en celebrar el presente boleto de compraventa, sujeto a las siguientes cláusulas:</p>
@@ -673,7 +683,7 @@ window.imprimirBoletoHtml = (data) => {
 
                 <div style="margin-top: 80px; display: flex; justify-content: space-around;">
                     <div style="text-align: center;">
-                        <p style="border-top: 1px solid #000; padding-top: 5px; width: 250px;">Firma Vendedor (Rivas Auto)</p>
+                        <p style="border-top: 1px solid #000; padding-top: 5px; width: 250px;">Firma Vendedor</p>
                     </div>
                     <div style="text-align: center;">
                         <p style="border-top: 1px solid #000; padding-top: 5px; width: 250px;">Firma Comprador</p>
