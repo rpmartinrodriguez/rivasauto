@@ -269,7 +269,6 @@ window.handleGastoTallerSubmit = async (e, autoId) => {
         const esFueraDeCaja = document.getElementById('gt-fuera-caja').checked;
         const fDate = new Date().toISOString().split('T')[0];
         
-        // Creamos un ID único que usaremos para vincular ambos si es necesario
         const txUnicoId = window.generateId ? window.generateId() : Date.now().toString();
 
         const nuevoGasto = { 
@@ -488,7 +487,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
         const auto = window.state.autos.find(x => x.id === autoId);
         const userQueRegistra = window.state.currentUser; 
         
-        // 1. Recolección de valores
         const nombreComprador = document.getElementById('vent-comp-nombre').value;
         const vEfectivo = document.getElementById('chk-efectivo')?.checked ? Number(document.getElementById('val-efectivo').value.replace(/[^0-9]/g, '')) : 0;
         const vCredito = document.getElementById('chk-credito')?.checked ? Number(document.getElementById('val-credito').value.replace(/[^0-9]/g, '')) : 0;
@@ -511,7 +509,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 
         const fDate = new Date().toISOString().split('T')[0];
 
-        // 2. Registro de Ingresos de Efectivo
         if (vEfectivo > 0) {
             const notaEfectivo = document.getElementById('nota-efectivo').value || 'Efectivo';
             await window.fbAdd("transacciones", {
@@ -530,7 +527,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             });
         }
 
-        // 3. Objetos de Deuda
         let objCredito = null;
         if (vCredito > 0 && cCredito > 0) {
             objCredito = { 
@@ -557,7 +553,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
         if (vPagare > 0) metodosUsados.push('Pagaré');
         if (vPermuta > 0) metodosUsados.push('Permuta');
         
-        // 4. Registro Histórico de Ventas
         await window.fbAdd("ventas", {
             fecha: fDate, 
             autoDesc: `${auto.marca} ${auto.modelo} (${auto.patente})`, 
@@ -582,7 +577,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             detallePermuta: window.state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
         });
 
-        // 5. Alta del Auto en Permuta
         if (window.state.ventaData.tienePermuta) {
             await window.fbAdd("autos", { 
                 marca: document.getElementById('p-marca').value.toUpperCase(), 
@@ -601,10 +595,8 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             });
         }
         
-        // 6. Baja del Auto de la Flota
         await window.fbUpdate("autos", autoId, { estado: 'Vendido' }); 
         
-        // 7. CIERRE INTELIGENTE EN EL CRM (EL PUENTE)
         try {
             const leadMatch = (window.state.consultas || []).find(c => c.nombre.trim().toLowerCase() === nombreComprador.trim().toLowerCase());
             
@@ -627,7 +619,6 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             console.error("Error al intentar vincular y cerrar el lead en el CRM:", crmErr);
         }
 
-        // 8. Auto-generación de Boleto
         const cuotasMax = Math.max(cCredito, cPagare);
         const tipoBoleto = window.state.ventaData.tienePermuta ? 'Boleto Venta con Permuta' : 'Boleto Compra Venta';
         
@@ -1275,20 +1266,74 @@ window.deleteTransaccion = async (id) => {
     }
 };
 
+window.verHistorialEdicion = (id) => {
+    const t = window.state.transacciones.find(x => x.id === id);
+    if (!t || !t.historialEdiciones || t.historialEdiciones.length === 0) {
+        alert("No hay historial detallado para este movimiento.");
+        return;
+    }
+    
+    let html = `<div class="space-y-4">`;
+    
+    t.historialEdiciones.forEach((h) => {
+        html += `
+            <div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                <p class="text-xs font-bold text-neutral-500 mb-2 border-b border-neutral-200 dark:border-neutral-700 pb-2 flex justify-between items-center">
+                    <span>Modificado el ${window.formatDate(h.fechaCambio.split('T')[0])}</span>
+                    <span class="text-amber-600 dark:text-amber-400 font-black"><i data-lucide="user" class="w-3 h-3 inline mr-1"></i>${h.modificadoPor}</span>
+                </p>
+                <div class="grid grid-cols-2 gap-2 text-sm mt-3">
+                    <p class="text-neutral-500">Valor Anterior:</p>
+                    <p class="font-black text-right">${window.formatMoney(h.datosAnteriores.monto)}</p>
+                    <p class="text-neutral-500">Detalle Anterior:</p>
+                    <p class="font-bold text-right">${h.datosAnteriores.descripcion}</p>
+                    <p class="text-neutral-500">Categoría:</p>
+                    <p class="font-bold text-right uppercase text-[10px] tracking-widest">${h.datosAnteriores.categoria}</p>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    
+    let modal = document.getElementById('modal-historial-caja');
+    if(!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-historial-caja';
+        modal.className = 'fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden fade-in';
+        modal.innerHTML = `
+            <div class="bg-white dark:bg-neutral-900 w-full max-w-md rounded-[2rem] shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col max-h-[90vh] mx-4">
+                <div class="p-6 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center bg-amber-50 dark:bg-amber-900/10">
+                    <h3 class="text-sm font-black uppercase tracking-widest text-amber-800 dark:text-amber-400 flex items-center">
+                        <i data-lucide="history" class="w-4 h-4 mr-2"></i> Auditoría de Edición
+                    </h3>
+                    <button onclick="document.getElementById('modal-historial-caja').classList.add('hidden')" class="p-2 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-colors shadow-sm text-neutral-500">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="historial-caja-content" class="p-6 overflow-y-auto no-scrollbar"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('historial-caja-content').innerHTML = html;
+    if(window.lucide) window.lucide.createIcons();
+    modal.classList.remove('hidden');
+};
+
 window.handleCajaSubmit = async (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     
-    // Captura estricta del botón para frenar los clics múltiples al instante
     const btn = e.submitter || e.target.querySelector('button[type="submit"]') || e.target.querySelector('button');
 
-    // Escudo: Si ya está enviando, o si el botón ya está deshabilitado, rechazamos la petición extra
     if (window.state.isSubmittingCaja || (btn && btn.disabled)) {
         return;
     }
 
     if (window.state.editingTransaccionId) {
-        if (!confirm("⚠️ ADVERTENCIA: Estás a punto de modificar un movimiento contable. Esto alterará los saldos históricos de la caja. ¿Deseas continuar con la edición?")) {
+        if (!confirm("⚠️ ADVERTENCIA: Estás a punto de modificar un movimiento contable. El registro de este cambio quedará guardado permanentemente en el sistema de auditoría. ¿Deseas continuar?")) {
             return;
         }
     }
@@ -1326,9 +1371,29 @@ window.handleCajaSubmit = async (e) => {
         const oldTx = txId ? window.state.transacciones.find(t => t.id === txId) : null;
         const oldAutoId = oldTx ? oldTx.autoId : null;
 
-        if (txId) {
+        if (txId && oldTx) {
+            // ARMAMOS EL HISTORIAL DE AUDITORÍA
+            const historial = oldTx.historialEdiciones ? [...oldTx.historialEdiciones] : [];
+            historial.push({
+                fechaCambio: new Date().toISOString(),
+                modificadoPor: window.state.currentUser.nombre,
+                datosAnteriores: {
+                    fecha: oldTx.fecha,
+                    descripcion: oldTx.descripcion,
+                    categoria: oldTx.categoria,
+                    monto: oldTx.valor
+                }
+            });
+
             data.editado = true;
             data.fechaEdicion = new Date().toISOString();
+            data.historialEdiciones = historial;
+            
+            // Conservamos el creador original, el userId que viene en 'data' ahora es del editor. 
+            // Para mantener la propiedad, forzamos el userId original:
+            data.userId = oldTx.userId;
+            data.sucursalId = oldTx.sucursalId;
+
             await window.fbUpdate("transacciones", txId, data);
         } else {
             const docRef = await window.fbAdd("transacciones", data);
