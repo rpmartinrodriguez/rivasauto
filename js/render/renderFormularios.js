@@ -442,6 +442,15 @@ window.editarFormulario = (id) => {
         return new Intl.NumberFormat('es-AR').format(parseInt(cleaned, 10));
     };
     
+    // Ayudante inteligente para letras
+    const getLetras = (val, prevLetras) => {
+        if (prevLetras) return prevLetras;
+        if (!val) return '';
+        const cleaned = String(val).replace(/[^0-9]/g, '');
+        if (!cleaned) return '';
+        return window.numeroALetras(Number(cleaned));
+    };
+    
     window.openModalBoleto(tipo);
 
     setTimeout(() => {
@@ -449,36 +458,42 @@ window.editarFormulario = (id) => {
         window.state.tempFormData.autoIdAsociado = f.autoIdAsociado;
 
         if (tipo === 'simple') {
-            document.getElementById('bf-vendedor').value = f.vendedor || '';
-            document.getElementById('bf-vendedor-domicilio').value = f.vendedorDomicilio || '';
-            document.getElementById('bf-vendedor-loc').value = f.vendedorLoc || '';
+            document.getElementById('bf-vendedor').value = f.vendedor || 'RIVAS AUTO';
+            document.getElementById('bf-vendedor-domicilio').value = f.vendedorDomicilio || 'Urquiza 1234';
+            document.getElementById('bf-vendedor-loc').value = f.vendedorLoc || 'Gualeguaychú, Entre Ríos';
             document.getElementById('bf-vendedor-tel').value = f.vendedorTel || '';
+            
             document.getElementById('bf-comprador').value = f.comprador || '';
             document.getElementById('bf-dni').value = f.dni || '';
             document.getElementById('bf-domicilio').value = f.domicilio || '';
             document.getElementById('bf-loc-comp').value = f.locComp || 'Gualeguaychú';
             document.getElementById('bf-telefono').value = f.telefono || '';
-            document.getElementById('bf-categoria').value = f.categoria || '';
+            
+            document.getElementById('bf-categoria').value = f.categoria || 'Automóvil';
             document.getElementById('bf-marca').value = f.marca || '';
             document.getElementById('bf-modelo').value = f.modelo || '';
-            document.getElementById('bf-tipo').value = f.tipoVehiculo || '';
+            document.getElementById('bf-tipo').value = f.tipoVehiculo || 'Sedán';
             document.getElementById('bf-anio').value = f.año || '';
             document.getElementById('bf-motor').value = f.motor || '';
             document.getElementById('bf-chasis').value = f.chasis || '';
             document.getElementById('bf-dominio').value = f.dominio || '';
+            
             document.getElementById('bf-monto').value = formatNum(f.monto);
-            document.getElementById('bf-monto-letras').value = f.montoLetras || '';
+            document.getElementById('bf-monto-letras').value = getLetras(f.monto, f.montoLetras);
+            
             document.getElementById('bf-formapago').value = f.formaPago || '';
-            document.getElementById('bf-dias-transf').value = f.diasTransf || '';
-            document.getElementById('bf-ciudad-firma').value = f.ciudadFirma || '';
+            document.getElementById('bf-dias-transf').value = f.diasTransf || '15';
+            document.getElementById('bf-ciudad-firma').value = f.ciudadFirma || 'Gualeguaychú';
             document.getElementById('bf-obs').value = f.observaciones || '';
         } else {
-            document.getElementById('bf-vendedor').value = f.vendedor || '';
+            document.getElementById('bf-vendedor').value = f.vendedor || 'RIVAS AUTO';
             document.getElementById('bf-comprador').value = f.comprador || '';
+            
             document.getElementById('bf-dni').value = f.dni || '';
             document.getElementById('bf-telefono').value = f.telefono || '';
             document.getElementById('bf-domicilio').value = f.domicilio || '';
             document.getElementById('bf-loc-comp').value = f.locComp || 'Gualeguaychú';
+            
             document.getElementById('bf-marca').value = f.marca || '';
             document.getElementById('bf-modelo').value = f.modelo || '';
             document.getElementById('bf-anio').value = f.año || '';
@@ -486,9 +501,12 @@ window.editarFormulario = (id) => {
             document.getElementById('bf-motor').value = f.motor || '';
             document.getElementById('bf-chasis').value = f.chasis || '';
             document.getElementById('bf-loc-pat').value = f.locPat || '';
+            
             document.getElementById('bf-monto').value = formatNum(f.monto);
-            document.getElementById('bf-monto-letras').value = f.montoLetras || '';
+            document.getElementById('bf-monto-letras').value = getLetras(f.monto, f.montoLetras);
+            
             document.getElementById('bf-efectivo').value = formatNum(f.efectivo);
+            
             document.getElementById('bp-marca').value = f.p_marca || '';
             document.getElementById('bp-modelo').value = f.p_modelo || '';
             document.getElementById('bp-anio').value = f.p_anio || '';
@@ -496,13 +514,15 @@ window.editarFormulario = (id) => {
             document.getElementById('bp-motor').value = f.p_motor || '';
             document.getElementById('bp-chasis').value = f.p_chasis || '';
             document.getElementById('bp-loc-pat').value = f.p_locPat || '';
+            
             document.getElementById('bp-tasado').value = formatNum(f.p_tasado);
-            document.getElementById('bp-tasado-letras').value = f.p_tasadoLetras || '';
-            document.getElementById('bf-remanente-letras').value = f.remanenteLetras || '';
-            document.getElementById('bf-detalle-remanente').value = f.detalleRemanente || '';
-            document.getElementById('bf-obs').value = f.observaciones || '';
+            document.getElementById('bp-tasado-letras').value = getLetras(f.p_tasado, f.p_tasadoLetras);
             
             window.calcRemanentePermuta();
+            
+            if (f.remanenteLetras) document.getElementById('bf-remanente-letras').value = f.remanenteLetras;
+            if (f.detalleRemanente) document.getElementById('bf-detalle-remanente').value = f.detalleRemanente;
+            document.getElementById('bf-obs').value = f.observaciones || '';
         }
     }, 100);
 };
@@ -627,7 +647,6 @@ window.imprimirBoletoHtml = (id) => {
     const sUpper = (val) => (val || '').toString().toUpperCase();
     const sStr = (val) => (val || '').toString();
     
-    // El formateador ciego final para el papel
     const sMoney = (val) => {
         if (!val) return '0';
         const cleaned = String(val).replace(/[^0-9]/g, '');
@@ -687,7 +706,7 @@ window.imprimirBoletoHtml = (id) => {
                 Tipo: <strong>${sUpper(data.tipoVehiculo) || 'S/D'}</strong> - Categoría: <strong>${sUpper(data.categoria) || 'S/D'}</strong><br>
                 Marca: <strong>${sUpper(data.marca)}</strong> - Modelo: <strong>${sUpper(data.modelo)}</strong> - Año: <strong>${sStr(data.año)}</strong><br>
                 Dominio: <strong>${sUpper(data.dominio)}</strong> - Motor N°: <strong>${sUpper(data.motor) || 'S/D'}</strong> - Chasis N°: <strong>${sUpper(data.chasis) || 'S/D'}</strong>.<br>
-                El vehículo se entrega en el estado general que se encuentra, siendo conocido y aceptado por el comprador, quien declara haberlo revisado a su entera satisfaction.</p>
+                El vehículo se entrega en el estado general que se encuentra, siendo conocido y aceptado por el comprador, quien declara haberlo revisado a su entera satisfacción.</p>
 
                 <p><strong>SEGUNDA:</strong> El precio total y definitivo de esta venta se conviene en la suma de Pesos <strong>$ ${sMoney(data.monto)}</strong> (Son Pesos: <strong>${sUpper(data.montoLetras)}</strong>). Dicho importe es abonado de la siguiente manera: <strong>${sStr(data.formaPago)}</strong>.</p>
 
