@@ -160,15 +160,17 @@ window.renderCajaView = () => {
             </span>
         ` : '';
 
-        // BOTONES DE AUDITORÍA (Admin y Encargado)
+        // BOTONES DE AUDITORÍA INTELIGENTES
         let btnAcciones = '';
-        if (currentRole === 'Admin' || currentRole === 'Encargado') {
+        // Permiso de Edición: Admin, Encargado, o el propio creador del movimiento (Vendedor)
+        if (currentRole === 'Admin' || currentRole === 'Encargado' || t.userId === currentUserId) {
             btnAcciones += `
                 <button onclick="window.editTransaccion('${t.id}')" class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors shadow-sm ml-2" title="Editar Movimiento">
                     <i data-lucide="edit-3" class="w-4 h-4"></i>
                 </button>
             `;
         }
+        // Permiso de Eliminación: SOLO el Admin
         if (currentRole === 'Admin') {
             btnAcciones += `
                 <button onclick="window.deleteTransaccion('${t.id}')" class="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg transition-colors shadow-sm ml-1" title="Eliminar Movimiento">
