@@ -179,8 +179,6 @@ window.renderFormulariosView = () => {
             ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' 
             : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300';
 
-        const fJson = JSON.stringify(f).replace(/'/g, "&#39;");
-
         const btnEliminar = isAdmin ? `
             <button onclick="window.eliminarFormulario('${f.id}')" class="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg transition-colors shadow-sm" title="Eliminar">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -214,10 +212,10 @@ window.renderFormulariosView = () => {
                     </p>
                 </td>
                 <td class="px-6 py-4 text-center whitespace-nowrap">
-                    <button onclick='window.imprimirBoletoHtml(${fJson})' class="p-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:text-blue-500 dark:hover:text-blue-400 rounded-lg transition-colors mr-1 shadow-sm" title="Imprimir / Ver">
+                    <button onclick="window.imprimirBoletoHtml('${f.id}')" class="p-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:text-blue-500 dark:hover:text-blue-400 rounded-lg transition-colors mr-1 shadow-sm" title="Imprimir / Ver">
                         <i data-lucide="printer" class="w-4 h-4"></i>
                     </button>
-                    <button onclick='window.editarFormulario(${fJson})' class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors mr-1 shadow-sm" title="Editar Formulario">
+                    <button onclick="window.editarFormulario('${f.id}')" class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors mr-1 shadow-sm" title="Editar Formulario">
                         <i data-lucide="edit" class="w-4 h-4"></i>
                     </button>
                     ${btnVincular}
@@ -430,8 +428,12 @@ window.openModalBoleto = (tipo) => {
     if (window.lucide) window.lucide.createIcons();
 };
 
-window.editarFormulario = (f) => {
+window.editarFormulario = (id) => {
+    const f = window.state.formularios.find(x => x.id === id);
+    if (!f) return;
+
     const tipo = f.tipo.includes('Permuta') ? 'permuta' : 'simple';
+    const formatNum = (num) => num ? new Intl.NumberFormat('es-AR').format(num) : '';
     
     window.openModalBoleto(tipo);
 
@@ -457,7 +459,7 @@ window.editarFormulario = (f) => {
             document.getElementById('bf-motor').value = f.motor || '';
             document.getElementById('bf-chasis').value = f.chasis || '';
             document.getElementById('bf-dominio').value = f.dominio || '';
-            document.getElementById('bf-monto').value = f.monto || '';
+            document.getElementById('bf-monto').value = formatNum(f.monto);
             document.getElementById('bf-monto-letras').value = f.montoLetras || '';
             document.getElementById('bf-formapago').value = f.formaPago || '';
             document.getElementById('bf-dias-transf').value = f.diasTransf || '';
@@ -477,9 +479,9 @@ window.editarFormulario = (f) => {
             document.getElementById('bf-motor').value = f.motor || '';
             document.getElementById('bf-chasis').value = f.chasis || '';
             document.getElementById('bf-loc-pat').value = f.locPat || '';
-            document.getElementById('bf-monto').value = f.monto || '';
+            document.getElementById('bf-monto').value = formatNum(f.monto);
             document.getElementById('bf-monto-letras').value = f.montoLetras || '';
-            document.getElementById('bf-efectivo').value = f.efectivo || '';
+            document.getElementById('bf-efectivo').value = formatNum(f.efectivo);
             document.getElementById('bp-marca').value = f.p_marca || '';
             document.getElementById('bp-modelo').value = f.p_modelo || '';
             document.getElementById('bp-anio').value = f.p_anio || '';
@@ -487,7 +489,7 @@ window.editarFormulario = (f) => {
             document.getElementById('bp-motor').value = f.p_motor || '';
             document.getElementById('bp-chasis').value = f.p_chasis || '';
             document.getElementById('bp-loc-pat').value = f.p_locPat || '';
-            document.getElementById('bp-tasado').value = f.p_tasado || '';
+            document.getElementById('bp-tasado').value = formatNum(f.p_tasado);
             document.getElementById('bp-tasado-letras').value = f.p_tasadoLetras || '';
             document.getElementById('bf-remanente-letras').value = f.remanenteLetras || '';
             document.getElementById('bf-detalle-remanente').value = f.detalleRemanente || '';
@@ -526,7 +528,7 @@ window.preGuardarBoleto = (e, tipo) => {
             motor: document.getElementById('bf-motor').value, 
             chasis: document.getElementById('bf-chasis').value,
             dominio: document.getElementById('bf-dominio').value.toUpperCase(), 
-            monto: document.getElementById('bf-monto').value,
+            monto: document.getElementById('bf-monto').value.replace(/[^0-9]/g, ''),
             montoLetras: document.getElementById('bf-monto-letras').value, 
             formaPago: document.getElementById('bf-formapago').value,
             diasTransf: document.getElementById('bf-dias-transf').value, 
@@ -551,9 +553,9 @@ window.preGuardarBoleto = (e, tipo) => {
             motor: document.getElementById('bf-motor').value, 
             chasis: document.getElementById('bf-chasis').value,
             locPat: document.getElementById('bf-loc-pat').value, 
-            monto: document.getElementById('bf-monto').value,
+            monto: document.getElementById('bf-monto').value.replace(/[^0-9]/g, ''),
             montoLetras: document.getElementById('bf-monto-letras').value, 
-            efectivo: document.getElementById('bf-efectivo').value,
+            efectivo: document.getElementById('bf-efectivo').value.replace(/[^0-9]/g, ''),
             p_marca: document.getElementById('bp-marca').value, 
             p_modelo: document.getElementById('bp-modelo').value,
             p_anio: document.getElementById('bp-anio').value, 
@@ -561,7 +563,7 @@ window.preGuardarBoleto = (e, tipo) => {
             p_motor: document.getElementById('bp-motor').value, 
             p_chasis: document.getElementById('bp-chasis').value,
             p_locPat: document.getElementById('bp-loc-pat').value, 
-            p_tasado: document.getElementById('bp-tasado').value,
+            p_tasado: document.getElementById('bp-tasado').value.replace(/[^0-9]/g, ''),
             p_tasadoLetras: document.getElementById('bp-tasado-letras').value, 
             remanenteLetras: document.getElementById('bf-remanente-letras').value,
             detalleRemanente: document.getElementById('bf-detalle-remanente').value, 
@@ -593,7 +595,10 @@ window.preGuardarBoleto = (e, tipo) => {
     }
 };
 
-window.imprimirBoletoHtml = (data) => {
+window.imprimirBoletoHtml = (id) => {
+    const data = window.state.formularios.find(x => x.id === id);
+    if (!data) return;
+
     const printContent = document.getElementById('print-content');
     
     const globalLogo = document.getElementById('print-logo');
@@ -614,6 +619,7 @@ window.imprimirBoletoHtml = (data) => {
     
     const sUpper = (val) => (val || '').toString().toUpperCase();
     const sStr = (val) => (val || '').toString();
+    const sMoney = (val) => val ? new Intl.NumberFormat('es-AR').format(val) : '0';
 
     if (data.tipo.includes('Permuta')) {
         html += `
@@ -627,14 +633,14 @@ window.imprimirBoletoHtml = (data) => {
                 Dominio: <strong>${sUpper(data.dominio)}</strong> - Motor N°: <strong>${sUpper(data.motor) || 'S/D'}</strong> - Chasis N°: <strong>${sUpper(data.chasis) || 'S/D'}</strong><br>
                 Radicación actual: <strong>${sUpper(data.locPat) || 'S/D'}</strong>. En el estado en que se encuentra y que EL COMPRADOR declara conocer y aceptar, prestando plena conformidad.</p>
 
-                <p><strong>SEGUNDA:</strong> El precio total y convenido de esta operación se fija en la suma de Pesos <strong>${sStr(data.monto)}</strong> (Son Pesos: <strong>${sUpper(data.montoLetras)}</strong>), que serán abonados de la siguiente forma:</p>
+                <p><strong>SEGUNDA:</strong> El precio total y convenido de esta operación se fija en la suma de Pesos <strong>$ ${sMoney(data.monto)}</strong> (Son Pesos: <strong>${sUpper(data.montoLetras)}</strong>), que serán abonados de la siguiente forma:</p>
                 
                 <ul style="list-style-type: none; padding-left: 20px;">
-                    <li><strong>A)</strong> La suma de Pesos <strong>${sStr(data.efectivo) || '$ 0'}</strong> en dinero en efectivo, sirviendo el presente de suficiente recibo.</li>
+                    <li><strong>A)</strong> La suma de Pesos <strong>$ ${sMoney(data.efectivo)}</strong> en dinero en efectivo, sirviendo el presente de suficiente recibo.</li>
                     <li><strong>B)</strong> EL COMPRADOR entrega en concepto de Permuta/Parte de pago, y EL VENDEDOR acepta, un vehículo de las siguientes características:<br>
                     Marca: <strong>${sUpper(data.p_marca)}</strong> - Modelo: <strong>${sUpper(data.p_modelo)}</strong> - Año: <strong>${sStr(data.p_anio)}</strong><br>
-                    Dominio: <strong>${sUpper(data.p_dominio)}</strong> - Motor N°: <strong>${sUpper(data.p_motor) || 'S/D'}</strong> - Chasis N°: <strong>${sUpper(data.p_chasis) || 'S/D'}</strong>. Dicha unidad se tasa de común acuerdo en la suma de Pesos <strong>${sStr(data.p_tasado)}</strong> (Son Pesos: <strong>${sUpper(data.p_tasadoLetras)}</strong>).</li>
-                    <li><strong>C)</strong> El saldo remanente de Pesos <strong>${sUpper(data.remanenteLetras)}</strong> se cancelará de la siguiente manera: <strong>${sStr(data.detalleRemanente) || 'No aplica'}</strong>.</li>
+                    Dominio: <strong>${sUpper(data.p_dominio)}</strong> - Motor N°: <strong>${sUpper(data.p_motor) || 'S/D'}</strong> - Chasis N°: <strong>${sUpper(data.p_chasis) || 'S/D'}</strong>. Dicha unidad se tasa de común acuerdo en la suma de Pesos <strong>$ ${sMoney(data.p_tasado)}</strong> (Son Pesos: <strong>${sUpper(data.p_tasadoLetras)}</strong>).</li>
+                    <li><strong>C)</strong> El saldo remanente de Pesos <strong>${sUpper(data.remanenteLetras) || 'CERO CON 00/100'}</strong> se cancelará de la siguiente manera: <strong>${sStr(data.detalleRemanente) || 'No aplica'}</strong>.</li>
                 </ul>
 
                 <p><strong>TERCERA:</strong> EL COMPRADOR asume a partir de la fecha y hora de entrega de la unidad toda responsabilidad civil y/o penal por accidentes, daños o perjuicios ocasionados con el vehículo, como así también las infracciones de tránsito que se cometieran.</p>
@@ -669,7 +675,7 @@ window.imprimirBoletoHtml = (data) => {
                 Dominio: <strong>${sUpper(data.dominio)}</strong> - Motor N°: <strong>${sUpper(data.motor) || 'S/D'}</strong> - Chasis N°: <strong>${sUpper(data.chasis) || 'S/D'}</strong>.<br>
                 El vehículo se entrega en el estado general que se encuentra, siendo conocido y aceptado por el comprador, quien declara haberlo revisado a su entera satisfacción.</p>
 
-                <p><strong>SEGUNDA:</strong> El precio total y definitivo de esta venta se conviene en la suma de Pesos <strong>${sStr(data.monto)}</strong> (Son Pesos: <strong>${sUpper(data.montoLetras)}</strong>). Dicho importe es abonado de la siguiente manera: <strong>${sStr(data.formaPago)}</strong>.</p>
+                <p><strong>SEGUNDA:</strong> El precio total y definitivo de esta venta se conviene en la suma de Pesos <strong>$ ${sMoney(data.monto)}</strong> (Son Pesos: <strong>${sUpper(data.montoLetras)}</strong>). Dicho importe es abonado de la siguiente manera: <strong>${sStr(data.formaPago)}</strong>.</p>
 
                 <p><strong>TERCERA:</strong> El comprador se hace cargo a partir del momento de la firma y entrega de la unidad, de toda responsabilidad civil y/o penal derivada de accidentes de tránsito, daños a terceros, infracciones municipales o policiales, asumiendo la guarda del mismo.</p>
 
