@@ -433,7 +433,14 @@ window.editarFormulario = (id) => {
     if (!f) return;
 
     const tipo = f.tipo.includes('Permuta') ? 'permuta' : 'simple';
-    const formatNum = (num) => num ? new Intl.NumberFormat('es-AR').format(num) : '';
+    
+    // Limpiador blindado de números: Extrae todo lo que no sea número y lo formatea.
+    const formatNum = (val) => {
+        if (val === undefined || val === null || val === '') return '';
+        const cleaned = String(val).replace(/[^0-9]/g, '');
+        if (!cleaned) return '';
+        return new Intl.NumberFormat('es-AR').format(parseInt(cleaned, 10));
+    };
     
     window.openModalBoleto(tipo);
 
@@ -619,7 +626,14 @@ window.imprimirBoletoHtml = (id) => {
     
     const sUpper = (val) => (val || '').toString().toUpperCase();
     const sStr = (val) => (val || '').toString();
-    const sMoney = (val) => val ? new Intl.NumberFormat('es-AR').format(val) : '0';
+    
+    // El formateador ciego final para el papel
+    const sMoney = (val) => {
+        if (!val) return '0';
+        const cleaned = String(val).replace(/[^0-9]/g, '');
+        if (!cleaned) return '0';
+        return new Intl.NumberFormat('es-AR').format(parseInt(cleaned, 10));
+    };
 
     if (data.tipo.includes('Permuta')) {
         html += `
@@ -673,7 +687,7 @@ window.imprimirBoletoHtml = (id) => {
                 Tipo: <strong>${sUpper(data.tipoVehiculo) || 'S/D'}</strong> - Categoría: <strong>${sUpper(data.categoria) || 'S/D'}</strong><br>
                 Marca: <strong>${sUpper(data.marca)}</strong> - Modelo: <strong>${sUpper(data.modelo)}</strong> - Año: <strong>${sStr(data.año)}</strong><br>
                 Dominio: <strong>${sUpper(data.dominio)}</strong> - Motor N°: <strong>${sUpper(data.motor) || 'S/D'}</strong> - Chasis N°: <strong>${sUpper(data.chasis) || 'S/D'}</strong>.<br>
-                El vehículo se entrega en el estado general que se encuentra, siendo conocido y aceptado por el comprador, quien declara haberlo revisado a su entera satisfacción.</p>
+                El vehículo se entrega en el estado general que se encuentra, siendo conocido y aceptado por el comprador, quien declara haberlo revisado a su entera satisfaction.</p>
 
                 <p><strong>SEGUNDA:</strong> El precio total y definitivo de esta venta se conviene en la suma de Pesos <strong>$ ${sMoney(data.monto)}</strong> (Son Pesos: <strong>${sUpper(data.montoLetras)}</strong>). Dicho importe es abonado de la siguiente manera: <strong>${sStr(data.formaPago)}</strong>.</p>
 
