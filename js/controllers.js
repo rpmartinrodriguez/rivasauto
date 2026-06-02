@@ -487,38 +487,61 @@ window.handleDAVentaSubmit = async (e, autoId) => {
         const auto = window.state.autos.find(x => x.id === autoId);
         const userQueRegistra = window.state.currentUser; 
         
+        // --- BUSCAMOS AL ADMIN PARA ENVIARLE LA PLATA INMEDIATA ---
+        const adminUser = window.state.usuarios.find(u => u.rol === 'Admin') || userQueRegistra;
+        
+        // 1. Recolección de valores
         const nombreComprador = document.getElementById('vent-comp-nombre').value;
         const vEfectivo = document.getElementById('chk-efectivo')?.checked ? Number(document.getElementById('val-efectivo').value.replace(/[^0-9]/g, '')) : 0;
+        const notaEfectivo = document.getElementById('nota-efectivo')?.value || 'Efectivo';
+        
+        const vTransferencia = document.getElementById('chk-transferencia')?.checked ? Number(document.getElementById('val-transferencia').value.replace(/[^0-9]/g, '')) : 0;
+        const destTransferencia = document.getElementById('dest-transferencia')?.value || 'Transferencia';
+        
         const vCredito = document.getElementById('chk-credito')?.checked ? Number(document.getElementById('val-credito').value.replace(/[^0-9]/g, '')) : 0;
         const cCredito = Number(document.getElementById('cuotas-credito')?.value || 0);
         const vPagare = document.getElementById('chk-pagare')?.checked ? Number(document.getElementById('val-pagare').value.replace(/[^0-9]/g, '')) : 0;
         const cPagare = Number(document.getElementById('cuotas-pagare')?.value || 0);
         const vPermuta = window.state.ventaData.tienePermuta ? Number(document.getElementById('p-valor').value.replace(/[^0-9]/g, '')) : 0;
         
-        const totalVentaOperacion = vEfectivo + vCredito + vPagare + vPermuta;
+        const totalVentaOperacion = vEfectivo + vTransferencia + vCredito + vPagare + vPermuta;
 
         if (totalVentaOperacion <= 0) {
             alert("Debes especificar al menos una forma de pago válida o recibir una permuta.");
             window.state.isSubmittingVenta = false;
-            
-            if (btn) {
-                window.setBtnLoader(btn, false);
-            }
+            if (btn) window.setBtnLoader(btn, false);
             return;
         }
 
         const fDate = new Date().toISOString().split('T')[0];
 
+        // 2. Registro de Ingresos (DIRECTO A LA CAJA DEL ADMIN)
         if (vEfectivo > 0) {
-            const notaEfectivo = document.getElementById('nota-efectivo').value || 'Efectivo';
             await window.fbAdd("transacciones", {
                 fecha: fDate, 
                 tipo: 'ingreso', 
                 valor: vEfectivo, 
                 categoria: 'Venta Vehículos',
-                descripcion: `Entrega Venta: ${auto.marca} ${auto.modelo} (${notaEfectivo})`,
-                userId: userQueRegistra.id, 
-                sucursalId: userQueRegistra.sucursalId,
+                descripcion: `Entrega Venta (Efectivo): ${auto.marca} ${auto.modelo} (${notaEfectivo})`,
+                userId: adminUser.id,           // Asignado al Admin
+                sucursalId: adminUser.sucursalId,
+                tipoComprobante: 'X', 
+                numComprobante: '', 
+                iva: 0, 
+                estadoCobro: 'disponible', 
+                fechaAcreditacion: null
+            });
+        }
+        
+        if (vTransferencia > 0) {
+            await window.fbAdd("transacciones", {
+                fecha: fDate, 
+                tipo: 'ingreso', 
+                valor: vTransferencia, 
+                categoria: 'Venta Vehículos',
+                descripcion: `Entrega Venta (Transf a ${destTransferencia}): ${auto.marca} ${auto.modelo}`,
+                userId: adminUser.id,           // Asignado al Admin
+                sucursalId: adminUser.sucursalId,
                 tipoComprobante: 'X', 
                 numComprobante: '', 
                 iva: 0, 
@@ -527,6 +550,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             });
         }
 
+        // 3. Objetos de Deuda
         let objCredito = null;
         if (vCredito > 0 && cCredito > 0) {
             objCredito = { 
@@ -549,17 +573,20 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 
         let metodosUsados = [];
         if (vEfectivo > 0) metodosUsados.push('Efectivo');
+        if (vTransferencia > 0) metodosUsados.push('Transferencia');
         if (vCredito > 0) metodosUsados.push('Crédito');
         if (vPagare > 0) metodosUsados.push('Pagaré');
         if (vPermuta > 0) metodosUsados.push('Permuta');
         
+        // 4. Registro Histórico de Ventas (Este sí queda a nombre del Vendedor para las estadísticas)
         await window.fbAdd("ventas", {
             fecha: fDate, 
             autoDesc: `${auto.marca} ${auto.modelo} (${auto.patente})`, 
             precioListaOriginal: auto.precio, 
             montoTotal: totalVentaOperacion, 
             desglose: { 
-                efectivo: vEfectivo, 
+                efectivo: vEfectivo,
+                transferencia: vTransferencia,
                 credito: vCredito, 
                 pagare: vPagare, 
                 permuta: vPermuta 
@@ -577,6 +604,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             detallePermuta: window.state.ventaData.tienePermuta ? `${document.getElementById('p-marca').value} ${document.getElementById('p-modelo').value}` : null
         });
 
+        // 5. Alta del Auto en Permuta
         if (window.state.ventaData.tienePermuta) {
             await window.fbAdd("autos", { 
                 marca: document.getElementById('p-marca').value.toUpperCase(), 
@@ -595,8 +623,10 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             });
         }
         
+        // 6. Baja del Auto de la Flota
         await window.fbUpdate("autos", autoId, { estado: 'Vendido' }); 
         
+        // 7. CIERRE INTELIGENTE EN EL CRM (EL PUENTE)
         try {
             const leadMatch = (window.state.consultas || []).find(c => c.nombre.trim().toLowerCase() === nombreComprador.trim().toLowerCase());
             
@@ -619,6 +649,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             console.error("Error al intentar vincular y cerrar el lead en el CRM:", crmErr);
         }
 
+        // 8. Auto-generación de Boleto
         const cuotasMax = Math.max(cCredito, cPagare);
         const tipoBoleto = window.state.ventaData.tienePermuta ? 'Boleto Venta con Permuta' : 'Boleto Compra Venta';
         
@@ -644,7 +675,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
 
         if (window.state.ventaData.tienePermuta) {
             boletoData.telefono = document.getElementById('vent-comp-tel').value;
-            boletoData.efectivo = vEfectivo;
+            boletoData.efectivo = vEfectivo + vTransferencia; // Sumamos ambos como "entrega inicial" para el boleto
             boletoData.p_marca = document.getElementById('p-marca').value;
             boletoData.p_modelo = document.getElementById('p-modelo').value;
             boletoData.p_anio = document.getElementById('p-anio').value;
@@ -1372,7 +1403,6 @@ window.handleCajaSubmit = async (e) => {
         const oldAutoId = oldTx ? oldTx.autoId : null;
 
         if (txId && oldTx) {
-            // ARMAMOS EL HISTORIAL DE AUDITORÍA
             const historial = oldTx.historialEdiciones ? [...oldTx.historialEdiciones] : [];
             historial.push({
                 fechaCambio: new Date().toISOString(),
@@ -1388,9 +1418,6 @@ window.handleCajaSubmit = async (e) => {
             data.editado = true;
             data.fechaEdicion = new Date().toISOString();
             data.historialEdiciones = historial;
-            
-            // Conservamos el creador original, el userId que viene en 'data' ahora es del editor. 
-            // Para mantener la propiedad, forzamos el userId original:
             data.userId = oldTx.userId;
             data.sucursalId = oldTx.sucursalId;
 
