@@ -187,7 +187,6 @@ window.renderFormulariosView = () => {
             </button>
         ` : '';
 
-        // Botón inteligente de VINCULAR AL AUTO
         const btnVincular = !f.autoIdAsociado ? `
             <button onclick="window.abrirAsociarVehiculo('${f.id}')" class="p-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-lg transition-colors mr-1 shadow-sm" title="Vincular a Vehículo de Flota">
                 <i data-lucide="link" class="w-4 h-4"></i>
@@ -237,7 +236,6 @@ window.abrirAsociarVehiculo = (formId) => {
     const f = window.state.formularios.find(x => x.id === formId);
     if (!f) return;
     
-    // Cargamos los datos del formulario al estado temporal para que la función de guardado sepa a quién actualizar
     window.state.tempFormData = { ...f }; 
     
     const selectBox = document.getElementById('asoc-auto-select');
@@ -291,8 +289,9 @@ window.openModalBoleto = (tipo) => {
 
                 <div class="bg-white dark:bg-neutral-900 p-6 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
                     <h4 class="font-black text-sm uppercase tracking-widest text-neutral-400 mb-4">Datos del Comprador</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input id="bf-comprador" required placeholder="Nombre Comprador" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <input id="bf-comprador" required placeholder="Nombre Comprador" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
+                        <input id="bf-dni" required placeholder="DNI" class="col-span-2 md:col-span-1 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
                         <input id="bf-telefono" required placeholder="Teléfono Comprador" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
                         <input id="bf-domicilio" required placeholder="Domicilio Comprador" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
                         <input id="bf-loc-comp" required placeholder="Localidad Comprador" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
@@ -348,13 +347,12 @@ window.openModalBoleto = (tipo) => {
                         
                         <div class="bg-white dark:bg-neutral-900 p-6 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
                             <h4 class="font-black text-sm uppercase tracking-widest text-neutral-400 mb-4">Datos Comprador</h4>
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 <input id="bf-comprador" required placeholder="Nombre Comprador" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
-                                <input id="bf-dni" required placeholder="DNI" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
+                                <input id="bf-dni" required placeholder="DNI" class="col-span-2 md:col-span-1 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
                                 <input id="bf-telefono" required placeholder="Teléfono" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
-                                <input id="bf-domicilio" required placeholder="Calle" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
-                                <input id="bf-altura" placeholder="Altura/Piso" class="w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
-                                <input id="bf-loc-comp" required placeholder="Localidad" class="col-span-2 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
+                                <input id="bf-domicilio" required placeholder="Calle y Altura" class="col-span-2 md:col-span-1 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
+                                <input id="bf-loc-comp" required placeholder="Localidad" class="col-span-2 md:col-span-1 w-full rounded-xl px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 outline-none font-bold" />
                             </div>
                         </div>
 
@@ -447,8 +445,9 @@ window.editarFormulario = (f) => {
             document.getElementById('bf-vendedor-loc').value = f.vendedorLoc || '';
             document.getElementById('bf-vendedor-tel').value = f.vendedorTel || '';
             document.getElementById('bf-comprador').value = f.comprador || '';
+            document.getElementById('bf-dni').value = f.dni || '';
             document.getElementById('bf-domicilio').value = f.domicilio || '';
-            document.getElementById('bf-loc-comp').value = f.locComp || '';
+            document.getElementById('bf-loc-comp').value = f.locComp || 'Gualeguaychú';
             document.getElementById('bf-telefono').value = f.telefono || '';
             document.getElementById('bf-categoria').value = f.categoria || '';
             document.getElementById('bf-marca').value = f.marca || '';
@@ -470,8 +469,7 @@ window.editarFormulario = (f) => {
             document.getElementById('bf-dni').value = f.dni || '';
             document.getElementById('bf-telefono').value = f.telefono || '';
             document.getElementById('bf-domicilio').value = f.domicilio || '';
-            document.getElementById('bf-altura').value = f.altura || '';
-            document.getElementById('bf-loc-comp').value = f.locComp || '';
+            document.getElementById('bf-loc-comp').value = f.locComp || 'Gualeguaychú';
             document.getElementById('bf-marca').value = f.marca || '';
             document.getElementById('bf-modelo').value = f.modelo || '';
             document.getElementById('bf-anio').value = f.año || '';
@@ -516,6 +514,7 @@ window.preGuardarBoleto = (e, tipo) => {
             vendedorLoc: document.getElementById('bf-vendedor-loc').value,
             vendedorTel: document.getElementById('bf-vendedor-tel').value, 
             comprador: document.getElementById('bf-comprador').value,
+            dni: document.getElementById('bf-dni').value,
             domicilio: document.getElementById('bf-domicilio').value, 
             locComp: document.getElementById('bf-loc-comp').value,
             telefono: document.getElementById('bf-telefono').value, 
@@ -544,7 +543,6 @@ window.preGuardarBoleto = (e, tipo) => {
             dni: document.getElementById('bf-dni').value,
             telefono: document.getElementById('bf-telefono').value, 
             domicilio: document.getElementById('bf-domicilio').value,
-            altura: document.getElementById('bf-altura').value, 
             locComp: document.getElementById('bf-loc-comp').value,
             marca: document.getElementById('bf-marca').value, 
             modelo: document.getElementById('bf-modelo').value,
@@ -622,7 +620,7 @@ window.imprimirBoletoHtml = (data) => {
             <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; text-align: justify;">
                 <h2 style="text-align: center; text-transform: uppercase; text-decoration: underline; margin-bottom: 30px; font-size: 18px;">BOLETO DE COMPRA VENTA AUTOMOTOR CON PERMUTA</h2>
                 
-                <p>En la ciudad de <strong>Gualeguaychú</strong>, Provincia de Entre Ríos, a los <strong>${window.formatDate(data.fecha)}</strong>, entre el señor/a <strong>${sUpper(data.vendedor)}</strong>, en adelante denominado "EL VENDEDOR", y el señor/a <strong>${sUpper(data.comprador)}</strong>, D.N.I. N° <strong>${sStr(data.dni)}</strong>, domiciliado en calle <strong>${sStr(data.domicilio)} ${sStr(data.altura)}</strong> de la localidad de <strong>${sUpper(data.locComp)}</strong>, teléfono <strong>${sStr(data.telefono)}</strong>, en adelante denominado "EL COMPRADOR", convienen en celebrar el presente contrato de Compra-Venta, sujeto a las siguientes cláusulas y condiciones:</p>
+                <p>En la ciudad de <strong>Gualeguaychú</strong>, Provincia de Entre Ríos, a los <strong>${window.formatDate(data.fecha)}</strong>, entre el señor/a <strong>${sUpper(data.vendedor)}</strong>, en adelante denominado "EL VENDEDOR", y el señor/a <strong>${sUpper(data.comprador)}</strong>, D.N.I. N° <strong>${sStr(data.dni)}</strong>, domiciliado en calle <strong>${sStr(data.domicilio)}</strong> de la localidad de <strong>${sUpper(data.locComp)}</strong>, teléfono <strong>${sStr(data.telefono)}</strong>, en adelante denominado "EL COMPRADOR", convienen en celebrar el presente contrato de Compra-Venta, sujeto a las siguientes cláusulas y condiciones:</p>
 
                 <p><strong>PRIMERA:</strong> EL VENDEDOR vende y EL COMPRADOR compra un vehículo usado, cuyas características son las siguientes:<br>
                 Marca: <strong>${sUpper(data.marca)}</strong> - Modelo: <strong>${sUpper(data.modelo)}</strong> - Año: <strong>${sStr(data.año)}</strong><br>
@@ -663,7 +661,7 @@ window.imprimirBoletoHtml = (data) => {
             <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #000; text-align: justify;">
                 <h2 style="text-align: center; text-transform: uppercase; text-decoration: underline; margin-bottom: 30px; font-size: 18px;">BOLETO DE COMPRA VENTA AUTOMOTOR</h2>
                 
-                <p>En la ciudad de <strong>${sUpper(data.ciudadFirma)}</strong>, a los <strong>${window.formatDate(data.fecha)}</strong>, entre <strong>${sUpper(data.vendedor)}</strong>, domiciliado en <strong>${sStr(data.vendedorDomicilio)}</strong> de la localidad de <strong>${sStr(data.vendedorLoc)}</strong>, teléfono <strong>${sStr(data.vendedorTel)}</strong>, por una parte, en adelante "EL VENDEDOR", y por la otra parte el señor/a <strong>${sUpper(data.comprador)}</strong>, domiciliado en calle <strong>${sStr(data.domicilio)}</strong> de la localidad de <strong>${sStr(data.locComp)}</strong>, teléfono <strong>${sStr(data.telefono)}</strong>, en adelante "EL COMPRADOR", convienen en celebrar el presente boleto de compraventa, sujeto a las siguientes cláusulas:</p>
+                <p>En la ciudad de <strong>${sUpper(data.ciudadFirma)}</strong>, a los <strong>${window.formatDate(data.fecha)}</strong>, entre <strong>${sUpper(data.vendedor)}</strong>, domiciliado en <strong>${sStr(data.vendedorDomicilio)}</strong> de la localidad de <strong>${sStr(data.vendedorLoc)}</strong>, teléfono <strong>${sStr(data.vendedorTel)}</strong>, por una parte, en adelante "EL VENDEDOR", y por la otra parte el señor/a <strong>${sUpper(data.comprador)}</strong>, D.N.I. N° <strong>${sStr(data.dni)}</strong>, domiciliado en calle <strong>${sStr(data.domicilio)}</strong> de la localidad de <strong>${sStr(data.locComp)}</strong>, teléfono <strong>${sStr(data.telefono)}</strong>, en adelante "EL COMPRADOR", convienen en celebrar el presente boleto de compraventa, sujeto a las siguientes cláusulas:</p>
 
                 <p><strong>PRIMERA:</strong> EL VENDEDOR vende y EL COMPRADOR adquiere un vehículo usado cuyas características son:<br>
                 Tipo: <strong>${sUpper(data.tipoVehiculo) || 'S/D'}</strong> - Categoría: <strong>${sUpper(data.categoria) || 'S/D'}</strong><br>
