@@ -75,7 +75,6 @@ window.renderCajaView = () => {
     
     // 4. Filtrar las transacciones
     let transacciones = (window.state.transacciones || []).filter(t => {
-        // A. Regla base de visibilidad según ROL
         let isVisible = false;
         
         if (currentRole === 'Admin') {
@@ -89,14 +88,12 @@ window.renderCajaView = () => {
             }
         }
 
-        // B. Filtro por selector de Usuario
         if (isVisible && selectedUserId !== '') {
             if (t.userId !== selectedUserId) {
                 isVisible = false;
             }
         }
 
-        // C. Filtro por Buscador de Texto Libre
         if (isVisible && searchQuery !== '') {
             let autoStr = '';
             if (t.autoId) {
@@ -122,7 +119,6 @@ window.renderCajaView = () => {
     let totalEgresos = 0;
     let rowsHtml = '';
     
-    // Calculamos totales y armamos la tabla
     transacciones.forEach(t => {
         const monto = Number(t.valor) || 0;
         
@@ -157,25 +153,30 @@ window.renderCajaView = () => {
             detalleFactura = ` | FACT: ${t.tipoComprobante} ${t.numComprobante}`;
         }
 
-        // MARCADOR DE AUDITORÍA: Si fue editado, mostramos la (i) roja
+        // MARCADOR DE AUDITORÍA: Leyenda "(EDITADO)" clickable
         const badgeEditado = t.editado ? `
-            <i data-lucide="info" class="w-4 h-4 text-rose-500 inline ml-1 cursor-help hover:scale-110 transition-transform" title="Este movimiento fue editado"></i>
+            <span onclick="window.verHistorialEdicion('${t.id}')" class="ml-2 text-[9px] font-black tracking-widest text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30 px-2 py-0.5 rounded cursor-pointer hover:scale-105 transition-transform" title="Ver historial de cambios">
+                (EDITADO)
+            </span>
         ` : '';
 
-        // BOTONES DE AUDITORÍA (EDITAR Y ELIMINAR): Solo visible para el Administrador
+        // BOTONES DE AUDITORÍA (Admin y Encargado)
         let btnAcciones = '';
-        if (currentRole === 'Admin') {
-            btnAcciones = `
+        if (currentRole === 'Admin' || currentRole === 'Encargado') {
+            btnAcciones += `
                 <button onclick="window.editTransaccion('${t.id}')" class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg transition-colors shadow-sm ml-2" title="Editar Movimiento">
                     <i data-lucide="edit-3" class="w-4 h-4"></i>
                 </button>
+            `;
+        }
+        if (currentRole === 'Admin') {
+            btnAcciones += `
                 <button onclick="window.deleteTransaccion('${t.id}')" class="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg transition-colors shadow-sm ml-1" title="Eliminar Movimiento">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
             `;
         }
 
-        // Agregamos la fila al principio del string (para que las más nuevas queden arriba en la vista)
         rowsHtml = `
             <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
                 <td class="px-6 py-4 text-xs font-bold text-neutral-500">
@@ -204,7 +205,6 @@ window.renderCajaView = () => {
         ` + rowsHtml; 
     });
 
-    // Si no hay transacciones, mostramos mensaje vacío
     if (transacciones.length === 0) {
         rowsHtml = `
             <tr>
@@ -220,7 +220,6 @@ window.renderCajaView = () => {
 
     table.innerHTML = rowsHtml;
 
-    // Pintar tarjetas de estadísticas superiores
     statsContainer.innerHTML = `
         <div class="bg-white/60 dark:bg-neutral-900/60 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 p-6 rounded-3xl shadow-sm transition-transform hover:scale-[1.02]">
             <p class="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-2 flex items-center">
@@ -263,7 +262,6 @@ window.openModalPendientes = () => {
 
     let html = '';
     
-    // Buscamos ventas donde las cuotas pagadas sean menores a las cuotas totales (ya sea crédito o pagaré)
     const ventasPendientes = window.state.ventas.filter(v => 
         (v.credito && v.credito.pagadas < v.credito.cuotas) || 
         (v.pagare && v.pagare.pagadas < v.pagare.cuotas)
@@ -296,7 +294,6 @@ window.openModalPendientes = () => {
                     </div>
             `;
             
-            // Si tiene crédito y faltan cuotas
             if (v.credito && v.credito.pagadas < v.credito.cuotas) {
                 const numCuota = v.credito.pagadas + 1;
                 html += `
@@ -316,7 +313,6 @@ window.openModalPendientes = () => {
                 `;
             }
 
-            // Si tiene pagaré y faltan cuotas
             if (v.pagare && v.pagare.pagadas < v.pagare.cuotas) {
                 const numCuota = v.pagare.pagadas + 1;
                 html += `
