@@ -12,7 +12,6 @@ window.renderAutosView = () => {
   const container = document.getElementById('autos-container');
   if (!container) return;
 
-  // --- 1. INYECTAR BUSCADOR DINÁMICAMENTE ---
   let searchWrapper = document.getElementById('search-autos-wrapper');
   if (!searchWrapper && container.parentNode) {
       searchWrapper = document.createElement('div');
@@ -26,7 +25,6 @@ window.renderAutosView = () => {
           </div>
       `;
       
-      // Agrupamos los botones de vista de forma segura
       const btnGrid = document.getElementById('btn-view-grid');
       const btnList = document.getElementById('btn-view-list');
       
@@ -57,10 +55,8 @@ window.renderAutosView = () => {
       : 'p-2 rounded-lg text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors';
   }
   
-  // Base de autos no vendidos
   let autosValidos = (window.state.autos || []).filter(a => a.estado !== 'Vendido');
   
-  // --- 2. FILTRO DE BÚSQUEDA ---
   const searchInput = document.getElementById('search-autos');
   const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
@@ -88,7 +84,6 @@ window.renderAutosView = () => {
     return; 
   }
 
-  // --- 3. FILTRO DE SEGURIDAD CRM (Aplicado a la vista general) ---
   let leadsPermitidos = window.state.consultas || [];
   if (window.state.currentUser.rol === 'Vendedor') {
     leadsPermitidos = leadsPermitidos.filter(c => c.userId === window.state.currentUser.id);
@@ -119,7 +114,6 @@ window.renderAutosView = () => {
         
       const kmFmt = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : 0;
 
-      // INTELIGENCIA CRM: Buscar si hay interesados PERMITIDOS para este auto
       const interesados = leadsPermitidos.filter(c => {
           const interes = (c.marcaInteres || '').toLowerCase();
           return interes.includes(auto.marca.toLowerCase()) || interes.includes(auto.modelo.toLowerCase());
@@ -214,7 +208,6 @@ window.renderAutosView = () => {
         
       const kmFmt = auto.km ? new Intl.NumberFormat('es-AR').format(auto.km) : 0;
 
-      // INTELIGENCIA CRM: Ícono para la lista
       const interesados = leadsPermitidos.filter(c => {
           const interes = (c.marcaInteres || '').toLowerCase();
           return interes.includes(auto.marca.toLowerCase()) || interes.includes(auto.modelo.toLowerCase());
@@ -281,7 +274,6 @@ window.renderDetalleAuto = () => {
   
   let html = '';
 
-  // --- FILTRO DE SEGURIDAD CRM (Aplicado a la ficha del auto) ---
   let leadsPermitidos = window.state.consultas || [];
   if (window.state.currentUser.rol === 'Vendedor') {
     leadsPermitidos = leadsPermitidos.filter(c => c.userId === window.state.currentUser.id);
@@ -290,7 +282,6 @@ window.renderDetalleAuto = () => {
     leadsPermitidos = leadsPermitidos.filter(c => validUsers.includes(c.userId));
   }
 
-  // Calculamos los interesados que coinciden con la marca/modelo, PERMITIDOS para este usuario
   const interesados = leadsPermitidos.filter(c => {
       const interes = (c.marcaInteres || '').toLowerCase();
       return interes.includes(auto.marca.toLowerCase()) || interes.includes(auto.modelo.toLowerCase());
@@ -335,7 +326,6 @@ window.renderDetalleAuto = () => {
       </div>
     `;
 
-    // Detalle de Inteligencia CRM justo debajo de la caja negra
     if (interesados.length > 0) {
         html += `
             <div onclick="window.switchDASection('crm')" class="mb-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 rounded-2xl cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-600 transition-all flex justify-between items-center group shadow-sm">
@@ -571,7 +561,6 @@ window.renderDetalleAuto = () => {
        }
     }
   } else {
-    // === MODO VENTA ===
     if (window.state.currentUser.rol === 'Admin') {
       const gananciaFmt = auto.moneda === 'USD' ? 'U$S ' + window.formatMoney(auto.precio - ((auto.costo||0) + totalInv)).replace(/[^0-9.,]/g, '').trim() : window.formatMoney(auto.precio - ((auto.costo||0) + totalInv));
       html += `
@@ -611,11 +600,20 @@ window.renderDetalleAuto = () => {
           
           <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
             <input type="checkbox" id="chk-efectivo" onchange="document.getElementById('div-efectivo').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
-            <span>Efectivo / Transferencia (Inmediato a Caja)</span>
+            <span>Efectivo (Ingresa a Caja Central/Admin)</span>
           </label>
           <div id="div-efectivo" class="hidden pl-8 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 fade-in">
-            <input id="val-efectivo" type="text" oninput="window.formatInputMoney(this)" placeholder="Monto ($)" class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 font-bold text-lg outline-none focus:border-green-500">
-            <input id="nota-efectivo" type="text" placeholder="Nota / Banco..." class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none focus:border-green-500 font-bold">
+            <input id="val-efectivo" type="text" oninput="window.formatInputMoney(this)" placeholder="Monto en Efectivo ($)" class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 font-bold text-lg outline-none focus:border-green-500">
+            <input id="nota-efectivo" type="text" placeholder="Nota / Entregado por..." class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none focus:border-green-500 font-bold">
+          </div>
+
+          <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
+            <input type="checkbox" id="chk-transferencia" onchange="document.getElementById('div-transferencia').classList.toggle('hidden', !this.checked)" class="w-5 h-5 text-green-600 rounded"> 
+            <span>Transferencia (Ingresa a Caja Central/Admin)</span>
+          </label>
+          <div id="div-transferencia" class="hidden pl-8 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 fade-in">
+            <input id="val-transferencia" type="text" oninput="window.formatInputMoney(this)" placeholder="Monto Transferido ($)" class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 font-bold text-lg outline-none focus:border-green-500">
+            <input id="dest-transferencia" type="text" placeholder="Destino (Ej: Bco Galicia, MercadoPago)" class="rounded-xl px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none focus:border-green-500 font-bold">
           </div>
           
           <label class="flex items-center space-x-2 mb-2 font-bold cursor-pointer">
