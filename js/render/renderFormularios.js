@@ -434,7 +434,7 @@ window.editarFormulario = (id) => {
 
     const tipo = f.tipo.includes('Permuta') ? 'permuta' : 'simple';
     
-    // Limpiador blindado de números: Extrae todo lo que no sea número y lo formatea.
+    // Limpiador blindado de números
     const formatNum = (val) => {
         if (val === undefined || val === null || val === '') return '';
         const cleaned = String(val).replace(/[^0-9]/g, '');
@@ -442,9 +442,9 @@ window.editarFormulario = (id) => {
         return new Intl.NumberFormat('es-AR').format(parseInt(cleaned, 10));
     };
     
-    // Ayudante inteligente para letras
+    // Traductor automático: Si no hay letras guardadas, las genera al instante
     const getLetras = (val, prevLetras) => {
-        if (prevLetras) return prevLetras;
+        if (prevLetras && prevLetras.trim() !== '') return prevLetras;
         if (!val) return '';
         const cleaned = String(val).replace(/[^0-9]/g, '');
         if (!cleaned) return '';
@@ -463,6 +463,7 @@ window.editarFormulario = (id) => {
             document.getElementById('bf-vendedor-loc').value = f.vendedorLoc || 'Gualeguaychú, Entre Ríos';
             document.getElementById('bf-vendedor-tel').value = f.vendedorTel || '';
             
+            // Asignaciones directas del comprador
             document.getElementById('bf-comprador').value = f.comprador || '';
             document.getElementById('bf-dni').value = f.dni || '';
             document.getElementById('bf-domicilio').value = f.domicilio || '';
@@ -487,8 +488,9 @@ window.editarFormulario = (id) => {
             document.getElementById('bf-obs').value = f.observaciones || '';
         } else {
             document.getElementById('bf-vendedor').value = f.vendedor || 'RIVAS AUTO';
-            document.getElementById('bf-comprador').value = f.comprador || '';
             
+            // Asignaciones directas del comprador
+            document.getElementById('bf-comprador').value = f.comprador || '';
             document.getElementById('bf-dni').value = f.dni || '';
             document.getElementById('bf-telefono').value = f.telefono || '';
             document.getElementById('bf-domicilio').value = f.domicilio || '';
