@@ -523,7 +523,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
                 valor: vEfectivo, 
                 categoria: 'Venta Vehículos',
                 descripcion: `Entrega Venta (Efectivo): ${auto.marca} ${auto.modelo} (${notaEfectivo})`,
-                userId: adminUser.id,           // Asignado al Admin
+                userId: adminUser.id,
                 sucursalId: adminUser.sucursalId,
                 tipoComprobante: 'X', 
                 numComprobante: '', 
@@ -540,7 +540,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
                 valor: vTransferencia, 
                 categoria: 'Venta Vehículos',
                 descripcion: `Entrega Venta (Transf a ${destTransferencia}): ${auto.marca} ${auto.modelo}`,
-                userId: adminUser.id,           // Asignado al Admin
+                userId: adminUser.id,
                 sucursalId: adminUser.sucursalId,
                 tipoComprobante: 'X', 
                 numComprobante: '', 
@@ -578,7 +578,7 @@ window.handleDAVentaSubmit = async (e, autoId) => {
         if (vPagare > 0) metodosUsados.push('Pagaré');
         if (vPermuta > 0) metodosUsados.push('Permuta');
         
-        // 4. Registro Histórico de Ventas (Este sí queda a nombre del Vendedor para las estadísticas)
+        // 4. Registro Histórico de Ventas
         await window.fbAdd("ventas", {
             fecha: fDate, 
             autoDesc: `${auto.marca} ${auto.modelo} (${auto.patente})`, 
@@ -649,44 +649,80 @@ window.handleDAVentaSubmit = async (e, autoId) => {
             console.error("Error al intentar vincular y cerrar el lead en el CRM:", crmErr);
         }
 
-        // 8. Auto-generación de Boleto
+        // =========================================================
+        // 8. UNIFICADOR ESTRICTO DE BOLETOS (SINCRONIZACIÓN PERFECTA)
+        // =========================================================
         const cuotasMax = Math.max(cCredito, cPagare);
         const tipoBoleto = window.state.ventaData.tienePermuta ? 'Boleto Venta con Permuta' : 'Boleto Compra Venta';
         
+        const safeNumeroALetras = (num) => {
+            if(window.numeroALetras) return window.numeroALetras(num);
+            return '';
+        };
+
         const boletoData = {
             tipo: tipoBoleto, 
             fecha: fDate, 
+            estado: 'Pendiente', 
+            autoIdAsociado: autoId,
+            
+            // DATOS VENDEDOR POR DEFECTO
             vendedor: 'RIVAS AUTO', 
-            vendedorLoc: 'Gualeguaychú',
+            vendedorDomicilio: 'Urquiza 1234',
+            vendedorLoc: 'Gualeguaychú, Entre Ríos',
+            vendedorTel: '',
+
+            // DATOS COMPRADOR DIRECTOS DEL MODAL
             comprador: nombreComprador, 
             dni: document.getElementById('vent-comp-dni').value,
+            telefono: document.getElementById('vent-comp-tel').value,
             domicilio: document.getElementById('vent-comp-domicilio').value, 
+            locComp: 'Gualeguaychú',
+
+            // DATOS AUTO VENDIDO
+            categoria: 'Automóvil',
+            tipoVehiculo: 'Sedán',
             marca: auto.marca, 
             modelo: auto.modelo,
             año: auto.año, 
             dominio: auto.patente, 
             motor: '', 
             chasis: '', 
+            locPat: 'Gualeguaychú',
+
+            // MONTOS Y PAGOS
             monto: totalVentaOperacion, 
-            observaciones: '',
-            estado: 'Pendiente', 
-            autoIdAsociado: autoId
+            montoLetras: safeNumeroALetras(totalVentaOperacion),
+            observaciones: ''
         };
 
         if (window.state.ventaData.tienePermuta) {
-            boletoData.telefono = document.getElementById('vent-comp-tel').value;
-            boletoData.efectivo = vEfectivo + vTransferencia; // Sumamos ambos como "entrega inicial" para el boleto
-            boletoData.p_marca = document.getElementById('p-marca').value;
-            boletoData.p_modelo = document.getElementById('p-modelo').value;
+            boletoData.efectivo = vEfectivo + vTransferencia; 
+            
+            // DATOS AUTO PERMUTA
+            boletoData.p_marca = document.getElementById('p-marca').value.toUpperCase();
+            boletoData.p_modelo = document.getElementById('p-modelo').value.toUpperCase();
             boletoData.p_anio = document.getElementById('p-anio').value;
             boletoData.p_dominio = document.getElementById('p-pat').value.toUpperCase();
+            boletoData.p_motor = '';
+            boletoData.p_chasis = '';
+            boletoData.p_locPat = 'Gualeguaychú';
+            
             boletoData.p_tasado = vPermuta;
-            boletoData.saldo = vCredito + vPagare;
-            boletoData.cuotas = cuotasMax;
-            boletoData.valCuota = '';
+            boletoData.p_tasadoLetras = safeNumeroALetras(vPermuta);
+            
+            const remanente = totalVentaOperacion - vPermuta - (vEfectivo + vTransferencia);
+            boletoData.remanenteLetras = remanente > 0 ? safeNumeroALetras(remanente) : '';
+            
+            let det = [];
+            if(vCredito > 0) det.push(`Crédito (${cCredito} cuotas)`);
+            if(vPagare > 0) det.push(`Pagaré (${cPagare} cuotas)`);
+            boletoData.detalleRemanente = det.length > 0 ? 'Saldo a cancelar mediante: ' + det.join(' + ') : '';
+
         } else {
             boletoData.formaPago = metodosUsados.join(' + ');
-            boletoData.telefono = document.getElementById('vent-comp-tel').value;
+            boletoData.diasTransf = '15';
+            boletoData.ciudadFirma = 'Gualeguaychú';
         }
 
         await window.fbAdd("formularios", boletoData);
