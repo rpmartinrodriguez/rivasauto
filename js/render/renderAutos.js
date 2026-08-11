@@ -694,8 +694,9 @@ window.exportarFlotaExcel = () => {
         return;
     }
 
+    // Usamos punto y coma (;) para compatibilidad nativa con Excel en español
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-    csvContent += "Marca,Modelo,Año,Patente,KM,Color,Condicion,Estado,Costo,Precio,Moneda\n";
+    csvContent += "Marca;Modelo;Año;Patente;KM;Color;Condición;Estado;Costo;Precio Venta;Moneda\n";
 
     autosValidos.forEach(a => {
         const cleanStr = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
@@ -714,7 +715,7 @@ window.exportarFlotaExcel = () => {
             cleanStr(a.moneda || 'ARS')
         ];
         
-        csvContent += row.join(",") + "\n";
+        csvContent += row.join(";") + "\n";
     });
 
     const encodedUri = encodeURI(csvContent);
