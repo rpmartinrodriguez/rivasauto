@@ -685,6 +685,50 @@ window.autoFillComprador = (nombreSeleccionado) => {
     }
 };
 
+window.exportarFlotaExcel = () => {
+    let autosValidos = (window.state.autos || []).filter(a => a.estado !== 'Vendido');
+    autosValidos.sort((a, b) => String(a.marca || '').localeCompare(String(b.marca || '')) || String(a.modelo || '').localeCompare(String(b.modelo || '')));
+
+    if (autosValidos.length === 0) {
+        alert("No hay vehículos en stock para exportar.");
+        return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+    csvContent += "Marca,Modelo,Año,Patente,KM,Color,Condicion,Estado,Costo,Precio,Moneda\n";
+
+    autosValidos.forEach(a => {
+        const cleanStr = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
+        
+        const row = [
+            cleanStr(a.marca),
+            cleanStr(a.modelo),
+            a.año || '',
+            cleanStr(a.patente),
+            a.km || 0,
+            cleanStr(a.color),
+            cleanStr(a.condicion),
+            cleanStr(a.estado),
+            a.costo || 0,
+            a.precio || 0,
+            cleanStr(a.moneda || 'ARS')
+        ];
+        
+        csvContent += row.join(",") + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    
+    const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+    link.setAttribute("download", `Stock_Flota_${fecha}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
 window.imprimirFlota = () => {
    const globalLogo = document.getElementById('print-logo');
    if(globalLogo) globalLogo.classList.add('hidden');
