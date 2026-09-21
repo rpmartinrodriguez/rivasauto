@@ -1246,8 +1246,9 @@ window.editTransaccion = (id) => {
     window.openModal('modal-caja');
 };
 
+// --- BORRADO LÓGICO DE CAJA CHICA ---
 window.deleteTransaccion = async (id) => {
-    if (!confirm("⚠️ ADVERTENCIA CRÍTICA: Estás a punto de ELIMINAR permanentemente un movimiento contable. Esto alterará los saldos históricos de la caja. ¿Estás absolutamente seguro de continuar?")) {
+    if (!confirm("⚠️ ADVERTENCIA CRÍTICA: Estás a punto de ELIMINAR un movimiento contable.\n\nEste movimiento desaparecerá de la caja y no sumará al saldo, pero quedará un registro oculto en la base de datos (Categoría: BORRADOS) por seguridad.\n\n¿Estás absolutamente seguro de continuar?")) {
         return;
     }
 
@@ -1263,7 +1264,15 @@ window.deleteTransaccion = async (id) => {
             }
         }
 
-        await window.fbDelete("transacciones", id);
+        // BORRADO LÓGICO
+        await window.fbUpdate("transacciones", id, { 
+            eliminado: true,
+            categoriaOriginal: t.categoria || '',
+            categoria: 'BORRADOS', 
+            borradoPor: window.state.currentUser.nombre,
+            fechaBorrado: new Date().toISOString()
+        });
+        
     } catch (err) {
         console.error("Error eliminando transacción de caja:", err);
         alert("Hubo un error al eliminar el movimiento.");
