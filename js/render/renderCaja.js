@@ -75,6 +75,9 @@ window.renderCajaView = () => {
     
     // 4. Filtrar las transacciones
     let transacciones = (window.state.transacciones || []).filter(t => {
+        // ESCUDO ANTI-BORRADOS LÓGICOS
+        if (t.eliminado === true) return false;
+        
         let isVisible = false;
         
         if (currentRole === 'Admin') {
@@ -264,9 +267,12 @@ window.openModalPendientes = () => {
 
     let html = '';
     
+    // Filtramos ventas que NO estén eliminadas lógicamente
     const ventasPendientes = window.state.ventas.filter(v => 
-        (v.credito && v.credito.pagadas < v.credito.cuotas) || 
-        (v.pagare && v.pagare.pagadas < v.pagare.cuotas)
+        !v.eliminado && (
+            (v.credito && v.credito.pagadas < v.credito.cuotas) || 
+            (v.pagare && v.pagare.pagadas < v.pagare.cuotas)
+        )
     );
 
     if (ventasPendientes.length === 0) {
