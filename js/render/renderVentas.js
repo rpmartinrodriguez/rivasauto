@@ -3,7 +3,8 @@
 // ==========================================
 
 window.renderVentasView = () => { 
-  let misVentas = window.state.ventas || [];
+  // ESCUDO ANTI-BORRADOS APLICADO AQUÍ
+  let misVentas = (window.state.ventas || []).filter(v => !v.eliminado);
   
   if(window.state.currentUser.rol === 'Vendedor') {
      misVentas = misVentas.filter(v => v.userId === window.state.currentUser.id);
@@ -145,9 +146,6 @@ window.openDetalleVenta = (id) => {
     const ganancia = v.montoTotal - totalEgresos;
     const colorGanancia = ganancia >= 0 ? 'text-green-600 dark:text-green-500' : 'text-rose-600 dark:text-rose-500';
 
-    // -----------------------------------------------------
-    // ARMADO DEL MINI-RESUMEN DE GASTOS DE TALLER
-    // -----------------------------------------------------
     let gastosDesgloseHtml = '';
     if (a && a.gastos && a.gastos.length > 0) {
         gastosDesgloseHtml = `<div id="gastos-det-${v.id}" class="hidden mt-2 p-3 bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-700 space-y-2">`;
@@ -215,6 +213,7 @@ window.openDetalleVenta = (id) => {
         </div>
       </div>
       
+      <!-- BOTONES EXCLUSIVOS DE ADMIN: ELIMINAR Y EDITAR LÓGICO -->
       <div class="mt-6 flex space-x-3 pt-6 border-t border-neutral-200 dark:border-neutral-800">
         <button onclick="window.editarVentaAdmin('${v.id}')" class="flex-1 py-3 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-black rounded-xl shadow-sm hover:scale-[1.02] transition-transform flex justify-center items-center">
             <i data-lucide="edit" class="w-4 h-4 mr-2"></i> Editar Venta
@@ -237,14 +236,21 @@ window.openDetalleVenta = (id) => {
   if(window.lucide) window.lucide.createIcons();
 };
 
-// --------------------------------------------------------
-// FUNCIONES EXCLUSIVAS DE ADMINISTRACIÓN DE VENTAS
-// --------------------------------------------------------
 window.eliminarVentaAdmin = async (id) => {
-    if(!confirm("⚠️ ADVERTENCIA CRÍTICA: Estás a punto de ELIMINAR permanentemente esta venta del historial.\n\nTen en cuenta que esto NO devolverá el vehículo al stock ni borrará los ingresos contables en la caja de forma automática. Deberás ajustarlos manualmente si es necesario.\n\n¿Estás absolutamente seguro de continuar?")) return;
+    if(!confirm("⚠️ ADVERTENCIA CRÍTICA: Estás a punto de ELIMINAR esta venta del historial.\n\nDesaparecerá de la app, pero quedará guardada en la base de datos bajo el estado 'BORRADO' por seguridad.\n\nTen en cuenta que esto NO devolverá el vehículo al stock ni borrará los ingresos de la caja automáticamente.\n\n¿Estás seguro de continuar?")) return;
     
     try {
-        await window.fbDelete("ventas", id);
+        const v = window.state.ventas.find(x => x.id === id);
+        if(!v) return;
+
+        // BORRADO LÓGICO
+        await window.fbUpdate("ventas", id, {
+            eliminado: true,
+            estadoOperacion: 'BORRADOS', 
+            borradoPor: window.state.currentUser.nombre,
+            fechaBorrado: new Date().toISOString()
+        });
+
         window.closeModal('modal-detalle-venta');
         if(window.renderVentasView) window.renderVentasView();
         alert("Venta eliminada del historial correctamente.");
@@ -259,7 +265,7 @@ window.editarVentaAdmin = async (id) => {
     if(!v) return;
 
     const nuevoNombre = prompt("Editar Nombre del Comprador:", v.compradorNombre || '');
-    if(nuevoNombre === null) return; // Si el admin da "Cancelar", abortamos.
+    if(nuevoNombre === null) return; 
 
     const nuevoTelefono = prompt("Editar Teléfono del Comprador:", v.compradorTelefono || '');
     if(nuevoTelefono === null) return;
@@ -292,11 +298,12 @@ window.imprimirHistorialVentas = () => {
   let ventasReporte = [];
   let usuariosReporte = [];
 
+  // FILTRAMOS LAS BORRADAS TAMBIÉN PARA LA IMPRESIÓN
   if (isAdmin) {
-     ventasReporte = window.state.ventas || [];
+     ventasReporte = (window.state.ventas || []).filter(v => !v.eliminado);
      usuariosReporte = (window.state.usuarios || []).filter(u => ventasReporte.some(v => v.userId === u.id));
   } else {
-     ventasReporte = (window.state.ventas || []).filter(v => v.userId === currentUser.id);
+     ventasReporte = (window.state.ventas || []).filter(v => v.userId === currentUser.id && !v.eliminado);
      usuariosReporte = [currentUser];
   }
 
