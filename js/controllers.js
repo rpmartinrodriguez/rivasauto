@@ -1209,6 +1209,21 @@ window.marcarCobrado = async (id) => {
 window.openModalCaja = () => {
     window.state.editingTransaccionId = null;
     document.getElementById('form-caja').reset();
+    const currentUser = window.state.currentUser;
+    const selectedId = currentUser.rol === 'Admin'
+        ? document.getElementById('caja-user-filter')?.value
+        : null;
+    const targetUser = selectedId
+        ? window.state.usuarios.find(u => u.id === selectedId)
+        : currentUser;
+
+    // Fijamos el destinatario al abrir el formulario, aunque se refresque la tabla.
+    window.state.cajaTargetUserId = targetUser?.id || currentUser.id;
+    const info = document.getElementById('caja-destino-info');
+    if (info) {
+        info.textContent = 'Caja de destino: ' + (targetUser?.nombre || currentUser.nombre) +
+            (currentUser.rol === 'Admin' && !selectedId ? ' (sin usuario filtrado: caja del administrador)' : '');
+    }
     const title = document.getElementById('modal-caja-title');
     if(title) title.innerText = "Nuevo Movimiento de Caja";
     window.openModal('modal-caja');
@@ -1365,9 +1380,20 @@ window.handleCajaSubmit = async (e) => {
         const montoTx = Number(document.getElementById('caja-monto').value.replace(/[^0-9]/g, ''));
         const fDate = document.getElementById('caja-fecha').value;
 
+        const selectedTarget = window.state.currentUser.rol === 'Admin' && !window.state.editingTransaccionId
+            ? window.state.usuarios.find(u => u.id === window.state.cajaTargetUserId)
+            : null;
+        if (window.state.currentUser.rol === 'Admin' && !window.state.editingTransaccionId &&
+            window.state.cajaTargetUserId && !selectedTarget &&
+            window.state.cajaTargetUserId !== window.state.currentUser.id) {
+            throw new Error('La caja seleccionada ya no existe. Volvé a abrir el formulario.');
+        }
+        const targetUser = selectedTarget || window.state.currentUser;
         const data = {
-            userId: window.state.currentUser.id, 
-            sucursalId: window.state.currentUser.sucursalId,
+            userId: targetUser.id,
+            sucursalId: targetUser.sucursalId || null,
+            registradoPorId: window.state.currentUser.id,
+            registradoPorNombre: window.state.currentUser.nombre,
             fecha: fDate, 
             tipo: tipoTx,
             descripcion: descTx, 
@@ -1402,6 +1428,8 @@ window.handleCajaSubmit = async (e) => {
             data.historialEdiciones = historial;
             data.userId = oldTx.userId;
             data.sucursalId = oldTx.sucursalId;
+            data.registradoPorId = oldTx.registradoPorId || window.state.currentUser.id;
+            data.registradoPorNombre = oldTx.registradoPorNombre || window.state.currentUser.nombre;
 
             await window.fbUpdate("transacciones", txId, data);
         } else {
@@ -1445,10 +1473,12 @@ window.handleCajaSubmit = async (e) => {
         
         window.closeModal('modal-caja');
         e.target.reset();
-        window.state.editingTransaccionId = null; 
-        
+        window.state.editingTransaccionId = null;
+        window.state.cajaTargetUserId = null;
+
     } catch(err) {
         console.error("Error guardando transaccion de caja:", err);
+        alert("No se pudo guardar el movimiento de caja. " + (err?.message || 'Revisá la conexión y los permisos de Firebase.'));
     } finally {
         window.state.isSubmittingCaja = false;
         if (btn) window.setBtnLoader(btn, false);
