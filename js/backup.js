@@ -44,7 +44,7 @@ function deserialize(v){
 function normalized(v){if(Array.isArray(v))return v.map(normalized);if(v&&typeof v==="object"){const o={};Object.keys(v).sort().forEach(k=>o[k]=normalized(v[k]));return o;}return v;}
 const same=(a,b)=>JSON.stringify(normalized(a))===JSON.stringify(normalized(b));
 async function read(names){
- const out={};for(const n of names){const snap=await window.getDocs(window.collection(window.db,n));out[n]=snap.docs.map(d=>({id:d.id,data:serialize(d.data())}));}
+ const out={};for(const n of names){const snap=await window.fbGetDocsFromServer(window.collection(window.db,n));out[n]=snap.docs.map(d=>({id:d.id,data:serialize(d.data())}));}
  return out;
 }
 function csvRows(transacciones,usuarios){
