@@ -503,7 +503,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, runTransaction, Timestamp, GeoPoint, Bytes, DocumentReference } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, getDocsFromServer, updateDoc, deleteDoc, doc, runTransaction, Timestamp, GeoPoint, Bytes, DocumentReference } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyDCQSEAMGBfd8MgMMEgaYZ5jAjhaPYfeng",
@@ -521,6 +521,7 @@
         window.collection = collection;
         window.addDoc = addDoc;
         window.getDocs = getDocs;
+        window.fbGetDocsFromServer = getDocsFromServer;
         window.updateDoc = updateDoc;
         window.deleteDoc = deleteDoc;
         window.doc = doc;
