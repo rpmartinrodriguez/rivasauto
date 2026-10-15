@@ -1,14 +1,16 @@
 // sw.js - Service Worker para RIVAS AUTO ERP
 
 // Nombre del caché (puedes cambiar el v1 a v2 cuando hagas grandes actualizaciones de diseño)
-const CACHE_NAME = 'rivas-auto-cache-v1';
+const CACHE_NAME = 'rivas-auto-cache-v2';
 
 // Archivos estáticos que se guardarán en la memoria del dispositivo
 const urlsToCache = [
   './',
   './index.html',
   './icon.png',
-  './manifest.json'
+  './manifest.json',
+  './js/backup.js',
+  './js/recovery.js'
 ];
 
 // 1. INSTALACIÓN: Guardar los archivos iniciales en el caché
@@ -58,3 +60,5 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+
+self.addEventListener('message', event => { if (event.data === 'SKIP_WAITING') self.skipWaiting(); });
