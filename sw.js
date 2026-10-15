@@ -1,64 +1,34 @@
-// sw.js - Service Worker para RIVAS AUTO ERP
-
-// Nombre del caché (puedes cambiar el v1 a v2 cuando hagas grandes actualizaciones de diseño)
-const CACHE_NAME = 'rivas-auto-cache-v2';
-
-// Archivos estáticos que se guardarán en la memoria del dispositivo
-const urlsToCache = [
-  './',
-  './index.html',
-  './icon.png',
-  './manifest.json',
-  './js/backup.js',
-  './js/recovery.js'
-];
-
-// 1. INSTALACIÓN: Guardar los archivos iniciales en el caché
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Archivos de Rivas Auto guardados en caché correctamente.');
-        return cache.addAll(urlsToCache);
-      })
-  );
+/* Rivas Auto - cache v3: actualiza HTML y scripts antes de servir el cache. */
+const CACHE_NAME = "rivas-auto-cache-v3";
+const ASSETS = ["./","./index.html","./icon.png","./manifest.json","./js/backup.js","./js/recovery.js"];
+self.addEventListener("install", event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    try { await cache.addAll(ASSETS); } catch (e) { console.warn("Cache inicial incompleto", e); }
+    await self.skipWaiting();
+  })());
 });
-
-// 2. ACTIVACIÓN: Limpiar cachés antiguos si se cambia el CACHE_NAME
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('Borrando caché antiguo:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
+self.addEventListener("activate", event => {
+  event.waitUntil((async () => {
+    const names = await caches.keys();
+    await Promise.all(names.filter(x => x !== CACHE_NAME).map(x => caches.delete(x)));
+    await self.clients.claim();
+  })());
 });
-
-// 3. INTERCEPCIÓN DE PETICIONES (Fetch): Estrategia Cache-First para assets estáticos
-self.addEventListener('fetch', event => {
-  // Solo interceptamos peticiones GET
-  if (event.request.method !== 'GET') return;
-
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Si el archivo está en caché, lo devuelve al instante (ideal para el HTML y Logo)
-        if (response) {
-          return response;
-        }
-        // Si no está, lo busca en internet
-        return fetch(event.request).catch(() => {
-            console.log('Falló la red al intentar obtener:', event.request.url);
-        });
-      })
-  );
+self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+  const fresh = event.request.mode === "navigate" || /\.(?:js|html|css)$/i.test(url.pathname);
+  if (fresh) {
+    event.respondWith(fetch(event.request).then(response => {
+      if (response.ok) {
+        const cloned = response.clone();
+        caches.open(CACHE_NAME).then(c => c.put(event.request, cloned)).catch(() => {});
+      }
+      return response;
+    }).catch(() => caches.match(event.request)));
+  } else {
+    event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+  }
 });
-
-self.addEventListener('message', event => { if (event.data === 'SKIP_WAITING') self.skipWaiting(); });
