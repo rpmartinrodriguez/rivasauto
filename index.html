@@ -35,6 +35,8 @@
     </script>
 
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body class="bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 overflow-hidden selection:bg-green-500 selection:text-white transition-colors duration-300">
 
@@ -148,6 +150,12 @@
                     <button onclick="window.switchTab('resumenes')" id="nav-resumenes" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
                         <i data-lucide="pie-chart" class="w-5 h-5"></i><span>Reportes Finanzas</span>
                     </button>
+                    <button onclick="window.RivasBackup.openBackup()" class="w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                        <i data-lucide="database-backup" class="w-5 h-5"></i><span>Respaldo local</span>
+                    </button>
+                    <button onclick="window.RivasBackup.openRecovery()" class="w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                        <i data-lucide="folder-input" class="w-5 h-5"></i><span>Recuperación de datos</span>
+                    </button>
                     <button onclick="window.switchTab('admin')" id="nav-admin" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 text-sm font-bold rounded-xl text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
                         <i data-lucide="settings" class="w-5 h-5"></i><span>Configuración / Usuarios</span>
                     </button>
@@ -172,6 +180,9 @@
                     <h2 id="topbar-title" class="text-xl md:text-2xl font-black tracking-tight capitalize">Panel Principal</h2>
                 </div>
                 <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="topbar-backup" onclick="window.RivasBackup.openBackup()" class="hidden items-center gap-2 px-3 py-2 bg-neutral-900 dark:bg-white text-white dark:text-black rounded-xl text-xs font-bold shadow-sm hover:opacity-90" title="Respaldar datos en Windows">
+                        <i data-lucide="database-backup" class="w-4 h-4"></i><span class="hidden sm:inline">Respaldo</span>
+                    </button>
                     <div id="dolar-widget-container" class="hidden"></div>
                     
                     <div class="relative" id="notif-container">
@@ -417,7 +428,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, runTransaction, Timestamp, GeoPoint, Bytes, DocumentReference } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyDCQSEAMGBfd8MgMMEgaYZ5jAjhaPYfeng",
@@ -438,6 +449,11 @@
         window.updateDoc = updateDoc;
         window.deleteDoc = deleteDoc;
         window.doc = doc;
+        window.fbRunTransaction = runTransaction;
+        window.fbTimestamp = Timestamp;
+        window.fbGeoPoint = GeoPoint;
+        window.fbBytes = Bytes;
+        window.fbDocumentReference = DocumentReference;
     </script>
 
     <script src="js/state.js"></script>
@@ -455,6 +471,8 @@
     <script src="js/render/renderFacturas.js"></script>
 
     <script src="js/controllers.js"></script>
+    <script src="js/backup.js"></script>
+    <script src="js/recovery.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
