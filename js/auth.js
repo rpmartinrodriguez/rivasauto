@@ -80,6 +80,11 @@ window.updateProfileUI = () => {
       adminMenu.classList.add('hidden');
     }
   }
+  const backupButton = document.getElementById('topbar-backup');
+  if (backupButton) {
+    backupButton.classList.toggle('hidden', u.rol !== 'Admin');
+    backupButton.classList.toggle('flex', u.rol === 'Admin');
+  }
 };
 
 window.showLogin = () => {
