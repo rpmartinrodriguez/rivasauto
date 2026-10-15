@@ -166,7 +166,7 @@ async function recover(){
   }
   // Recargar colecciones recuperadas y vistas visibles, sin cerrar sesion.
   for(const n of Object.keys(fresh)){
-   const snap=await window.getDocs(window.collection(window.db,n));
+   const snap=await window.fbGetDocsFromServer(window.collection(window.db,n));
    window.state[n]=snap.docs.map(d=>({id:d.id,...d.data()}));
   }
   window.initSelects?.();window.reRenderActiveViews?.();
